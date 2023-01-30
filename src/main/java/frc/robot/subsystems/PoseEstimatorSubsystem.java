@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.math.util.Units.degreesToRadians;
-import static frc.robot.Constants.VisionConstants.CAMERA_TO_ROBOT;
+
 import java.util.HashMap;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -108,9 +108,11 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final static boolean enableReportPoseEstimator = false;
   private final static boolean enableReportTarget = true;
   private final static boolean enableReportVisionPose = true;
+  private final Transform3d cameraPositions[];
 
-  public PoseEstimatorSubsystem(PhotonCamera photonCameras[], DrivetrainSubsystem drivetrainSubsystem) {
+  public PoseEstimatorSubsystem(PhotonCamera photonCameras[], Transform3d cameraPositions[], DrivetrainSubsystem drivetrainSubsystem) {
     this.photonCameras = photonCameras;
+    this.cameraPositions = cameraPositions;
     previousPipelineTimestamp = new double[photonCameras.length];
     this.drivetrainSubsystem = drivetrainSubsystem;
 
@@ -128,7 +130,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
   }
 
-  final static double AMBIGUITY = 0.4;
+  final static double AMBIGUITY = 0.2;
 
   public void processCamera(int cameraId, PhotonCamera photonCamera) {
     PhotonPipelineResult pipelineResult = photonCamera.getLatestResult();
@@ -143,7 +145,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         if (targetPose != null) {
           Transform3d camToTarget = target.getBestCameraToTarget();
           Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
-          Pose3d visionMeasurement = camPose.transformBy(CAMERA_TO_ROBOT[cameraId]);
+          Pose3d visionMeasurement = camPose.transformBy(cameraPositions[cameraId]);
           poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
           reportVisionPose(cameraId, fiducialId, camToTarget, camPose, visionMeasurement);
         }
@@ -182,7 +184,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    */
   public void reportVisionPose(int cameraId, int fiducialId, Transform3d camToTarget, Pose3d camPose,
       Pose3d visionMeasurement) {
-    if (Robot.count % 15 == 0 && enableReportVisionPose) {
+    if (Robot.count % 15 == 0 && enableReportVisionPose ) {
       SmartDashboard.putNumber(TAG_LABEL[cameraId], fiducialId);
       SmartDashboard.putNumber(CAM_TO_TARGET_X_LABEL[cameraId], camToTarget.getX());
       SmartDashboard.putNumber(CAM_TO_TARGET_Y_LABEL[cameraId], camToTarget.getY());
@@ -207,7 +209,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    */
   public void reportPoseEstimator() {
     // if (Robot.count % 15 == 9 && enableReportPoseEstimator) {
-    if (Robot.count % 15 == 0) {
+    if (Robot.count % 15 == 0 ) {
       SmartDashboard.putNumber("Est X Pos", poseEstimator.getEstimatedPosition().getX());
       SmartDashboard.putNumber("Est Y Pos", poseEstimator.getEstimatedPosition().getY());
       SmartDashboard.putNumber("Est Angle", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
@@ -217,7 +219,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       // poseEstimator.getEstimatedPosition().getRotation().getDegrees());
     }
   }
-  // }
+ 
 
   @Override
   public void periodic() {

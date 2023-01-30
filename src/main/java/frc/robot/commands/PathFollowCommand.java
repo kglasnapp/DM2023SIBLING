@@ -73,8 +73,8 @@ public class PathFollowCommand extends CommandBase {
     this.trajectory = trajectory;
     this.poseProvider = poseProvider;
    
-    xController.setTolerance(0.005);
-    yController.setTolerance(0.005);
+    xController.setTolerance(0.01);
+    yController.setTolerance(0.01 );
     omegaController.setTolerance(Units.degreesToRadians(1));
     omegaController.enableContinuousInput(-Math.PI, Math.PI);
     addRequirements(drivetrainSubsystem);

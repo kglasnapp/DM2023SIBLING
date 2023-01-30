@@ -61,7 +61,7 @@ public final class Constants {
          * Physical location of the camera on the robot, relative to the center of the robot.
          */
         public static final Transform3d CAMERA_TO_ROBOT[] =
-            { new Transform3d(new Translation3d(-0.575, -0.17, 0.0), new Rotation3d(0.0,0.0,0.0)) };
+            { };
             // new Transform3d(new Translation3d(-0.36, -0.045, 0.0), new Rotation3d(0.0,0.0,0.0));
       }
 }

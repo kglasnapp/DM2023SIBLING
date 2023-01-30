@@ -1,22 +1,17 @@
 package frc.robot.commands;
 
-import java.util.LinkedList;
+import static frc.robot.utilities.Util.logf;
 
 import org.opencv.core.Point;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import static frc.robot.utilities.Util.logf;
 
 public class GamePiecePlacementCommand extends CommandBase {
     Pose2d driveTrainPoseTarget;

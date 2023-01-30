@@ -232,7 +232,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_chassisSpeeds = chassisSpeeds;
   }
 
-  // TODO Do we need to read the absolute values from the cancoder 
+  // Read the absolute values from the cancoder 
   //CANCoder backLeft = new CANCoder(Constants.BACK_LEFT_MODULE_STEER_ENCODER);
   //double absPosDeg = backLeft.getAbsolutePosition();
   //double encPosDeg = backLeft.getPosition();

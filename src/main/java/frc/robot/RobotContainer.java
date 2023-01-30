@@ -8,6 +8,9 @@ package frc.robot;
 import org.photonvision.PhotonCamera;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,13 +18,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.BalanceCommand;
-import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.DefaultArmCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GamePiecePlacementCommand;
-import frc.robot.commands.HolonomicTargetCommand;
-import frc.robot.commands.PathFollowCommand;
 import frc.robot.commands.ShoulderCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -46,9 +46,14 @@ public class RobotContainer {
   // private final XboxController m_controller = new XboxController(2);
   private final static CommandXboxController m_controller = new CommandXboxController(2);
   
-  public PhotonCamera photonCameras[] = { new PhotonCamera("gloworm") };
+  public final PhotonCamera photonCameras[] = { new PhotonCamera("gloworm1")
+  , new PhotonCamera("gloworm2") }
+  ; 
+  public final Transform3d cameraPositions[] = {  
+    new Transform3d(new Translation3d(-0.1575, -0.17, -0.5775), new Rotation3d(0.0,0.0,0.0)),
+    new Transform3d(new Translation3d(-0.1575, 0.215, -0.578), new Rotation3d(0.0,0.0,0.0)) };
 
-  private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCameras, m_drivetrainSubsystem);
+  private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCameras, cameraPositions, m_drivetrainSubsystem);
 
   private final GamePiecePlacementCommand gamePiecePlacementCommand = new GamePiecePlacementCommand(m_drivetrainSubsystem, 
     m_armSubsystem, poseEstimator, GamePiecePlacementCommand.driveTrainPoseTargets[0], GamePiecePlacementCommand.armTargets[0]);
@@ -86,7 +91,7 @@ public class RobotContainer {
             m_controller.x()));
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),
-        () -> (RobotContainer.getRightBumper() ? -1 : 1) * RobotContainer.getRightTrigger()));
+        () -> (RobotContainer.getRightBumper() ? 1 : -1) * RobotContainer.getRightTrigger()));
     // Configure the button bindings
     configureButtonBindings();
     configureDashboard();
