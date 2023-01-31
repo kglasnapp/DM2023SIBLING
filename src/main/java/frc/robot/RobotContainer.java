@@ -22,7 +22,9 @@ import frc.robot.commands.DefaultArmCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GamePiecePlacementCommand;
+import frc.robot.commands.PathFollowCommand;
 import frc.robot.commands.ShoulderCommand;
+import frc.robot.commands.StraightPathCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -162,7 +164,8 @@ public class RobotContainer {
       m_controller.povLeft().whileTrue(new ExtenderCommand(m_armSubsystem, 0));
       m_controller.povRight().whileTrue(new ExtenderCommand(m_armSubsystem, -9));
 
-      m_controller.b().whileTrue(gamePiecePlacementCommand);
+      //m_controller.b().whileTrue(gamePiecePlacementCommand);
+      m_controller.b().whileTrue(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator::getCurrentPose, GamePiecePlacementCommand.driveTrainPoseTargets[0]));
     }
   }
 

@@ -22,13 +22,14 @@ public class GamePiecePlacementCommand extends CommandBase {
     PathFollowCommand pathFollowCommand;
     ShoulderCommand shoulderCommand;
     ExtenderCommand extenderCommand;
+    StraightPathCommand straightPathCommand;
     // Trajectory trajectory;
     
     Command compositeCommand;
 
     public final static Pose2d driveTrainPoseTargets[] = new Pose2d[] {
         // new Pose2d(new Translation2d(14.55, 4.91), new Rotation2d(0,0)),
-        new Pose2d(new Translation2d(14.08, 5.05), new Rotation2d(Math.toRadians(0))), // this worked!
+        new Pose2d(new Translation2d(14.69, 5.55), new Rotation2d(Math.toRadians(0))), // this worked!
        // new Pose2d(new Translation2d(16.61, 4.38), new Rotation2d(Math.toRadians(180))),
         
         new Pose2d(new Translation2d(0.0, 0.0), new Rotation2d(0,0)),
@@ -83,7 +84,7 @@ public class GamePiecePlacementCommand extends CommandBase {
         //         config);
         // pathFollowCommand = new PathFollowCommand(trajectory, drivetrainSubsystem,
         //         poseEstimatorSubsystem::getCurrentPose);
-        StraightPathCommand straightPathCommand =
+        straightPathCommand =
             new StraightPathCommand(drivetrainSubsystem, poseEstimatorSubsystem::getCurrentPose,driveTrainPoseTarget);
         shoulderCommand = new ShoulderCommand(armSubsystem, armTarget.x);
         extenderCommand = new ExtenderCommand(armSubsystem, armTarget.y);
@@ -99,9 +100,11 @@ public class GamePiecePlacementCommand extends CommandBase {
     }
 
     @Override
-    public void end(boolean interrupted) {
-        drivetrainSubsystem.stop();
-        
+    public void end(boolean interrupted) {  
+        System.out.println("game piece commad end");
+        straightPathCommand.end(interrupted);
+        shoulderCommand.end(interrupted);
+        extenderCommand.end(interrupted);
         compositeCommand.end(interrupted);
     }
 

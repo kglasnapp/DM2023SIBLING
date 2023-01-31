@@ -37,7 +37,7 @@ public class StraightPathCommand extends CommandBase {
    
     xController.setTolerance(0.005);
     yController.setTolerance(0.005);
-    omegaController.setTolerance(Units.degreesToRadians(1));
+    omegaController.setTolerance(Units.degreesToRadians(3));
     omegaController.enableContinuousInput(-Math.PI, Math.PI);
     addRequirements(drivetrainSubsystem);
   }
@@ -111,9 +111,14 @@ public class StraightPathCommand extends CommandBase {
     public boolean isFinished() {
         double currentTime = RobotController.getFPGATime();
         var robotPose = poseProvider.get();
-        logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f>\n", (currentTime - initialTime) / 1000000,
-                robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
-        return xController.atGoal() && yController.atGoal() && omegaController.atGoal();
+        boolean atGoalX = Math.abs(robotPose.getX() - destination.getX())<0.01;
+        boolean atGoalY = Math.abs(robotPose.getY() - destination.getY())<0.01;
+        boolean atGoalO = Math.abs(robotPose.getRotation().getDegrees() - destination.getRotation().getDegrees()) < 1;
+        logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b>\n", (currentTime - initialTime) / 1000000,
+                robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), atGoalX, atGoalY, atGoalO);
+        return  atGoalX && 
+                atGoalY && 
+               atGoalO;
     }
 
     @Override
