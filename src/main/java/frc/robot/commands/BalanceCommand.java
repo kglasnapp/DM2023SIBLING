@@ -52,8 +52,8 @@ public class BalanceCommand extends CommandBase {
         double pitch = drivetrainSubsystem.m_navx.getPitch() - zeroPitch;
         double roll = drivetrainSubsystem.m_navx.getRoll() - zeroRoll;
         if (Robot.count % 20 == 0) {
-            SmartDashboard.putNumber("Pitch", pitch);
-            SmartDashboard.putNumber("Roll", roll);
+            //SmartDashboard.putNumber("Pitch", pitch);
+            //SmartDashboard.putNumber("Roll", roll);
         }
         
 
@@ -74,8 +74,8 @@ public class BalanceCommand extends CommandBase {
             xSpeed=0;
         }
         if (Robot.count % 20 == 0) {
-            SmartDashboard.putNumber("xSpeed", xSpeed);
-            SmartDashboard.putNumber("ySpeed", ySpeed);
+            //SmartDashboard.putNumber("xSpeed", xSpeed);
+            //SmartDashboard.putNumber("ySpeed", ySpeed);
         }
 
         drivetrainSubsystem.drive(

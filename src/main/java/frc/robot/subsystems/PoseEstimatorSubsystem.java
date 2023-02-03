@@ -1,52 +1,45 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.math.util.Units.degreesToRadians;
 
-import java.util.HashMap;
+
+import java.io.IOException;
+import java.util.ConcurrentModificationException;
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
+//import com.pathplanner.lib.PathPlannerTrajectory;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.utilities.Util.logf;
-import frc.robot.Robot;
-import frc.robot.utilities.RunningAverage;
+//import frc.robot.Constants.DrivetrainConstants;
+
 
 public class PoseEstimatorSubsystem extends SubsystemBase {
 
-  private final PhotonCamera photonCameras[];
+  private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
-  private RunningAverage averageTime = new RunningAverage(10);
-
-  private static HashMap<String, Pose3d> targets = new HashMap<>();
-
-  static {
-    // targets.put("1", new Pose3d(2.37,2.51, 0.3, new Rotation3d(0, 0,
-    // degreesToRadians(180.0))));
-    // targets.put("2", new Pose3d(-0.055, 2.51, 0.3, new Rotation3d(0, 0,
-    // degreesToRadians(0.0))));
-    targets.put("3", new Pose3d(15.51, 4.42, 0.46, new Rotation3d(0, 0, degreesToRadians(180.0))));
-    // targets.put("4", new Pose3d(2.37, 0.53, 0.3, new Rotation3d(0, 0,
-    // degreesToRadians(180.0))));
-    // targets.put("5", new Pose3d(1.13, -0.07, 0.3, new Rotation3d(0, 0,
-    // degreesToRadians(90.0))));
-    // targets.put("6", new Pose3d(1.13, 2.96, 0.3, new Rotation3d(0, 0,
-    // degreesToRadians(-90.0))));
-  }
+  private final PhotonPoseEstimator photonPoseEstimator;
 
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
   // you trust your various sensors. Smaller numbers will cause the filter to
@@ -60,8 +53,11 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * matrix is in the form [x, y, theta]ᵀ, with units in meters and radians, then
    * meters.
    */
-  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
+  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(5));
+  // private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.025, 0.025,
+  // Units.degreesToRadians(1));
 
+  private Optional<EstimatedRobotPose> photonEstimatedRobotPose = Optional.empty();
   /**
    * Standard deviations of the vision measurements. Increase these numbers to
    * trust global measurements from vision
@@ -69,54 +65,42 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
    * radians.
    */
   private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
+  // private static final Vector<N3> visionMeasurementStdDevs =
+  // VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
+  // private static final Vector<N3> visionMeasurementStdDevs =
+  // VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
 
   private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field2d = new Field2d();
-  // we create labels for the smartdashboard
-  // avoiding garbage collection
-  private final String TARGET_LABEL[] = {
-      "tar1", "tar2"
-  };
-  private final String AMBIGUITY_LABEL[] = {
-      "AMB1", "AMB2"
-  };
-  private final String TAG_LABEL[] = {
-      "tag1", "tag2"
-  };
-  private final String CAM_TO_TARGET_X_LABEL[] = {
-      "CAM to tar X1", "CAM to tar X2"
-  };
-  private final String CAM_TO_TARGET_Y_LABEL[] = {
-      "CAM to tar Y1", "CAM to tar Y2"
-  };
-  private final String CAM_X_LABEL[] = {
-      "CAM X1", "CAM X2"
-  };
-  private final String CAM_Y_LABEL[] = {
-      "CAM Y1", "CAM Y2"
-  };
-  private final String V_X_LABEL[] = {
-      "V X1", "V X2"
-  };
-  private final String V_Y_LABEL[] = {
-      "V Y1", "V Y2"
-  };
+  public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(0.1,0.15, 0.56), new Rotation3d());
+  public static final Transform3d CAMERA_TO_ROBOT = ROBOT_TO_CAMERA.inverse();
+  
+  public static void main(String arg[]) {
+    System.out.println(ROBOT_TO_CAMERA);
+    System.out.println(CAMERA_TO_ROBOT);
+  }
+  
+  //CAMERA_TO_ROBOT.inverse();  
 
-  private double previousPipelineTimestamp[];
-
-  private final static boolean enableReportPoseEstimator = false;
-  private final static boolean enableReportTarget = true;
-  private final static boolean enableReportVisionPose = true;
-  private final Transform3d cameraPositions[];
-
-  public PoseEstimatorSubsystem(PhotonCamera photonCameras[], Transform3d cameraPositions[], DrivetrainSubsystem drivetrainSubsystem) {
-    this.photonCameras = photonCameras;
-    this.cameraPositions = cameraPositions;
-    previousPipelineTimestamp = new double[photonCameras.length];
+  public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
+    this.photonCamera = photonCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
-
+    AprilTagFieldLayout layout;
+    try {
+      layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+      var alliance = DriverStation.getAlliance();
+      // var alliance = Alliance.Blue;
+      layout.setOrigin(alliance == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
+          : OriginPosition.kRedAllianceWallRightSide);
+    } catch (IOException e) {
+      DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
+      layout = null;
+    }
     ShuffleboardTab tab = Shuffleboard.getTab("Vision");
+
+    photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, this.photonCamera,
+        ROBOT_TO_CAMERA);
 
     poseEstimator = new SwerveDrivePoseEstimator(
         DrivetrainSubsystem.m_kinematics,
@@ -130,116 +114,37 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
   }
 
-  final static double AMBIGUITY = 0.2;
-
-  public void processCamera(int cameraId, PhotonCamera photonCamera) {
-    PhotonPipelineResult pipelineResult = photonCamera.getLatestResult();
-    double resultTimestamp = pipelineResult.getTimestampSeconds();
-    reportTarget(cameraId, pipelineResult); // update smartdashboard
-    if (resultTimestamp != previousPipelineTimestamp[cameraId] && pipelineResult.hasTargets()) {
-      previousPipelineTimestamp[cameraId] = resultTimestamp;
-      PhotonTrackedTarget target = pipelineResult.getBestTarget();
-      if (target.getPoseAmbiguity() <= AMBIGUITY) {
-        int fiducialId = target.getFiducialId();
-        Pose3d targetPose = targets.get("" + fiducialId);
-        if (targetPose != null) {
-          Transform3d camToTarget = target.getBestCameraToTarget();
-          Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
-          Pose3d visionMeasurement = camPose.transformBy(cameraPositions[cameraId]);
-          poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
-          reportVisionPose(cameraId, fiducialId, camToTarget, camPose, visionMeasurement);
-        }
-      }
-    }
-  }
-
-  /**
-   * This method just pushes info into the Smart Dashboard about
-   * the the target being visible or not.
-   * 
-   * @param cameraId
-   * @param pipelineResult
-   */
-  public void reportTarget(int cameraId, PhotonPipelineResult pipelineResult) {
-    if (Robot.count % 10 == 3 && enableReportTarget) {
-      SmartDashboard.putBoolean(TARGET_LABEL[cameraId], pipelineResult.hasTargets() &&
-          pipelineResult.getBestTarget().getPoseAmbiguity() < AMBIGUITY);
-      if (pipelineResult.hasTargets()) {
-        SmartDashboard.putNumber(AMBIGUITY_LABEL[cameraId], pipelineResult.getBestTarget().getPoseAmbiguity());
-      } else {
-        SmartDashboard.putNumber(AMBIGUITY_LABEL[cameraId], 9999);
-      }
-    }
-  }
-
-  /**
-   * This method pushes to the Smart Dashboard different parameters to help
-   * debug the camera readings
-   * 
-   * @param cameraId
-   * @param fiducialId
-   * @param camToTarget
-   * @param camPose
-   * @param visionMeasurement
-   */
-  public void reportVisionPose(int cameraId, int fiducialId, Transform3d camToTarget, Pose3d camPose,
-      Pose3d visionMeasurement) {
-    if (Robot.count % 15 == 0 && enableReportVisionPose ) {
-      SmartDashboard.putNumber(TAG_LABEL[cameraId], fiducialId);
-      SmartDashboard.putNumber(CAM_TO_TARGET_X_LABEL[cameraId], camToTarget.getX());
-      SmartDashboard.putNumber(CAM_TO_TARGET_Y_LABEL[cameraId], camToTarget.getY());
-      SmartDashboard.putNumber(CAM_X_LABEL[cameraId], camPose.getX());
-      SmartDashboard.putNumber(CAM_Y_LABEL[cameraId], camPose.getY());
-      SmartDashboard.putNumber(V_X_LABEL[cameraId], visionMeasurement.toPose2d().getX());
-      SmartDashboard.putNumber(V_Y_LABEL[cameraId], visionMeasurement.toPose2d().getY());
-
-    //   logf(
-    //       "VISION ONLY: Pose Est ID:%d camtotarg<%.2f,%.2f,%.2f> camPose<%.2f,%.2f,%.2f> vision<%.2f,%.2f,%.2f> RunTime:%.2f\n",
-    //       fiducialId, camToTarget.getX(), camToTarget.getY(),
-    //       Math.toDegrees(camToTarget.getRotation().getAngle()),
-    //       camPose.getX(), camPose.getY(), Math.toDegrees(camPose.getRotation().getAngle()),
-    //       visionMeasurement.getX(), visionMeasurement.getY(),
-    //       Math.toDegrees(visionMeasurement.getRotation().getAngle()),
-    //       averageTime.getAverage());
-     }
-  }
-
-  /**
-   * This method pushes to the Smart Dashboard about the pose estimator
-   */
-  public void reportPoseEstimator() {
-    // if (Robot.count % 15 == 9 && enableReportPoseEstimator) {
-    if (Robot.count % 15 == 0 ) {
-      SmartDashboard.putNumber("Est X Pos", poseEstimator.getEstimatedPosition().getX());
-      SmartDashboard.putNumber("Est Y Pos", poseEstimator.getEstimatedPosition().getY());
-      SmartDashboard.putNumber("Est Angle", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
-      // logf("VISION+ODOMETRY est x = %.2f y = %.2f angle=%.2f\n",
-      // poseEstimator.getEstimatedPosition().getX(),
-      // poseEstimator.getEstimatedPosition().getY(),
-      // poseEstimator.getEstimatedPosition().getRotation().getDegrees());
-    }
-  }
- 
-
   @Override
   public void periodic() {
-    long startTime = RobotController.getFPGATime();
-    // Update pose estimator with the best visible target
-    for (int cameraId = 0; cameraId < photonCameras.length; ++cameraId) {
-      processCamera(cameraId, photonCameras[cameraId]);
-    }
+    photonEstimatedRobotPose = photonPoseEstimator.update();
+    if (photonEstimatedRobotPose.isPresent()) {
+      EstimatedRobotPose pose = photonEstimatedRobotPose.get();
+      // Max distance you want a tag to be read at. Found issues after 15 feet away
+      // from tag while moving.
+      if (Math.hypot(pose.estimatedPose.getX(), pose.estimatedPose.getY()) < 5.25) {
+        // Error with WPI code https://github.com/wpilibsuite/allwpilib/issues/4952
+        try {
+          poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
+        } catch (ConcurrentModificationException e) {
+        }
+      }
 
+    }
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(
         drivetrainSubsystem.getGyroscopeRotation(),
         drivetrainSubsystem.getModulePositions());
 
     field2d.setRobotPose(getCurrentPose());
-
-    reportPoseEstimator();
-
-    long totalTime = RobotController.getFPGATime() - startTime;
-    averageTime.add(totalTime / 1000);
+    // Conversion so robot appears where it actually is on field instead of always
+    // on blue.
+    if (DriverStation.getAlliance() == Alliance.Red) {
+      field2d.setRobotPose(new Pose2d(FieldConstants.fieldLength - getCurrentPose().getX(),
+          FieldConstants.fieldWidth - getCurrentPose().getY(),
+          new Rotation2d(getCurrentPose().getRotation().getRadians() + Math.PI)));
+    } else {
+      field2d.setRobotPose(getCurrentPose());
+    }
   }
 
   private String getFomattedPose() {
@@ -276,5 +181,10 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   public void resetFieldPosition() {
     setCurrentPose(new Pose2d());
   }
+
+  // TODO: make it work later
+  // public void addTrajectory(PathPlannerTrajectory traj) {
+  //   field2d.getObject("Trajectory").setTrajectory(traj);
+  // }
 
 }

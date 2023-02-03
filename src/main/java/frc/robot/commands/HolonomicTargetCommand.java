@@ -71,13 +71,13 @@ public class HolonomicTargetCommand extends CommandBase {
       // - visible targets are in range [-90, 90]
 
       cameraToTarget.getRotation().getAngle();
-      SmartDashboard.putNumber("Target X", cameraToTarget.getX());
-      SmartDashboard.putNumber("Target Y", cameraToTarget.getY());
-      SmartDashboard.putNumber("Target Z", cameraToTarget.getZ());
-      SmartDashboard.putNumber("Target Rotation X", Units.radiansToDegrees(cameraToTarget.getRotation().getX()));
-      SmartDashboard.putNumber("Target Rotation Y", Units.radiansToDegrees(cameraToTarget.getRotation().getY()));
-      SmartDashboard.putNumber("Target Rotation Z", Units.radiansToDegrees(cameraToTarget.getRotation().getZ()));
-      SmartDashboard.putNumber("Tag", tagID);
+      // SmartDashboard.putNumber("Target X", cameraToTarget.getX());
+      // SmartDashboard.putNumber("Target Y", cameraToTarget.getY());
+      // SmartDashboard.putNumber("Target Z", cameraToTarget.getZ());
+      // SmartDashboard.putNumber("Target Rotation X", Units.radiansToDegrees(cameraToTarget.getRotation().getX()));
+      // SmartDashboard.putNumber("Target Rotation Y", Units.radiansToDegrees(cameraToTarget.getRotation().getY()));
+      // SmartDashboard.putNumber("Target Rotation Z", Units.radiansToDegrees(cameraToTarget.getRotation().getZ()));
+      // SmartDashboard.putNumber("Tag", tagID);
 
       // Handle distance to target
       var distanceFromTarget = cameraToTarget.getX();

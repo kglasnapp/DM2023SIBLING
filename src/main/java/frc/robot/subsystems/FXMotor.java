@@ -180,8 +180,8 @@ public class FXMotor {
     }
 
     public void updateSmart() {
-        SmartDashboard.putNumber(name + " Pos", (int) motor.getSensorCollection().getIntegratedSensorPosition());
-        SmartDashboard.putNumber(name + " Cur", round2(motor.getStatorCurrent()));
+       // SmartDashboard.putNumber(name + " Pos", (int) motor.getSensorCollection().getIntegratedSensorPosition());
+       // SmartDashboard.putNumber(name + " Cur", round2(motor.getStatorCurrent()));
     }
 
     public void setSpeed(double speed) {

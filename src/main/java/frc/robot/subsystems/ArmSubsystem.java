@@ -225,21 +225,21 @@ public class ArmSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("ExtPos", position);
         }
 
-        if (RobotContainer.mrKeith) {
-            int pov = RobotContainer.getPov();
-            if (lastPOV == pov) {
-                return;
-            }
-            lastPOV = pov;
-            if (pov == 0) {
-                setMotorToPosition(shoulderMotor, 0);
-            } else if (pov == 90) {
-                setMotorToPosition(shoulderMotor, 5000);
-            } else if (pov == 180) {
-                setMotorToPosition(shoulderMotor, 10000);
-            } else if (pov == 270) {
-                setMotorToPosition(shoulderMotor, 15000);
-            }
-        }
+        // if (RobotContainer.mrKeith) {
+        //     int pov = RobotContainer.getPov();
+        //     if (lastPOV == pov) {
+        //         return;
+        //     }
+        //     lastPOV = pov;
+        //     if (pov == 0) {
+        //         setMotorToPosition(shoulderMotor, 0);
+        //     } else if (pov == 90) {
+        //         setMotorToPosition(shoulderMotor, 5000);
+        //     } else if (pov == 180) {
+        //         setMotorToPosition(shoulderMotor, 10000);
+        //     } else if (pov == 270) {
+        //         setMotorToPosition(shoulderMotor, 15000);
+        //     }
+        // }
     }
 }

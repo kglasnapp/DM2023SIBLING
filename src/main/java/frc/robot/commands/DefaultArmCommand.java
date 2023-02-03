@@ -15,7 +15,7 @@ public class DefaultArmCommand extends CommandBase {
     DoubleSupplier extenderSupplier;
     boolean shoulderActive = false;
     boolean extenderActive = false;
-    
+
     double SHOULDER_THRESHOLD = 500;
     double EXTENDER_THRESHOLD = 50;
 
@@ -28,11 +28,11 @@ public class DefaultArmCommand extends CommandBase {
     public DefaultArmCommand(ArmSubsystem armSubsystem,
             DoubleSupplier shoulderSupplier,
             DoubleSupplier extenderSupplier) {
-                this.armSubsystem = armSubsystem;
-                this.shoulderSupplier = shoulderSupplier;
-                this.extenderSupplier = extenderSupplier;
+        this.armSubsystem = armSubsystem;
+        this.shoulderSupplier = shoulderSupplier;
+        this.extenderSupplier = extenderSupplier;
         addRequirements(armSubsystem);
-        
+
     }
 
     @Override
@@ -43,40 +43,18 @@ public class DefaultArmCommand extends CommandBase {
 
     @Override
     public void execute() {
-        // if (Robot.count % 15 == 5) {
-        //     double current = armSubsystem.shoulderMotor.getStatorCurrent();
-        //     SmartDashboard.putNumber("ShlCur", current);
-        //     boolean forwardLimit = armSubsystem.getForwardLimitSwitch(armSubsystem.shoulderMotor);
-        //     SmartDashboard.putBoolean("ShlForL", forwardLimit);
-        //     boolean reverseLimit = armSubsystem.getReverseLimitSwitch(armSubsystem.shoulderMotor);
-        //     SmartDashboard.putBoolean("ShlRevL", reverseLimit);
-        //     double position = armSubsystem.getShoulderPos();
-        //     SmartDashboard.putNumber("ShlPos", position);
-        // }
-
-        
-        // // Display Eextender Data
-        // if (Robot.count % 15 == 10) {
-        //     double current = armSubsystem.extenderMotor.getStatorCurrent();
-        //     SmartDashboard.putNumber("ExtCur", current);
-        //     boolean forwardLimit = armSubsystem.getForwardLimitSwitch(armSubsystem.extenderMotor);
-        //     SmartDashboard.putBoolean("ExtForL", forwardLimit);
-        //     boolean reverseLimit = armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor);
-        //     SmartDashboard.putBoolean("ExtRevL", reverseLimit);
-        //     double position = armSubsystem.getExtenderPos();
-        //     SmartDashboard.putNumber("ExtPos", position);
-        // }
-
-
+        if (Robot.count % 15 == 5) {
+            SmartDashboard.putString("ArmState", homeState.toString());
+        }
         if (homeState == State.START_HOME_EXTENDER) {
-            armSubsystem.setExtenderSpeed(0.3);
+            armSubsystem.setExtenderSpeed(-0.6);
             homeState = State.HOMING_EXTENDER;
         }
         if (homeState == State.HOMING_EXTENDER) {
-            if (armSubsystem.getForwardLimitSwitch(armSubsystem.extenderMotor)) {
+            if (armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {
                 homeState = State.HOMING_SHOULDER;
                 armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
-                armSubsystem.setExtenderSpeed(0);  // KAG added 1/24
+                armSubsystem.setExtenderSpeed(0); // KAG added 1/24
                 logf("++++++++++++++++++++Extender Homed\n");
                 armSubsystem.setExtenderSpeed(0);
                 armSubsystem.setMotorToPosition(armSubsystem.extenderMotor, 0);
@@ -84,9 +62,8 @@ public class DefaultArmCommand extends CommandBase {
                 logf("++++++++++++++++++++Start homing shoulder\n");
             }
         }
-         
 
-        if (armSubsystem.getForwardLimitSwitch(armSubsystem.extenderMotor)) {
+        if (armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {
             armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
         }
 
@@ -98,9 +75,7 @@ public class DefaultArmCommand extends CommandBase {
                 logf("++++++++++++++++++++Shoulder Homed\n");
                 armSubsystem.setShoulderSpeed(0);
             }
-            
-        } 
-        
+        }
 
         if (armSubsystem.getReverseLimitSwitch(armSubsystem.shoulderMotor)) {
             armSubsystem.zeroEncoder(armSubsystem.shoulderMotor);
@@ -110,39 +85,41 @@ public class DefaultArmCommand extends CommandBase {
             return;
         }
 
-
-
         double shoulder = shoulderSupplier.getAsDouble();
         if (Math.abs(shoulder) > .05) {
             armSubsystem.setShoulderSpeed(shoulder * .3);
             shoulderActive = true;
             armSubsystem.lastShoulderStopPosition = armSubsystem.getShoulderPos();
-            // logf("Shoulder Speed %.2f\n", left * .3);
-        } else { 
-            if (Math.abs(armSubsystem.getShoulderPos() - armSubsystem.lastShoulderStopPosition) > SHOULDER_THRESHOLD) {
-                shoulderActive = false;
-                armSubsystem.setShoulderSpeed(0);
-                armSubsystem.setEncoderPosition(armSubsystem.shoulderMotor,armSubsystem.lastShoulderStopPosition);
+            logf("Shoulder Speed %.2f\n", shoulder * .3);
+        } else {
+            if (shoulderActive) {
+                if (Math.abs(
+                        armSubsystem.getShoulderPos() - armSubsystem.lastShoulderStopPosition) > SHOULDER_THRESHOLD) {
+                    shoulderActive = false;
+                    armSubsystem.setShoulderSpeed(0);
+                    armSubsystem.setEncoderPosition(armSubsystem.shoulderMotor, armSubsystem.lastShoulderStopPosition);
+                }
             }
         }
 
         double extender = extenderSupplier.getAsDouble();
-        SmartDashboard.putNumber("Extender Speed", extender);
+        // SmartDashboard.putNumber("Extender Speed", extender);
         if (Math.abs(extender) > .05) {
             extenderActive = true;
             armSubsystem.setExtenderSpeed(extender * .9);
             armSubsystem.lastExtenderStopPosition = armSubsystem.getExtenderPos();
-            if (Robot.count % 20 == 0) {
-              logf("Extender Speed %.2f\n"  ,extender * .9);
-            }
+            logf("Extender Speed %.2f\n", extender * .9);
         } else {
-            if (Math.abs(armSubsystem.getExtenderPos() - armSubsystem.lastExtenderStopPosition) > EXTENDER_THRESHOLD) {
-                extenderActive = false;
-                armSubsystem.setExtenderSpeed(0);
-                //logf("*****-----******* current pos = %.2f setting the extender pos to %.2f\n", armSubsystem.getExtenderPos(), armSubsystem.lastExtenderStopPosition);
-                // TODO this is not correct -- test with a call below
-                // armSubsystem.setMotorToPosition(armSubsystem.extenderMotor, armSubsystem.lastExtenderStopPosition);
-                //armSubsystem.setMotorToPosition(armSubsystem.extenderMotor,-500 );
+            // Was taking too much time to set speed to zero so add extenderActive test
+            if (extenderActive) {
+                if (Math.abs(
+                        armSubsystem.getExtenderPos() - armSubsystem.lastExtenderStopPosition) > EXTENDER_THRESHOLD) {
+                    extenderActive = false;
+                    armSubsystem.setExtenderSpeed(0);
+                    // armSubsystem.setMotorToPosition(armSubsystem.extenderMotor,
+                    // armSubsystem.lastExtenderStopPosition);
+                    // armSubsystem.setMotorToPosition(armSubsystem.extenderMotor,-500 );
+                }
             }
         }
     }

@@ -29,7 +29,7 @@ public class GamePiecePlacementCommand extends CommandBase {
 
     public final static Pose2d driveTrainPoseTargets[] = new Pose2d[] {
         // new Pose2d(new Translation2d(14.55, 4.91), new Rotation2d(0,0)),
-        new Pose2d(new Translation2d(14.69, 5.55), new Rotation2d(Math.toRadians(0))), // this worked!
+        new Pose2d(new Translation2d(1.79, 2.88), new Rotation2d(Math.toRadians(180))), // this worked!
        // new Pose2d(new Translation2d(16.61, 4.38), new Rotation2d(Math.toRadians(180))),
         
         new Pose2d(new Translation2d(0.0, 0.0), new Rotation2d(0,0)),

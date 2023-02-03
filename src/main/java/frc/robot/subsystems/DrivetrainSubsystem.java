@@ -255,11 +255,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
         states[3].angle.getRadians());
     if (Robot.count % 20 == 7) {
-      SmartDashboard.putNumber("FL", states[0].angle.getDegrees());
-      SmartDashboard.putNumber("FR", states[1].angle.getDegrees());
-      SmartDashboard.putNumber("BL", states[2].angle.getDegrees());
-      SmartDashboard.putNumber("BR", states[3].angle.getDegrees());
-      SmartDashboard.putNumber("Yaw", -m_navx.getYaw());
+      //SmartDashboard.putNumber("FL", states[0].angle.getDegrees());
+      //SmartDashboard.putNumber("FR", states[1].angle.getDegrees());
+      //SmartDashboard.putNumber("BL", states[2].angle.getDegrees());
+      //SmartDashboard.putNumber("BR", states[3].angle.getDegrees());
+      SmartDashboard.putNumber("Yaw", m_navx.getYaw());
       SmartDashboard.putNumber("Rot", getGyroscopeRotation().getDegrees());
     }
   }
@@ -317,11 +317,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_backLeftModule.set(speed[2] / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, getAngle(a, d));
     m_backRightModule.set(speed[3] / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, getAngle(a, c));
     if (Robot.count % 15 == 6) {
-      SmartDashboard.putNumber("FL", getAngle(b, d));
-      SmartDashboard.putNumber("FR", getAngle(b, c));
-      SmartDashboard.putNumber("BL", getAngle(a, d));
-      SmartDashboard.putNumber("BR", getAngle(a, c));
-      SmartDashboard.putNumber("Yaw", m_navx.getYaw());
+      //SmartDashboard.putNumber("FL", getAngle(b, d));
+      //SmartDashboard.putNumber("FR", getAngle(b, c));
+      //SmartDashboard.putNumber("BL", getAngle(a, d));
+      //SmartDashboard.putNumber("BR", getAngle(a, c));
+      //SmartDashboard.putNumber("Yaw", m_navx.getYaw());
     }
 
     // frontLeft.setAngle(getAngle(b, d));
@@ -374,12 +374,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
     double blP = m_backLeftModule.getPosition();
     double brP = m_backRightModule.getPosition();
 
-    if (Robot.count % 20 == 6) {
-      SmartDashboard.putNumber("FL POS", flP);
-      SmartDashboard.putNumber("FR POS", frP);
-      SmartDashboard.putNumber("BR POS", brP);
-      SmartDashboard.putNumber("BL POS", blP);
-    }
+    // if (Robot.count % 20 == 6) {
+    //   SmartDashboard.putNumber("FL POS", flP);
+    //   SmartDashboard.putNumber("FR POS", frP);
+    //   SmartDashboard.putNumber("BR POS", brP);
+    //   SmartDashboard.putNumber("BL POS", blP);
+    // }
     // The postition is in meters
     return new SwerveModulePosition[] {
         new SwerveModulePosition(flP, flA),

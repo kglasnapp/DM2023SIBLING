@@ -24,7 +24,7 @@ public class StraightPathCommand extends CommandBase {
             Math.toRadians(180), Math.toRadians(180));
     private final ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, X_CONSTRAINTS);
     private final ProfiledPIDController yController = new ProfiledPIDController(1, 0, 0, Y_CONSTRAINTS);
-    private final ProfiledPIDController omegaController = new ProfiledPIDController(1, 0, 0, OMEGA_CONSTRATINTS);
+    private final ProfiledPIDController omegaController = new ProfiledPIDController(.5, 0, 0, OMEGA_CONSTRATINTS);
     private final Supplier<Pose2d> poseProvider;
     Pose2d initialPose;
     Pose2d destination;
@@ -113,7 +113,7 @@ public class StraightPathCommand extends CommandBase {
         var robotPose = poseProvider.get();
         boolean atGoalX = Math.abs(robotPose.getX() - destination.getX())<0.01;
         boolean atGoalY = Math.abs(robotPose.getY() - destination.getY())<0.01;
-        boolean atGoalO = Math.abs(robotPose.getRotation().getDegrees() - destination.getRotation().getDegrees()) < 1;
+        boolean atGoalO = Math.abs(drivetrainSubsystem.getGyroscopeRotation().getDegrees() - destination.getRotation().getDegrees()) < 2;
         logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b>\n", (currentTime - initialTime) / 1000000,
                 robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), atGoalX, atGoalY, atGoalO);
         return  atGoalX && 

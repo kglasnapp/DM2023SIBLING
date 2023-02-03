@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-
 import org.photonvision.PhotonCamera;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -22,11 +21,14 @@ import frc.robot.commands.DefaultArmCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GamePiecePlacementCommand;
+import frc.robot.commands.GrabberDefaultCommand;
 import frc.robot.commands.PathFollowCommand;
 import frc.robot.commands.ShoulderCommand;
 import frc.robot.commands.StraightPathCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.PDHData;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 //import static frc.robot.utilities.Util.logf;
 
@@ -42,58 +44,66 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  private final GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
 
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
 
   // private final XboxController m_controller = new XboxController(2);
   private final static CommandXboxController m_controller = new CommandXboxController(2);
-  
-  public final PhotonCamera photonCameras[] = { new PhotonCamera("gloworm1")
-  , new PhotonCamera("gloworm2") }
-  ; 
-  public final Transform3d cameraPositions[] = {  
-    new Transform3d(new Translation3d(-0.1575, -0.17, -0.5775), new Rotation3d(0.0,0.0,0.0)),
-    new Transform3d(new Translation3d(-0.1575, 0.215, -0.578), new Rotation3d(0.0,0.0,0.0)) };
 
-  private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCameras, cameraPositions, m_drivetrainSubsystem);
+  public final PhotonCamera photonCameras[] = { new PhotonCamera("gloworm1"), new PhotonCamera("gloworm2") };
+  public final Transform3d cameraPositions[] = {
+      new Transform3d(new Translation3d(-0.1575, -0.17, -0.5775), new Rotation3d(0.0, 0.0, 0.0)),
+      new Transform3d(new Translation3d(-0.1575, 0.215, -0.578), new Rotation3d(0.0, 0.0, 0.0)) };
+// TODO: this needs to be fixed
+  private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCameras[0], m_drivetrainSubsystem);
 
-  private final GamePiecePlacementCommand gamePiecePlacementCommand = new GamePiecePlacementCommand(m_drivetrainSubsystem, 
-    m_armSubsystem, poseEstimator, GamePiecePlacementCommand.driveTrainPoseTargets[0], GamePiecePlacementCommand.armTargets[0]);
-  // private final PathFollowCommand pathFollowCommand = new PathFollowCommand(m_drivetrainSubsystem,
-  //     poseEstimator::getCurrentPose);
+  private final GamePiecePlacementCommand gamePiecePlacementCommand = new GamePiecePlacementCommand(
+      m_drivetrainSubsystem,
+      m_armSubsystem, poseEstimator, GamePiecePlacementCommand.driveTrainPoseTargets[0],
+      GamePiecePlacementCommand.armTargets[0]);
+  // private final PathFollowCommand pathFollowCommand = new
+  // PathFollowCommand(m_drivetrainSubsystem,
+  // poseEstimator::getCurrentPose);
 
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
 
-  public static boolean mrKeith = false;
+  public static boolean mrKeith = true;
   private SlewRateLimiter sLX = new SlewRateLimiter(3);
   private SlewRateLimiter sLY = new SlewRateLimiter(3);
-  private SlewRateLimiter sRX = new SlewRateLimiter(3);
+  private SlewRateLimiter sRX = new SlewRateLimiter(9);
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
+    // The robot's subsystems and commands are defined here...
+    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem));
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rotation
     // m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-    //     m_drivetrainSubsystem,
-    //     () -> -modifyAxis(squareWithSign(m_controller.getLeftY())) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-    //     () -> -modifyAxis(squareWithSign( m_controller.getLeftX())) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-    //     () -> -modifyAxis(squareWithSign(m_controller.getRightX()))
-    //         * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+    // m_drivetrainSubsystem,
+    // () -> -modifyAxis(squareWithSign(m_controller.getLeftY())) *
+    // DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+    // () -> -modifyAxis(squareWithSign( m_controller.getLeftX())) *
+    // DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+    // () -> -modifyAxis(squareWithSign(m_controller.getRightX()))
+    // * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
         m_drivetrainSubsystem,
-        () -> -modifyAxis(squareWithSign(sLY.calculate(m_controller.getLeftY()))) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(squareWithSign( sLX.calculate(m_controller.getLeftX()))) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(squareWithSign( sRX.calculate(m_controller.getRightX())))
+        () -> -modifyAxis(squareWithSign(sLY.calculate(m_controller.getLeftY())))
+            * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -modifyAxis(squareWithSign(sLX.calculate(m_controller.getLeftX())))
+            * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -modifyAxis(squareWithSign(sRX.calculate(m_controller.getRightX())))
             * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-            m_controller.x()));
+        m_controller.x()));
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),
-        () -> (RobotContainer.getRightBumper() ? 1 : -1) * RobotContainer.getRightTrigger()));
+        () -> (RobotContainer.getRightBumper() ? -1 : 1) * RobotContainer.getRightTrigger()));
     // Configure the button bindings
     configureButtonBindings();
     configureDashboard();
@@ -163,10 +173,11 @@ public class RobotContainer {
 
       m_controller.povLeft().whileTrue(new ExtenderCommand(m_armSubsystem, 0));
       m_controller.povRight().whileTrue(new ExtenderCommand(m_armSubsystem, -9));
-
-      //m_controller.b().whileTrue(gamePiecePlacementCommand);
-      m_controller.b().whileTrue(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator::getCurrentPose, GamePiecePlacementCommand.driveTrainPoseTargets[0]));
     }
+    // m_controller.b().whileTrue(gamePiecePlacementCommand);
+    m_controller.b().whileTrue(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator::getCurrentPose,
+        GamePiecePlacementCommand.driveTrainPoseTargets[0]));
+
   }
 
   /**

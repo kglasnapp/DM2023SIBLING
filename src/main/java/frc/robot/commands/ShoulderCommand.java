@@ -67,7 +67,7 @@ public class ShoulderCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         armSubsystem.setShoulderSpeed(0);        
-        SmartDashboard.putNumber("ShlSpd", 0);
+        //SmartDashboard.putNumber("ShlSpd", 0);
     }
 
     double getShoulderAngle(double x, double y) {

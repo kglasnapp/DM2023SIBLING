@@ -4,18 +4,27 @@ public class RunningAverage {
     private int lastSample = 0;
     private int numSamples = 0;
     private final double[] samples;
+    private int size = 0;
 
     public RunningAverage(int size) {
         samples = new double[size];
+        this.size = size;
     }
 
-    public void add(double d) {
+    public void init() {
+        for(int i = 0; i < size; i++)
+          samples[i] = 0;
+        numSamples = 0;
+    }
+
+    public double add(double d) {
         if (lastSample >= samples.length)
             lastSample = 0;
         samples[lastSample] = d;
         lastSample++;
         if (numSamples != samples.length)
             numSamples++;
+        return getAverage();
     }
 
     public double getAverage() {
