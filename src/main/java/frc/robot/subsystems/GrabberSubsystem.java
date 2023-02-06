@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
 import static frc.robot.utilities.Util.logf;
 
 public class GrabberSubsystem extends SubsystemBase {
@@ -20,7 +19,6 @@ public class GrabberSubsystem extends SubsystemBase {
     private PID grabberPid;
     public TalonSRX grabberMotor;
     public double lastGrabberStopPosition;
-    private int lastPOV = -1;
     private double lastPowerLevel  = 0;
 
     public GrabberSubsystem() {
@@ -124,24 +122,5 @@ public class GrabberSubsystem extends SubsystemBase {
             //SmartDashboard.putNumber("GrbPos", position);
         }
 
-
-        if (RobotContainer.mrKeith) {
-            int pov = RobotContainer.getPov();
-            if (lastPOV == pov) {
-                return;
-            }
-            lastPOV = pov;
-            if (pov == 0) {
-                setGrabberPower(0);
-            } else if (pov == 90) {
-                // Grab
-                setGrabberPower(.6);
-            } else if (pov == 180) {
-                setGrabberPower(1);
-            } else if (pov == 270) {
-                // Drop
-                setGrabberPower(-.6);
-            }
-        }
     }
 }

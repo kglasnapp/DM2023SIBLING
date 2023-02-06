@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch PiecePickerPoseProvider",
+      "request": "launch",
+      "mainClass": "frc.robot.utilities.PiecePickerPoseProvider",
+      "projectName": "2023-swerve-comp"
+    },
+    {
+      "type": "java",
       "name": "Launch PoseEstimatorSubsystem",
       "request": "launch",
       "mainClass": "frc.robot.subsystems.PoseEstimatorSubsystem",

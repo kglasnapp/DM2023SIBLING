@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
+
 import static frc.robot.utilities.Util.logf;
 
 public class ArmSubsystem extends SubsystemBase {
@@ -27,7 +27,7 @@ public class ArmSubsystem extends SubsystemBase {
     private PID extenderPid;
     // private double lastSpeed = 0;
     // private double lastJoy = 0;
-    private double lastPOV = -1;
+    
     public TalonFX shoulderMotor;
     public TalonFX extenderMotor;
 

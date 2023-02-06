@@ -8,6 +8,8 @@ import frc.robot.utilities.RunningAverage;
 
 import static frc.robot.utilities.Util.logf;
 
+import java.util.function.BooleanSupplier;
+
 public class GrabberDefaultCommand extends CommandBase {
 
     GrabberSubsystem grabberSubsystem;
@@ -16,16 +18,25 @@ public class GrabberDefaultCommand extends CommandBase {
     double CURRENT_THRESHOLD = 4;
     RunningAverage avg = new RunningAverage(20);
 
+    BooleanSupplier openProvider;
+    BooleanSupplier closeProvider;
+    BooleanSupplier stopProvider;
+
     public enum State {
         IDLE, START_HOME_GRABBER, HOMING_GRABBER, READY, OVERCURRENT
     }
 
     State state = State.START_HOME_GRABBER;
 
-    public GrabberDefaultCommand(GrabberSubsystem grabberSubsystem) {
+    public GrabberDefaultCommand(GrabberSubsystem grabberSubsystem,    
+        BooleanSupplier openProvider,
+        BooleanSupplier closeProvider,
+        BooleanSupplier stopProvider) {
         this.grabberSubsystem = grabberSubsystem;
+        this.openProvider = openProvider;
+        this.closeProvider = closeProvider;
+        this.stopProvider = stopProvider;
         addRequirements(grabberSubsystem);
-
     }
 
     @Override
@@ -36,19 +47,25 @@ public class GrabberDefaultCommand extends CommandBase {
         state = State.START_HOME_GRABBER;
     }
 
+   
+
     @Override
     public void execute() {
         double avgCurrent = Math.abs(avg.add(grabberSubsystem.getStatorCurrent()));
         if (state == State.START_HOME_GRABBER) {
-            grabberSubsystem.setGrabberPower(0.6);
+            
+                grabberSubsystem.setGrabberPower(0.6);
+            
             state = State.HOMING_GRABBER;
         }
         if (state == State.HOMING_GRABBER) {
             if (avgCurrent > CURRENT_THRESHOLD) {
-                state = State.READY;
-                grabberSubsystem.zeroEncoder();
-                grabberSubsystem.setGrabberPower(0);
-                logf("Grabber Homed\n");
+                
+                    state = State.READY;
+                    grabberSubsystem.zeroEncoder();
+                    grabberSubsystem.setGrabberPower(0);
+                    logf("Grabber Homed\n");
+                
 
             }
         }
@@ -78,6 +95,16 @@ public class GrabberDefaultCommand extends CommandBase {
                 logf("Set New Power Level  %.2f after over current lastest %.2f\n", presentPowerLevel, avgCurrent);
             }
 
+        }
+
+        if (openProvider.getAsBoolean()) {
+            grabberSubsystem.setGrabberPower(.6);
+        }
+        if (closeProvider.getAsBoolean()) {
+            grabberSubsystem.setGrabberPower(-.6);
+        }
+        if (stopProvider.getAsBoolean()) {
+            grabberSubsystem.setGrabberPower(0);
         }
     }
 }

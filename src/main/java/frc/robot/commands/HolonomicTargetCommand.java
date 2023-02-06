@@ -5,7 +5,7 @@ import org.photonvision.PhotonCamera;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import static frc.robot.Util.logf;
@@ -50,7 +50,7 @@ public class HolonomicTargetCommand extends CommandBase {
     boolean hasTarget = result.hasTargets();
     if (hasTarget) {
       var cameraToTarget = result.getBestTarget().getBestCameraToTarget();
-      int tagID = result.getBestTarget().getFiducialId();
+      
 
       // X - distance from camera in meters (in meters)
       // Y - right and left of camera center (in meters)

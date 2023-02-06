@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import static frc.robot.Robot.count;
 import static frc.robot.utilities.Util.logf;
-import static frc.robot.utilities.Util.round2;
+
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -13,7 +13,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import frc.robot.Constants;
 
 // setSensorPhase() should change the direction reported in the getSelectedSensor*() methods 

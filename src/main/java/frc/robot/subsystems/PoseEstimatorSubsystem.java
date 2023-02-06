@@ -21,9 +21,9 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
+
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -33,13 +33,16 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 //import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.utilities.RunningAverage;
 
 
 public class PoseEstimatorSubsystem extends SubsystemBase {
-
+  
   private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final PhotonPoseEstimator photonPoseEstimator;
+  // TODO Size on running average seems very high????? KAG
+  private final RunningAverage avg = new RunningAverage(120);
 
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
   // you trust your various sensors. Smaller numbers will cause the filter to
@@ -73,18 +76,12 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field2d = new Field2d();
-  public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(0.1,0.15, 0.56), new Rotation3d());
-  public static final Transform3d CAMERA_TO_ROBOT = ROBOT_TO_CAMERA.inverse();
+  public Transform3d robotToCamera;
   
-  public static void main(String arg[]) {
-    System.out.println(ROBOT_TO_CAMERA);
-    System.out.println(CAMERA_TO_ROBOT);
-  }
-  
-  //CAMERA_TO_ROBOT.inverse();  
-
-  public PoseEstimatorSubsystem(PhotonCamera photonCamera, DrivetrainSubsystem drivetrainSubsystem) {
+  public PoseEstimatorSubsystem(String name, PhotonCamera photonCamera, Transform3d robotToCamera, DrivetrainSubsystem drivetrainSubsystem) {
+    
     this.photonCamera = photonCamera;
+    this.robotToCamera = robotToCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
     AprilTagFieldLayout layout;
     try {
@@ -97,10 +94,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
       layout = null;
     }
-    ShuffleboardTab tab = Shuffleboard.getTab("Vision");
-
+    
     photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, this.photonCamera,
-        ROBOT_TO_CAMERA);
+        robotToCamera);
 
     poseEstimator = new SwerveDrivePoseEstimator(
         DrivetrainSubsystem.m_kinematics,
@@ -109,9 +105,14 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         new Pose2d(),
         stateStdDevs,
         visionMeasurementStdDevs);
-
+    
+    ShuffleboardTab tab = Shuffleboard.getTab("Vision "+name);
     tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
     tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
+  }
+
+  public double getAvg() {
+    return avg.getAverage();
   }
 
   @Override
@@ -119,16 +120,21 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     photonEstimatedRobotPose = photonPoseEstimator.update();
     if (photonEstimatedRobotPose.isPresent()) {
       EstimatedRobotPose pose = photonEstimatedRobotPose.get();
+      
       // Max distance you want a tag to be read at. Found issues after 15 feet away
       // from tag while moving.
       if (Math.hypot(pose.estimatedPose.getX(), pose.estimatedPose.getY()) < 5.25) {
         // Error with WPI code https://github.com/wpilibsuite/allwpilib/issues/4952
         try {
           poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
+          avg.add(3);
         } catch (ConcurrentModificationException e) {
         }
+      } else {
+        avg.add(1);
       }
-
+    } else {
+      avg.add(1);
     }
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(

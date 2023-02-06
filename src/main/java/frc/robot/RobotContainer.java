@@ -13,24 +13,30 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultArmCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtenderCommand;
-import frc.robot.commands.GamePiecePlacementCommand;
+
 import frc.robot.commands.GrabberDefaultCommand;
-import frc.robot.commands.PathFollowCommand;
+import frc.robot.commands.KeyPadStateCommand;
+
 import frc.robot.commands.ShoulderCommand;
 import frc.robot.commands.StraightPathCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
-import frc.robot.subsystems.PDHData;
+
+import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 //import static frc.robot.utilities.Util.logf;
+import frc.robot.utilities.KeyPadPositionSupplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -51,20 +57,13 @@ public class RobotContainer {
   // private final XboxController m_controller = new XboxController(2);
   private final static CommandXboxController m_controller = new CommandXboxController(2);
 
-  public final PhotonCamera photonCameras[] = { new PhotonCamera("gloworm1"), new PhotonCamera("gloworm2") };
-  public final Transform3d cameraPositions[] = {
-      new Transform3d(new Translation3d(-0.1575, -0.17, -0.5775), new Rotation3d(0.0, 0.0, 0.0)),
-      new Transform3d(new Translation3d(-0.1575, 0.215, -0.578), new Rotation3d(0.0, 0.0, 0.0)) };
-// TODO: this needs to be fixed
-  private final PoseEstimatorSubsystem poseEstimator = new PoseEstimatorSubsystem(photonCameras[0], m_drivetrainSubsystem);
+  private GenericHID keyPadController = new GenericHID(1);
 
-  private final GamePiecePlacementCommand gamePiecePlacementCommand = new GamePiecePlacementCommand(
-      m_drivetrainSubsystem,
-      m_armSubsystem, poseEstimator, GamePiecePlacementCommand.driveTrainPoseTargets[0],
-      GamePiecePlacementCommand.armTargets[0]);
-  // private final PathFollowCommand pathFollowCommand = new
-  // PathFollowCommand(m_drivetrainSubsystem,
-  // poseEstimator::getCurrentPose);
+  private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[]{
+    new PoseEstimatorSubsystem("1",new PhotonCamera("gloworm1"), new Transform3d(new Translation3d(0.1,0.16, 0.56), new Rotation3d()), m_drivetrainSubsystem),
+    new PoseEstimatorSubsystem("2",new PhotonCamera("gloworm2"), new Transform3d(new Translation3d(0.1,-0.20, 0.56), new Rotation3d()), m_drivetrainSubsystem),
+  });
+
 
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
 
@@ -78,7 +77,11 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // The robot's subsystems and commands are defined here...
-    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem));
+    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem, 
+      m_controller.povLeft(),
+      m_controller.povRight(),
+      m_controller.povDown()));
+      
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
@@ -167,17 +170,28 @@ public class RobotContainer {
     // m_controller.b().whileTrue(chaseTagCommand);
     // m_controller.x().whileTrue(pathFollowCommand);
     m_controller.y().whileTrue(balanceCommand);
-    if (!mrKeith) {
-      m_controller.povDown().whileTrue(new ShoulderCommand(m_armSubsystem, 0));
-      m_controller.povUp().whileTrue(new ShoulderCommand(m_armSubsystem, 0.95));
-
-      m_controller.povLeft().whileTrue(new ExtenderCommand(m_armSubsystem, 0));
-      m_controller.povRight().whileTrue(new ExtenderCommand(m_armSubsystem, -9));
-    }
     // m_controller.b().whileTrue(gamePiecePlacementCommand);
-    m_controller.b().whileTrue(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator::getCurrentPose,
-        GamePiecePlacementCommand.driveTrainPoseTargets[0]));
+    
+    m_controller.b().whileTrue(getCommandFor(0));
+          
+    for (int i=0;i<9;++i) {
+      getKeyPadControllerButton(i).whileTrue(getCommandFor(i));
+    }
+    for (int i=0;i<3;++i) {
+      getKeyPadControllerButton(9+i).onTrue(new KeyPadStateCommand(i));
+    }
+  }
 
+  CommandBase getCommandFor(int pos) {
+    return new StraightPathCommand(m_drivetrainSubsystem, poseEstimator.poseEstimators[0]::getCurrentPose,
+        new KeyPadPositionSupplier(pos))
+          .andThen(new ShoulderCommand(m_armSubsystem, pos,0))
+          .andThen(new ExtenderCommand(m_armSubsystem, pos))
+          .andThen(new ShoulderCommand(m_armSubsystem, pos, 1));
+  }
+
+  Trigger getKeyPadControllerButton(int buttonId) {
+    return keyPadController.button(buttonId + 1, CommandScheduler.getInstance().getDefaultButtonLoop()).castTo(Trigger::new);
   }
 
   /**

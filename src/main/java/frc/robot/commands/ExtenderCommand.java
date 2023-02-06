@@ -13,7 +13,7 @@ public class ExtenderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * inches)
      */
-    public final static double TOLERANCE = 0.02;
+    public final static double TOLERANCE = 1000;
     ArmSubsystem armSubsystem;
     double extenderGoal;
 
@@ -21,22 +21,29 @@ public class ExtenderCommand extends CommandBase {
 
     private TrapezoidProfile extenderTrapezoidProfile;
     double extenderInitial;
-
+    
+    /**
+     * These are the exteder pos for the encoder based on the target we are after:
+     * up, middle, floor
+     */
+    double goals[] = new double[] {
+        271000, 120354, 120354
+    };
     /**
      * We create a command with a position goal in inches.
      * 
      * @param extenderGoal
      */
-    public ExtenderCommand(ArmSubsystem armSubsystem, double extenderGoal) {
+    public ExtenderCommand(ArmSubsystem armSubsystem, int keyPad) {
         this.armSubsystem = armSubsystem;
-        this.extenderGoal = extenderGoal;
+        this.extenderGoal = goals[keyPad % 3];
         addRequirements(armSubsystem);
     }
 
     @Override
     public void initialize() {
-        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(55, 25);
-        this.extenderInitial = armSubsystem.getExtenderRevs();
+        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(300000, 50000);
+        this.extenderInitial = armSubsystem.getExtenderPos();
         TrapezoidProfile.State extenderGoalState = new TrapezoidProfile.State(extenderGoal - extenderInitial, 0);
         extenderTrapezoidProfile = new TrapezoidProfile(constraints, extenderGoalState);
         initialTime = RobotController.getFPGATime();
@@ -50,9 +57,9 @@ public class ExtenderCommand extends CommandBase {
         TrapezoidProfile.State intermediateExtenderState = extenderTrapezoidProfile.calculate(elapsedSec);
         double intermediateExtenderGoal = intermediateExtenderState.position;
 
-        armSubsystem.setMotorToPosition(armSubsystem.extenderMotor, (intermediateExtenderGoal + extenderInitial) * 2000 * 4);
+        armSubsystem.setMotorToPosition(armSubsystem.extenderMotor, (intermediateExtenderGoal + extenderInitial));
         if (Robot.count % 15 == 10) {
-            double position = armSubsystem.getExtenderRevs();
+            double position = armSubsystem.getExtenderPos();
             SmartDashboard.putNumber("Ext Goal", extenderGoal);
             logf("Time:%.1f Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
                     intermediateExtenderGoal + extenderInitial, extenderGoal, extenderInitial);
@@ -61,7 +68,7 @@ public class ExtenderCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return (Math.abs(armSubsystem.getExtenderRevs() - extenderGoal) < TOLERANCE);
+        return (Math.abs(armSubsystem.getExtenderPos() - extenderGoal) < TOLERANCE);
     }
 
     @Override
