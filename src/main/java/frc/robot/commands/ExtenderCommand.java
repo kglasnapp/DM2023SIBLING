@@ -13,7 +13,7 @@ public class ExtenderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * inches)
      */
-    public final static double TOLERANCE = 1000;
+    public final static double TOLERANCE = 20000;
     ArmSubsystem armSubsystem;
     double extenderGoal;
 
@@ -27,7 +27,7 @@ public class ExtenderCommand extends CommandBase {
      * up, middle, floor
      */
     double goals[] = new double[] {
-        271000, 120354, 120354
+        468000, 280354, 0   
     };
     /**
      * We create a command with a position goal in inches.
@@ -36,13 +36,13 @@ public class ExtenderCommand extends CommandBase {
      */
     public ExtenderCommand(ArmSubsystem armSubsystem, int keyPad) {
         this.armSubsystem = armSubsystem;
-        this.extenderGoal = goals[keyPad % 3];
+        this.extenderGoal = goals[keyPad / 3];
         addRequirements(armSubsystem);
     }
 
     @Override
     public void initialize() {
-        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(300000, 50000);
+        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(300000, 300000);
         this.extenderInitial = armSubsystem.getExtenderPos();
         TrapezoidProfile.State extenderGoalState = new TrapezoidProfile.State(extenderGoal - extenderInitial, 0);
         extenderTrapezoidProfile = new TrapezoidProfile(constraints, extenderGoalState);
@@ -61,7 +61,7 @@ public class ExtenderCommand extends CommandBase {
         if (Robot.count % 15 == 10) {
             double position = armSubsystem.getExtenderPos();
             SmartDashboard.putNumber("Ext Goal", extenderGoal);
-            logf("Time:%.1f Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
+            logf("Time:%.1f Extender Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
                     intermediateExtenderGoal + extenderInitial, extenderGoal, extenderInitial);
         }
     }

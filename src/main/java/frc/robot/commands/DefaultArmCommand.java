@@ -105,7 +105,7 @@ public class DefaultArmCommand extends CommandBase {
         // SmartDashboard.putNumber("Extender Speed", extender);
         if (Math.abs(extender) > .05) {
             extenderActive = true;
-            armSubsystem.setExtenderSpeed(extender * .9);
+            armSubsystem.setExtenderSpeed(extender * 1.0);
             armSubsystem.lastExtenderStopPosition = armSubsystem.getExtenderPos();
            // logf("Extender Speed %.2f\n", extender * .9);
         } else {

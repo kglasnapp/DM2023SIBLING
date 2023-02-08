@@ -67,11 +67,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public double getShoulderPos() {
-        return shoulderMotor.getSensorCollection().getIntegratedSensorPosition();
+        return shoulderMotor.getSelectedSensorPosition(); //getSensorCollection().getIntegratedSensorPosition();
     }
 
     public double getExtenderPos() {
-        return extenderMotor.getSensorCollection().getIntegratedSensorPosition();
+        return extenderMotor.getSelectedSensorPosition(); //getSensorCollection().getIntegratedSensorPosition();
     }
 
     public double getShoulderRevs() {
@@ -98,15 +98,17 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void setCurrentLimits(TalonFX motor) {
-        SupplyCurrentLimitConfiguration currLimitCfg = new SupplyCurrentLimitConfiguration(true, 5, 5, .2);
+        SupplyCurrentLimitConfiguration currLimitCfg = new SupplyCurrentLimitConfiguration(true, 10, 10, .2);
         motor.configSupplyCurrentLimit(currLimitCfg);
-        StatorCurrentLimitConfiguration statCurrentLimitCfg = new StatorCurrentLimitConfiguration(true, 5, 5, .2);
+        StatorCurrentLimitConfiguration statCurrentLimitCfg = new StatorCurrentLimitConfiguration(true, 10, 10, .2);
         motor.configGetStatorCurrentLimit(statCurrentLimitCfg);
     }
 
     public void setShoulderSpeed(double speed) {
         if (speed == 0) {
             shoulderMotor.set(ControlMode.Disabled, 0);
+            // TODO Mr. Keith took out next three
+            //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else {
             shoulderMotor.set(ControlMode.PercentOutput, speed);
         }
@@ -115,6 +117,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void setExtenderSpeed(double speed) {
         if (speed == 0) {
             extenderMotor.set(ControlMode.Disabled, 0);
+            //lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
         } else {
             extenderMotor.set(ControlMode.PercentOutput, speed);
         }
@@ -123,6 +126,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void setShoulderVelocity(double velocity) {
         if (velocity == 0) {
             shoulderMotor.set(ControlMode.Disabled, 0);
+           // lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else {
             shoulderMotor.set(ControlMode.Velocity, velocity);
         }
@@ -131,17 +135,25 @@ public class ArmSubsystem extends SubsystemBase {
     public void setExtenderVelocity(double velocity) {
         if (velocity == 0) {
             extenderMotor.set(ControlMode.Disabled, 0);
+           // lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
         } else {
             extenderMotor.set(ControlMode.Velocity, velocity);
         }
     }
 
     public void zeroEncoder(TalonFX motor) {
-        motor.getSensorCollection().setIntegratedSensorPosition(0.0, Constants.kTimeoutMs);
+        motor.setSelectedSensorPosition(0.0);
+        //getSensorCollection().setIntegratedSensorPosition(0.0, Constants.kTimeoutMs);
     }
 
     public void setEncoderPosition(TalonFX motor, double position) {
-        motor.getSensorCollection().setIntegratedSensorPosition(position, Constants.kTimeoutMs);
+        motor.setSelectedSensorPosition(position);
+        //getSensorCollection().setIntegratedSensorPosition(position, Constants.kTimeoutMs);
+        if (motor == shoulderMotor) {
+            //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
+        } else if (motor == extenderMotor) {
+            //lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
+        }
     }
 
     public boolean getForwardLimitSwitch(TalonFX motor) {

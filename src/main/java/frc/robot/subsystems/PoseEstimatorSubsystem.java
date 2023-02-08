@@ -41,7 +41,6 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final PhotonPoseEstimator photonPoseEstimator;
-  // TODO Size on running average seems very high????? KAG
   private final RunningAverage avg = new RunningAverage(120);
 
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
@@ -104,7 +103,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         drivetrainSubsystem.getModulePositions(),
         new Pose2d(),
         stateStdDevs,
-        visionMeasurementStdDevs);
+        visionMeasurementStdDevs);  
     
     ShuffleboardTab tab = Shuffleboard.getTab("Vision "+name);
     tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);

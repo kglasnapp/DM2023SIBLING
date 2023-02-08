@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.BalanceCommand;
+import frc.robot.commands.ConeAlignCommand;
 import frc.robot.commands.DefaultArmCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtenderCommand;
@@ -37,6 +38,7 @@ import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 //import static frc.robot.utilities.Util.logf;
 import frc.robot.utilities.KeyPadPositionSupplier;
+import frc.robot.utilities.PiecePickerPoseProvider;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -64,7 +66,8 @@ public class RobotContainer {
     new PoseEstimatorSubsystem("2",new PhotonCamera("gloworm2"), new Transform3d(new Translation3d(0.1,-0.20, 0.56), new Rotation3d()), m_drivetrainSubsystem),
   });
 
-
+  private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
+  private final ConeAlignCommand coneAlignCommand = new ConeAlignCommand(pickerPoseProvider, m_drivetrainSubsystem, poseEstimator);
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
 
   public static boolean mrKeith = true;
@@ -171,7 +174,8 @@ public class RobotContainer {
     // m_controller.x().whileTrue(pathFollowCommand);
     m_controller.y().whileTrue(balanceCommand);
     // m_controller.b().whileTrue(gamePiecePlacementCommand);
-    
+    m_controller.a().whileTrue(coneAlignCommand);
+
     m_controller.b().whileTrue(getCommandFor(0));
           
     for (int i=0;i<9;++i) {

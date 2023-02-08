@@ -14,7 +14,7 @@ public class ShoulderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * incshes)
      */
-    public final static double TOLERANCE = 1000;
+    public final static double TOLERANCE = 20000;
     private TrapezoidProfile shoulderTrapezoidProfile;
     ArmSubsystem armSubsystem; 
     double shoulderInitial;
@@ -31,8 +31,8 @@ public class ShoulderCommand extends CommandBase {
      * phase1: up, middle, floor
      */
     final static double goal[][] = new double[][] {
-        new double[] {87133, 104054, 104054},
-        new double[] {66133, 66133, 66133},
+        new double[] {104054 * 2.08, 87133 * 2.08, 87133 * 2.08},
+        new double[] {87133 * 2.08, 66133 * 2.08, 20000 * 2.08},
     };
 
     /**
@@ -42,14 +42,14 @@ public class ShoulderCommand extends CommandBase {
      */
     public ShoulderCommand(ArmSubsystem armSubsystem, int keyPad, int phase) {
         this.armSubsystem = armSubsystem;
-        this.shoulderGoal = goal[phase][keyPad % 3];
+        this.shoulderGoal = goal[phase][keyPad / 3];
         addRequirements(armSubsystem);
     }
 
     @Override
     public void initialize() {
         this.shoulderInitial = armSubsystem.getShoulderPos();
-        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(60000, 20000);
+        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(100000, 100000);
         TrapezoidProfile.State shoulderGoalState = new TrapezoidProfile.State(shoulderGoal - shoulderInitial, 0);
         shoulderTrapezoidProfile = new TrapezoidProfile(constraints, shoulderGoalState);
         initialTime = RobotController.getFPGATime();
@@ -69,7 +69,7 @@ public class ShoulderCommand extends CommandBase {
             SmartDashboard.putNumber("Shld Pos", position);
             SmartDashboard.putNumber("Shld Int Goal", intermediateShoulderGoal);
             SmartDashboard.putNumber("Shld Fin Goal", shoulderGoal);
-            logf("Time:%.1f Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
+            logf("Time:%.1f Shoulder Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
                     intermediateShoulderGoal + shoulderInitial, shoulderGoal, shoulderInitial);
         }
     }

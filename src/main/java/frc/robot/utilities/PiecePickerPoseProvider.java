@@ -3,57 +3,59 @@ package frc.robot.utilities;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class PiecePickerPoseProvider {
+public class PiecePickerPoseProvider implements Runnable {
+    int count = 0;
     private DatagramSocket socket;
-    private byte buffer[] = new byte[1024];
+    private byte buffer[] = new byte[256];
     PieceEstimatedPose estimatedPose;
 
-    public PiecePickerPoseProvider() throws Exception {
-        socket = new DatagramSocket(4445);
-
+    public PiecePickerPoseProvider() {
+        try {
+            socket = new DatagramSocket(5005);
+            Thread t = new Thread(this);
+            t.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void main(String argp[]) {
-        byte buffer[]= new byte[32];
-        for (byte i=0;i<buffer.length;++i) {
-            buffer[i] =(byte) (7 -(i % 8));
-        }
-        for (int i=0;i<buffer.length;++i) {
-            System.out.println(buffer[i]);
-        }
-        double timestamp = ByteBuffer.wrap(buffer,0,8).getDouble();
-        double x = ByteBuffer.wrap(buffer,8,8).getDouble();
-        double y = ByteBuffer.wrap(buffer,16,8).getDouble();
-        double angle = ByteBuffer.wrap(buffer,24,8).getDouble();        
-        Pose2d pose = new Pose2d(x,y,new Rotation2d(angle));
-        System.out.println("timestamp: "+timestamp);
-        System.out.println("x = "+x);
-        System.out.println("y = "+y);
-        System.out.println("angle = "+angle);
-        System.out.println("pose: "+pose);
-    }
-
-    public void run() throws Exception {
+    public void run() {
         boolean running = true;
-        while (running) {
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
-            double timestamp = ByteBuffer.wrap(buffer,0,8).getDouble();
-            double x = ByteBuffer.wrap(buffer,8,8).getDouble();
-            double y = ByteBuffer.wrap(buffer,16,8).getDouble();
-            double angle = ByteBuffer.wrap(buffer,24,8).getDouble();      
-            Pose2d pose = new Pose2d(x,y,new Rotation2d(angle));
-            estimatedPose = new PieceEstimatedPose(pose, timestamp);
+        try {
+            while (running) {
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+
+                double timestamp = ByteBuffer.wrap(buffer, 0, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                double x = ByteBuffer.wrap(buffer, 8, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                double y = ByteBuffer.wrap(buffer, 16, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                double angle = ByteBuffer.wrap(buffer, 24, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                if (count % 100 == 0) {
+                    SmartDashboard.putNumber("CCX", x);
+                    SmartDashboard.putNumber("CCY", y);
+                    SmartDashboard.putNumber("CCA", angle);
+                    count = 0;
+                }
+                Pose2d pose = new Pose2d(x, y, new Rotation2d(Math.toRadians(angle)));
+                estimatedPose = new PieceEstimatedPose(pose, RobotController.getFPGATime() / 1000);
+                count++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         socket.close();
     }
 
     public boolean hasResult() {
-        return estimatedPose != null;
+        double millSecs = RobotController.getFPGATime() / 1000;
+        return estimatedPose != null && millSecs - 500 <= estimatedPose.timestamp;
     }
 
     public PieceEstimatedPose getResult() {
@@ -63,6 +65,7 @@ public class PiecePickerPoseProvider {
     public class PieceEstimatedPose {
         Pose2d pose;
         double timestamp;
+
         public PieceEstimatedPose(Pose2d pose, double timestamp) {
             this.pose = pose;
             this.timestamp = timestamp;
