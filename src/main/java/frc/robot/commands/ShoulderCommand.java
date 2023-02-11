@@ -14,35 +14,16 @@ public class ShoulderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * incshes)
      */
-    public final static double TOLERANCE = 20000;
+    public final static double TOLERANCE = 10000;
     private TrapezoidProfile shoulderTrapezoidProfile;
     ArmSubsystem armSubsystem; 
     double shoulderInitial;
     double shoulderGoal;
     double initialTime = 0;
 
-    /**
-     * The shoulder command goes up, then the extender command goes, after that the shoulder command goes down.
-     * Going up is considered: phase 0.
-     * Going down after the extender command is: phase 1.
-     * Those two phases have a target pos that the shoulder encoder needs to achieve.
-     * Those goals are configured in this array.
-     * phase0: up, middle, floor
-     * phase1: up, middle, floor
-     */
-    final static double goal[][] = new double[][] {
-        new double[] {104054 * 2.08, 87133 * 2.08, 87133 * 2.08},
-        new double[] {87133 * 2.08, 66133 * 2.08, 20000 * 2.08},
-    };
-
-    /**
-     * We create a command with a position goal in inches.
-     * f\
-     * @param shoulderGoal
-     */
-    public ShoulderCommand(ArmSubsystem armSubsystem, int keyPad, int phase) {
+    public ShoulderCommand(ArmSubsystem armSubsystem, double goal) {
         this.armSubsystem = armSubsystem;
-        this.shoulderGoal = goal[phase][keyPad / 3];
+        this.shoulderGoal = goal;
         addRequirements(armSubsystem);
     }
 

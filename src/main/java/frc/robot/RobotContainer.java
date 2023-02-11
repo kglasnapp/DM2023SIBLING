@@ -4,11 +4,18 @@
 
 package frc.robot;
 
+import java.util.function.Supplier;
+
 import org.photonvision.PhotonCamera;
 
+import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -17,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.BalanceCommand;
@@ -24,7 +32,7 @@ import frc.robot.commands.ConeAlignCommand;
 import frc.robot.commands.DefaultArmCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtenderCommand;
-
+import frc.robot.commands.GrabberCommand;
 import frc.robot.commands.GrabberDefaultCommand;
 import frc.robot.commands.KeyPadStateCommand;
 
@@ -61,30 +69,33 @@ public class RobotContainer {
 
   private GenericHID keyPadController = new GenericHID(1);
 
-  private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[]{
-    new PoseEstimatorSubsystem("1",new PhotonCamera("gloworm1"), new Transform3d(new Translation3d(0.1,0.16, 0.56), new Rotation3d()), m_drivetrainSubsystem),
-    new PoseEstimatorSubsystem("2",new PhotonCamera("gloworm2"), new Transform3d(new Translation3d(0.1,-0.20, 0.56), new Rotation3d()), m_drivetrainSubsystem),
+  private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[] {
+      new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
+          new Transform3d(new Translation3d(0.14, 0.14, 0.51), new Rotation3d()), m_drivetrainSubsystem),
+      new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
+          new Transform3d(new Translation3d(0.14, -0.14, 0.51), new Rotation3d()), m_drivetrainSubsystem),
   });
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
-  private final ConeAlignCommand coneAlignCommand = new ConeAlignCommand(pickerPoseProvider, m_drivetrainSubsystem, poseEstimator);
+  private final ConeAlignCommand coneAlignCommand = new ConeAlignCommand(pickerPoseProvider, m_drivetrainSubsystem,
+      poseEstimator);
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
 
   public static boolean mrKeith = true;
   private SlewRateLimiter sLX = new SlewRateLimiter(3);
   private SlewRateLimiter sLY = new SlewRateLimiter(3);
-  private SlewRateLimiter sRX = new SlewRateLimiter(9);
+  private SlewRateLimiter sRX = new SlewRateLimiter(1);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     // The robot's subsystems and commands are defined here...
-    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem, 
-      m_controller.povLeft(),
-      m_controller.povRight(),
-      m_controller.povDown()));
-      
+    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem,
+        m_controller.povRight(),
+        m_controller.povLeft(),
+        m_controller.povDown()));
+
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
@@ -98,13 +109,18 @@ public class RobotContainer {
     // DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
     // () -> -modifyAxis(squareWithSign(m_controller.getRightX()))
     // * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
         m_drivetrainSubsystem,
-        () -> -modifyAxis(squareWithSign(sLY.calculate(m_controller.getLeftY())))
-            * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(squareWithSign(sLX.calculate(m_controller.getLeftX())))
-            * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(squareWithSign(sRX.calculate(m_controller.getRightX())))
+        () -> (SwerveModuleFactory.powerRatio == 1 ? -modifyAxis(squareWithSign(sLY.calculate(m_controller.getLeftY())))
+            * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
+            : -modifyAxis(squareWithSign(m_controller.getLeftY()))
+                * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+        () -> (SwerveModuleFactory.powerRatio == 1 ? -modifyAxis(squareWithSign(sLX.calculate(m_controller.getLeftX())))
+            * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
+            : -modifyAxis(squareWithSign(m_controller.getLeftX()))
+                * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
+        () -> -modifyAxis(squareWithSign(m_controller.getRightX()))
             * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
         m_controller.x()));
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
@@ -176,26 +192,59 @@ public class RobotContainer {
     // m_controller.b().whileTrue(gamePiecePlacementCommand);
     m_controller.a().whileTrue(coneAlignCommand);
 
-    m_controller.b().whileTrue(getCommandFor(0));
-          
-    for (int i=0;i<9;++i) {
+    // pick up from double substation
+
+    m_controller.b().whileTrue(
+        new StraightPathCommand(m_drivetrainSubsystem,
+            poseEstimator.poseEstimators[0]::getCurrentPose,
+            new Pose2d(new Translation2d(1.36, 1.30), new Rotation2d(Math.toRadians(180))))
+            .andThen(new ShoulderCommand(m_armSubsystem, 165000))
+            .andThen(new GrabberCommand(grabberSubsystem, true))
+            .andThen(new WaitCommand(0.5))
+            .andThen(new ExtenderCommand(m_armSubsystem, 240000))
+            .andThen(new GrabberCommand(grabberSubsystem, false))
+            .andThen(new WaitCommand(1.5))
+            .andThen(new ShoulderCommand(m_armSubsystem, 201000))
+            .andThen(new ExtenderCommand(m_armSubsystem, 0))
+            .andThen(new ShoulderCommand(m_armSubsystem, 0)));
+
+    for (int i = 0; i < 9; ++i) {
       getKeyPadControllerButton(i).whileTrue(getCommandFor(i));
     }
-    for (int i=0;i<3;++i) {
-      getKeyPadControllerButton(9+i).onTrue(new KeyPadStateCommand(i));
+    for (int i = 0; i < 3; ++i) {
+      getKeyPadControllerButton(9 + i).onTrue(new KeyPadStateCommand(i));
     }
   }
 
   CommandBase getCommandFor(int pos) {
-    return new StraightPathCommand(m_drivetrainSubsystem, poseEstimator.poseEstimators[0]::getCurrentPose,
+    double extenderGoals[] = new double[] {
+        468000, 125354, 0
+    };
+    /**
+     * The shoulder command goes up, then the extender command goes, after that the
+     * shoulder command goes down.
+     * Going up is considered: phase 0.
+     * Going down after the extender command is: phase 1.
+     * Those two phases have a target pos that the shoulder encoder needs to
+     * achieve.
+     * Those goals are configured in this array.
+     * phase0: up, middle, floor
+     * phase1: up, middle, floor
+     */
+    double shoulderGoals[][] = new double[][] {
+        new double[] { 104054 * 2.08, 87133 * 2.08, 87133 * 2.08 },
+        new double[] { 87133 * 2.08, 66133 * 2.08, 20000 * 2.08 },
+    };
+    return new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
         new KeyPadPositionSupplier(pos))
-          .andThen(new ShoulderCommand(m_armSubsystem, pos,0))
-          .andThen(new ExtenderCommand(m_armSubsystem, pos))
-          .andThen(new ShoulderCommand(m_armSubsystem, pos, 1));
+        .raceWith(new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
+        .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
+        .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[1][pos / 3]));
   }
 
   Trigger getKeyPadControllerButton(int buttonId) {
-    return keyPadController.button(buttonId + 1, CommandScheduler.getInstance().getDefaultButtonLoop()).castTo(Trigger::new);
+    return keyPadController.button(buttonId + 1, CommandScheduler.getInstance().getDefaultButtonLoop())
+        .castTo(Trigger::new);
   }
 
   /**

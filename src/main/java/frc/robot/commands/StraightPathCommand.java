@@ -28,14 +28,26 @@ public class StraightPathCommand extends CommandBase {
     private final ProfiledPIDController omegaController = new ProfiledPIDController(.5, 0, 0, OMEGA_CONSTRATINTS);
     private final Supplier<Pose2d> poseProvider;
     Pose2d initialPose;
-    Supplier<Pose2d> destination;
+    Supplier<Pose2d> destinationProvider;
+    Pose2d destination;
 
     public StraightPathCommand(DrivetrainSubsystem drivetrainSubsystem, Supplier<Pose2d> poseProvider,
             Supplier<Pose2d> destination) {
         this.drivetrainSubsystem = drivetrainSubsystem;
+        this.destinationProvider = destination;
+        this.poseProvider = poseProvider;
+        init();
+    }
+
+    public StraightPathCommand(DrivetrainSubsystem drivetrainSubsystem, Supplier<Pose2d> poseProvider,
+            Pose2d destination) {
+        this.drivetrainSubsystem = drivetrainSubsystem;
         this.destination = destination;
         this.poseProvider = poseProvider;
+        init();
+    }
 
+    void init() {
         xController.setTolerance(0.005);
         yController.setTolerance(0.005);
         omegaController.setTolerance(Units.degreesToRadians(3));
@@ -69,9 +81,13 @@ public class StraightPathCommand extends CommandBase {
         logf("executing path follow command\n");
         double currentTime = RobotController.getFPGATime() - initialTime;
 
-        double goalX = getIntermediateGoal(destination.get().getX(), initialPose.getX(), 3, currentTime);
-        double goalY = getIntermediateGoal(destination.get().getY(), initialPose.getY(), 3, currentTime);
-        double goalAngle = getIntermediateGoal(destination.get().getRotation().getDegrees(),
+        if (destinationProvider != null) {
+            destination = destinationProvider.get();
+        }
+
+        double goalX = getIntermediateGoal(destination.getX(), initialPose.getX(), 3, currentTime);
+        double goalY = getIntermediateGoal(destination.getY(), initialPose.getY(), 3, currentTime);
+        double goalAngle = getIntermediateGoal(destination.getRotation().getDegrees(),
                 initialPose.getRotation().getDegrees(), 3, currentTime);
         xController.setGoal(goalX);
         yController.setGoal(goalY);
@@ -113,11 +129,14 @@ public class StraightPathCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         double currentTime = RobotController.getFPGATime();
+        if (destinationProvider != null) {
+            destination = destinationProvider.get();
+        }
         var robotPose = poseProvider.get();
-        boolean atGoalX = Math.abs(robotPose.getX() - destination.get().getX()) < 0.01;
-        boolean atGoalY = Math.abs(robotPose.getY() - destination.get().getY()) < 0.01;
+        boolean atGoalX = Math.abs(robotPose.getX() - destination.getX()) < 0.01;
+        boolean atGoalY = Math.abs(robotPose.getY() - destination.getY()) < 0.01;
         boolean atGoalO = Math.abs((Util.normalizeAngle(robotPose.getRotation().getDegrees() -
-                destination.get().getRotation().getDegrees()))) < 2;
+                destination.getRotation().getDegrees()))) < 2;
         logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b>\n",
                 (currentTime - initialTime) / 1000000,
                 robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), atGoalX, atGoalY, atGoalO);

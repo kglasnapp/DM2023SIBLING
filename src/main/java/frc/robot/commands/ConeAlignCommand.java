@@ -74,13 +74,13 @@ public class ConeAlignCommand extends CommandBase {
             lastTarget = target;
             double coneX = target.getPose().getX();
             double coneY = target.getPose().getY();
-            double coneAngle = target.getPose().getRotation().getDegrees();
+            double coneAngle = cleanAngle(target.getPose().getRotation().getDegrees());
             atGoalX = Math.abs(coneX - 350) < 40;
             atGoalY = Math.abs(coneY - 220) < 40;
             atGoalA = Math.abs(Math.abs(coneAngle) - 90) < 10;
             logf("atGoalX %.2f %b atGoalY %.2f %b atGoalA %.2f %b\n",coneX, atGoalX, coneY, atGoalY, coneAngle, atGoalA);
             double goalPoseX = robotPose2d.getX() + ((350 - coneX) / 100);
-            double goalPoseY = robotPose2d.getY() + ((220 - coneY) / 100);
+            double goalPoseY = robotPose2d.getY() + ((220 - (440 - coneY)) / 100);
             double goalPoseAngle = Math.toRadians(robotPose2d.getRotation().getDegrees() + 90 - Math.abs(coneAngle));
             
             // Drive
@@ -114,6 +114,14 @@ public class ConeAlignCommand extends CommandBase {
             drivetrainSubsystem.drive(
                     ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed, robotPose2d.getRotation()));
         }
+    }
+
+    double cleanAngle(double angle) {
+        angle = Math.abs(angle);
+        while (angle > 90) {
+            angle-=90;
+        }
+        return angle;
     }
 
     @Override

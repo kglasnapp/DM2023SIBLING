@@ -23,20 +23,13 @@ public class ExtenderCommand extends CommandBase {
     double extenderInitial;
     
     /**
-     * These are the exteder pos for the encoder based on the target we are after:
-     * up, middle, floor
-     */
-    double goals[] = new double[] {
-        468000, 280354, 0   
-    };
-    /**
      * We create a command with a position goal in inches.
      * 
      * @param extenderGoal
      */
-    public ExtenderCommand(ArmSubsystem armSubsystem, int keyPad) {
+    public ExtenderCommand(ArmSubsystem armSubsystem, double goal) {
         this.armSubsystem = armSubsystem;
-        this.extenderGoal = goals[keyPad / 3];
+        this.extenderGoal = goal;
         addRequirements(armSubsystem);
     }
 

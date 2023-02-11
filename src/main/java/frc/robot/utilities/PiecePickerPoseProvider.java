@@ -37,7 +37,7 @@ public class PiecePickerPoseProvider implements Runnable {
                 double x = ByteBuffer.wrap(buffer, 8, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                 double y = ByteBuffer.wrap(buffer, 16, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                 double angle = ByteBuffer.wrap(buffer, 24, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
-                if (count % 100 == 0) {
+                if (count % 10 == 0) {
                     SmartDashboard.putNumber("CCX", x);
                     SmartDashboard.putNumber("CCY", y);
                     SmartDashboard.putNumber("CCA", angle);

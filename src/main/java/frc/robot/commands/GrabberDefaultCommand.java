@@ -26,12 +26,12 @@ public class GrabberDefaultCommand extends CommandBase {
         IDLE, START_HOME_GRABBER, HOMING_GRABBER, READY, OVERCURRENT
     }
 
-    State state = State.START_HOME_GRABBER;
+    static State state = State.START_HOME_GRABBER;
 
-    public GrabberDefaultCommand(GrabberSubsystem grabberSubsystem,    
-        BooleanSupplier openProvider,
-        BooleanSupplier closeProvider,
-        BooleanSupplier stopProvider) {
+    public GrabberDefaultCommand(GrabberSubsystem grabberSubsystem,
+            BooleanSupplier openProvider,
+            BooleanSupplier closeProvider,
+            BooleanSupplier stopProvider) {
         this.grabberSubsystem = grabberSubsystem;
         this.openProvider = openProvider;
         this.closeProvider = closeProvider;
@@ -47,33 +47,25 @@ public class GrabberDefaultCommand extends CommandBase {
         state = State.START_HOME_GRABBER;
     }
 
-   
-
     @Override
     public void execute() {
         double avgCurrent = Math.abs(avg.add(grabberSubsystem.getStatorCurrent()));
         if (state == State.START_HOME_GRABBER) {
-            
-                grabberSubsystem.setGrabberPower(0.6);
-            
+            grabberSubsystem.setGrabberPower(0.6);
             state = State.HOMING_GRABBER;
         }
         if (state == State.HOMING_GRABBER) {
             if (avgCurrent > CURRENT_THRESHOLD) {
-                
-                    state = State.READY;
-                    grabberSubsystem.zeroEncoder();
-                    grabberSubsystem.setGrabberPower(0);
-                    logf("Grabber Homed\n");
-                
-
+                state = State.READY;
+                grabberSubsystem.zeroEncoder();
+                grabberSubsystem.setGrabberPower(0);
+                logf("Grabber Homed\n");
             }
         }
         if (grabberSubsystem.getForwardLimitSwitch()) {
             grabberSubsystem.zeroEncoder();
         }
 
-        
         double presentPowerLevel = grabberSubsystem.getLastPowerLevel();
         if (Robot.count % 15 == 7) {
             SmartDashboard.putString("Gab State", state.toString());

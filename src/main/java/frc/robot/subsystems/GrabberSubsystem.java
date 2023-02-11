@@ -70,6 +70,7 @@ public class GrabberSubsystem extends SubsystemBase {
         return lastPowerLevel;
     }
     public void setGrabberPower(double speed) {
+        logf("------ setting speed for grabber: %.2f\n",speed);
         if (speed == 0) {
             grabberMotor.set(ControlMode.Disabled, 0);
         } else {

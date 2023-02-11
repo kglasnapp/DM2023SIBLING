@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import frc.robot.Util;
 
 public class PoseEstimatorAggregator implements Supplier<Pose2d> {
     public PoseEstimatorSubsystem poseEstimators[];
@@ -38,15 +39,15 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
         double total = 0;
         for (int i = 0; i < poseEstimators.length; ++i) {
             subsystemWeight[i] = poseEstimators[i].getAvg();
-            total += subsystemWeight[i];
+            total += subsystemWeight[i];            
         }
         for (int i = 0; i < poseEstimators.length; ++i) {
             Pose2d pose = poseEstimators[i].getCurrentPose();
             x += pose.getX() * subsystemWeight[i];
             y += pose.getY() * subsystemWeight[i];
-            angle += pose.getRotation().getRadians() * subsystemWeight[i];
+            angle += Util.unNormalilzeAngle(pose.getRotation().getDegrees()) * subsystemWeight[i];
         }
-        Pose2d pose = new Pose2d(x / total, y / total, new Rotation2d(angle / total));
+        Pose2d pose = new Pose2d(x / total, y / total, new Rotation2d(Math.toRadians(angle / total)));
         drawField(pose);
         return pose;
     }

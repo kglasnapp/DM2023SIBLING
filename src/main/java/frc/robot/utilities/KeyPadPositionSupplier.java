@@ -18,18 +18,20 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
      */
     public static int state = 0;
     int pos;
+    final static double changeX = -0.04;
+    final static double changeY = 0.02;
     public final static Pose2d driveTrainPoseTargets[] = new Pose2d[] {
-        new Pose2d(new Translation2d(1.88, 3.09), new Rotation2d(Math.toRadians(180))), // this worked!       
-        new Pose2d(new Translation2d(1.88, 3.59), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(1.88, 4.09), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.88 + changeX, 3.09 + changeY), new Rotation2d(Math.toRadians(180))), // this worked!       
+        new Pose2d(new Translation2d(1.88 + changeX, 3.59 + changeY), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.88 + changeX, 4.09 + changeY), new Rotation2d(Math.toRadians(180))),
 
-        new Pose2d(new Translation2d(1.88, 2.88), new Rotation2d(Math.toRadians(180))), // this worked!       
-        new Pose2d(new Translation2d(1.88, 0.0), new Rotation2d(0,0)),
-        new Pose2d(new Translation2d(1.88, 0.0), new Rotation2d(0,0)),
+        new Pose2d(new Translation2d(1.88 + changeX, 2.88 + changeY), new Rotation2d(Math.toRadians(180))), // this worked!       
+        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0)),
+        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0)),
 
-        new Pose2d(new Translation2d(1.88, 2.88), new Rotation2d(Math.toRadians(180))), // this worked!       
-        new Pose2d(new Translation2d(1.88, 0.0), new Rotation2d(0,0)),
-        new Pose2d(new Translation2d(1.88, 0.0), new Rotation2d(0,0))
+        new Pose2d(new Translation2d(1.88 + changeX, 2.88), new Rotation2d(Math.toRadians(180))), // this worked!       
+        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0)),
+        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0))
     };
 
     public KeyPadPositionSupplier(int pos) {
