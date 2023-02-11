@@ -13,7 +13,7 @@ public class ExtenderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * inches)
      */
-    public final static double TOLERANCE = 20000;
+    public final static double TOLERANCE = 15000;
     ArmSubsystem armSubsystem;
     double extenderGoal;
 
@@ -53,7 +53,7 @@ public class ExtenderCommand extends CommandBase {
         armSubsystem.setMotorToPosition(armSubsystem.extenderMotor, (intermediateExtenderGoal + extenderInitial));
         if (Robot.count % 15 == 10) {
             double position = armSubsystem.getExtenderPos();
-            SmartDashboard.putNumber("Ext Goal", extenderGoal);
+            // SmartDashboard.putNumber("Ext Goal", extenderGoal);
             logf("Time:%.1f Extender Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
                     intermediateExtenderGoal + extenderInitial, extenderGoal, extenderInitial);
         }
@@ -67,7 +67,7 @@ public class ExtenderCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         armSubsystem.setExtenderSpeed(0);
-        SmartDashboard.putNumber("ExtSpd", 0);
+        // SmartDashboard.putNumber("ExtSpd", 0);
     }
 
     double getShoulderAngle(double x, double y) {

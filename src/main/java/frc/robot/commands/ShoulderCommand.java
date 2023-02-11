@@ -14,7 +14,7 @@ public class ShoulderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * incshes)
      */
-    public final static double TOLERANCE = 10000;
+    public final static double TOLERANCE = 5000;
     private TrapezoidProfile shoulderTrapezoidProfile;
     ArmSubsystem armSubsystem; 
     double shoulderInitial;
@@ -45,13 +45,13 @@ public class ShoulderCommand extends CommandBase {
         armSubsystem.setMotorToPosition(armSubsystem.shoulderMotor, (intermediateShoulderGoal + shoulderInitial));
 
         if (Robot.count % 15 == 5) {
-            SmartDashboard.putNumber("Shld Time", elapsedSec);
+            // SmartDashboard.putNumber("Shld Time", elapsedSec);
             double position = armSubsystem.getShoulderPos();
             SmartDashboard.putNumber("Shld Pos", position);
-            SmartDashboard.putNumber("Shld Int Goal", intermediateShoulderGoal);
-            SmartDashboard.putNumber("Shld Fin Goal", shoulderGoal);
-            logf("Time:%.1f Shoulder Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
-                    intermediateShoulderGoal + shoulderInitial, shoulderGoal, shoulderInitial);
+            // SmartDashboard.putNumber("Shld Int Goal", intermediateShoulderGoal);
+            // SmartDashboard.putNumber("Shld Fin Goal", shoulderGoal);
+            // logf("Time:%.1f Shoulder Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
+            //         intermediateShoulderGoal + shoulderInitial, shoulderGoal, shoulderInitial);
         }
     }
 

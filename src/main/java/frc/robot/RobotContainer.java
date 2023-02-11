@@ -78,12 +78,12 @@ public class RobotContainer {
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
   private final ConeAlignCommand coneAlignCommand = new ConeAlignCommand(pickerPoseProvider, m_drivetrainSubsystem,
-      poseEstimator);
+  poseEstimator.poseEstimators[0]::getCurrentPose);
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
 
   public static boolean mrKeith = true;
-  private SlewRateLimiter sLX = new SlewRateLimiter(3);
-  private SlewRateLimiter sLY = new SlewRateLimiter(3);
+  private SlewRateLimiter sLX = new SlewRateLimiter(5);
+  private SlewRateLimiter sLY = new SlewRateLimiter(5);
   private SlewRateLimiter sRX = new SlewRateLimiter(1);
 
   /**
@@ -120,8 +120,10 @@ public class RobotContainer {
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis(squareWithSign(m_controller.getLeftX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        () -> -modifyAxis(squareWithSign(m_controller.getRightX()))
-            * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        () -> (SwerveModuleFactory.powerRatio == 1 ? -modifyAxis(squareWithSign(sRX.calculate(m_controller.getRightX())))
+        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
+        : -modifyAxis(squareWithSign(m_controller.getRightX()))
+            * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
         m_controller.x()));
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),
@@ -190,14 +192,18 @@ public class RobotContainer {
     // m_controller.x().whileTrue(pathFollowCommand);
     m_controller.y().whileTrue(balanceCommand);
     // m_controller.b().whileTrue(gamePiecePlacementCommand);
-    m_controller.a().whileTrue(coneAlignCommand);
+    
+    // todo: cone align    
+    //m_controller.a().whileTrue(coneAlignCommand);
 
     // pick up from double substation
 
     m_controller.b().whileTrue(
         new StraightPathCommand(m_drivetrainSubsystem,
-            poseEstimator.poseEstimators[0]::getCurrentPose,
-            new Pose2d(new Translation2d(1.36, 1.30), new Rotation2d(Math.toRadians(180))))
+            // poseEstimator.poseEstimators[0]::getCurrentPose, // to use camera 1
+            // poseEstimator.poseEstimators[1]::getCurrentPose, // to use camera 2
+            poseEstimator, // to use the aggregator
+            new Pose2d(new Translation2d(1.36, 0.55), new Rotation2d(Math.toRadians(180))))
             .andThen(new ShoulderCommand(m_armSubsystem, 165000))
             .andThen(new GrabberCommand(grabberSubsystem, true))
             .andThen(new WaitCommand(0.5))
@@ -206,6 +212,9 @@ public class RobotContainer {
             .andThen(new WaitCommand(1.5))
             .andThen(new ShoulderCommand(m_armSubsystem, 201000))
             .andThen(new ExtenderCommand(m_armSubsystem, 0))
+            .andThen(new StraightPathCommand(m_drivetrainSubsystem,
+            poseEstimator.poseEstimators[0]::getCurrentPose,
+            new Pose2d(new Translation2d(1.60, 0.64), new Rotation2d(Math.toRadians(180)))))
             .andThen(new ShoulderCommand(m_armSubsystem, 0)));
 
     for (int i = 0; i < 9; ++i) {
@@ -235,7 +244,10 @@ public class RobotContainer {
         new double[] { 104054 * 2.08, 87133 * 2.08, 87133 * 2.08 },
         new double[] { 87133 * 2.08, 66133 * 2.08, 20000 * 2.08 },
     };
-    return new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+    return new StraightPathCommand(m_drivetrainSubsystem,
+        // poseEstimator.poseEstimators[0]::getCurrentPose,  // to use camera 1
+        // poseEstimator.poseEstimators[1]::getCurrentPose,  // to use camera 2
+        poseEstimator, // to use aggregator
         new KeyPadPositionSupplier(pos))
         .raceWith(new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
         .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
