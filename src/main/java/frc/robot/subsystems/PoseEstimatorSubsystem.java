@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-
-
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
@@ -31,13 +29,13 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 //import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.utilities.RunningAverage;
 
-
 public class PoseEstimatorSubsystem extends SubsystemBase {
-  
+
   private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
   private final PhotonPoseEstimator photonPoseEstimator;
@@ -76,9 +74,11 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   private final Field2d field2d = new Field2d();
   public Transform3d robotToCamera;
-  
-  public PoseEstimatorSubsystem(String name, PhotonCamera photonCamera, Transform3d robotToCamera, DrivetrainSubsystem drivetrainSubsystem) {
-    
+  String name;
+
+  public PoseEstimatorSubsystem(String name, PhotonCamera photonCamera, Transform3d robotToCamera,
+      DrivetrainSubsystem drivetrainSubsystem) {
+    this.name = name;
     this.photonCamera = photonCamera;
     this.robotToCamera = robotToCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
@@ -93,7 +93,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
       layout = null;
     }
-    
+
     photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, this.photonCamera,
         robotToCamera);
 
@@ -103,9 +103,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
         drivetrainSubsystem.getModulePositions(),
         new Pose2d(),
         stateStdDevs,
-        visionMeasurementStdDevs);  
-    
-    ShuffleboardTab tab = Shuffleboard.getTab("Vision "+name);
+        visionMeasurementStdDevs);
+
+    ShuffleboardTab tab = Shuffleboard.getTab("Vision " + name);
     tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
     tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
   }
@@ -114,26 +114,61 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     return avg.getAverage();
   }
 
+  boolean lastValue = false;
+  int lastValueCount = 0;
+
   @Override
   public void periodic() {
     photonEstimatedRobotPose = photonPoseEstimator.update();
     if (photonEstimatedRobotPose.isPresent()) {
       EstimatedRobotPose pose = photonEstimatedRobotPose.get();
-      
+      // System.out.println("got a pose "+pose.estimatedPose);
       // Max distance you want a tag to be read at. Found issues after 15 feet away
       // from tag while moving.
-      if (Math.hypot(pose.estimatedPose.getX(), pose.estimatedPose.getY()) < 5.25) {
+      
+      
+      // if (Math.hypot(pose.estimatedPose.getX(), pose.estimatedPose.getY()) < 5.25) {
+      
+      
         // Error with WPI code https://github.com/wpilibsuite/allwpilib/issues/4952
         try {
+          //System.out.println("the distance is less than 15 feet");
+          if (!lastValue) {            
+            // if (lastValueCount > 10) {
+              SmartDashboard.putBoolean(name, true);
+              lastValue = true;
+              lastValueCount = 0;
+            // }                       
+          }
+          lastValueCount++;
           poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
           avg.add(3);
         } catch (ConcurrentModificationException e) {
         }
-      } else {
-        avg.add(1);
-      }
+      /** else statement for the hypotenuse */
+      // } else {
+      //   avg.add(1);
+      //   if (lastValue) {          
+      //     // if (lastValueCount > 10) {
+      //       SmartDashboard.putBoolean(name, false);
+      //       lastValue = false;
+      //       lastValueCount = 0;
+      //     // } else {
+      //       lastValueCount++;
+      //     // }
+      //   }
+      // }
     } else {
       avg.add(1);
+      if (lastValue) {        
+        // if (lastValueCount > 10) {
+          SmartDashboard.putBoolean(name, false);
+          lastValue = false;
+          lastValueCount = 0;
+        // } else {
+          lastValueCount++;
+        // }
+      }
     }
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(
@@ -189,7 +224,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   // TODO: make it work later
   // public void addTrajectory(PathPlannerTrajectory traj) {
-  //   field2d.getObject("Trajectory").setTrajectory(traj);
+  // field2d.getObject("Trajectory").setTrajectory(traj);
   // }
 
 }

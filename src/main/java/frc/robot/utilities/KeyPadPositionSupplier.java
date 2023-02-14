@@ -19,24 +19,25 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
     public static int state = 0;
     int pos;
     final static double changeX = -0.04;
-    final static double changeY = 0.02;
+    final static double changeY = -0.12;
     public final static Pose2d driveTrainPoseTargets[] = new Pose2d[] {
-        new Pose2d(new Translation2d(1.88 + changeX, 3.09 + changeY), new Rotation2d(Math.toRadians(180))), // this worked!       
-        new Pose2d(new Translation2d(1.88 + changeX, 3.59 + changeY), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(1.88 + changeX, 4.09 + changeY), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.88 + changeX, 3.09 + changeY), new Rotation2d(Math.toRadians(180))),        
+        new Pose2d(new Translation2d(2.05 + changeX, 3.59 + changeY), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(2.00 + changeX, 4.09 ), new Rotation2d(Math.toRadians(180))),
 
-        new Pose2d(new Translation2d(1.88 + changeX, 2.88 + changeY), new Rotation2d(Math.toRadians(180))), // this worked!       
-        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0)),
-        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0)),
+        new Pose2d(new Translation2d(1.70, 4.43), new Rotation2d(Math.toRadians(180))), 
+        new Pose2d(new Translation2d(2.05, 1.79), new Rotation2d(0,0)),
+        new Pose2d(new Translation2d(2.00, 2.41), new Rotation2d(0,0)),
 
-        new Pose2d(new Translation2d(1.88 + changeX, 2.88), new Rotation2d(Math.toRadians(180))), // this worked!       
-        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0)),
-        new Pose2d(new Translation2d(1.88 + changeX, 0.0), new Rotation2d(0,0))
+        new Pose2d(new Translation2d(1.84, -0.27 + changeY), new Rotation2d(Math.toRadians(180))), 
+        new Pose2d(new Translation2d(2.01, 0.23 + changeY), new Rotation2d(0,0)),
+        new Pose2d(new Translation2d(2.00 + changeX, 0.73), new Rotation2d(0,0))
     };
 
     public KeyPadPositionSupplier(int pos) {
         this.pos = pos;
     }
+
 
     @Override
     public Pose2d get() {

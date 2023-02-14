@@ -9,9 +9,17 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Util;
 
 public class PoseEstimatorAggregator implements Supplier<Pose2d> {
+    // TODO: to change the camera to use
+    // mode -1 = aggregator uses the smar average between all the estimators
+    // mode 0-n = returns the value of the estimator in the mode position. To use camera 1, 
+    // set the mode to 0, camera 2 set it to 1 
+    public int defaultMode = 0;
+    public int mode = 0;
+    public int count;
     public PoseEstimatorSubsystem poseEstimators[];
     private final Field2d field2d = new Field2d();
 
@@ -20,6 +28,7 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
         ShuffleboardTab tab = Shuffleboard.getTab("Vision Agreegator");
         tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
         tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
+        SmartDashboard.putNumber("VisMod", defaultMode);
     }
 
     private String getFomattedPose() {
@@ -32,6 +41,7 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
 
     @Override
     public Pose2d get() {
+        count++;
         double x = 0;
         double y = 0;
         double angle = 0;
@@ -39,7 +49,7 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
         double total = 0;
         for (int i = 0; i < poseEstimators.length; ++i) {
             subsystemWeight[i] = poseEstimators[i].getAvg();
-            total += subsystemWeight[i];            
+            total += subsystemWeight[i];
         }
         for (int i = 0; i < poseEstimators.length; ++i) {
             Pose2d pose = poseEstimators[i].getCurrentPose();
@@ -48,8 +58,16 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
             angle += Util.unNormalilzeAngle(pose.getRotation().getDegrees()) * subsystemWeight[i];
         }
         Pose2d pose = new Pose2d(x / total, y / total, new Rotation2d(Math.toRadians(angle / total)));
+        if (count % 20 == 0) {
+            mode = (int) SmartDashboard.getNumber("VisMod",defaultMode);
+            count = 0;
+        }
         drawField(pose);
-        return pose;
+        if (mode < 0) {
+            return pose;
+        } else {
+            return poseEstimators[mode].getCurrentPose();
+        }
     }
 
     public void drawField(Pose2d pose) {

@@ -50,7 +50,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * This is a measure of how fast the robot should be able to drive in a straight
    * line.
    */
-  public static final double MAX_VELOCITY_METERS_PER_SECOND = 100.0 / 60.0 *
+  public static final double MAX_VELOCITY_METERS_PER_SECOND = 80.0 / 60.0 *
       SdsModuleConfigurations.MK4I_L2.getDriveReduction() *
       SdsModuleConfigurations.MK4I_L2.getWheelDiameter() * Math.PI;
 
@@ -246,14 +246,25 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
+    
     m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-        states[0].angle.getRadians());
+        getAngleForModule(m_frontLeftModule, states[0]));
     m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-        states[1].angle.getRadians());
+        getAngleForModule(m_frontRightModule, states[1]));
     m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-        states[2].angle.getRadians());
+          getAngleForModule(m_backLeftModule, states[2]));
     m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-        states[3].angle.getRadians());
+          getAngleForModule(m_backRightModule, states[3]));
+
+
+    // m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    //     states[0].angle.getRadians());
+    // m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    //     states[1].angle.getRadians());
+    // m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    //     states[2].angle.getRadians());
+    // m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    //     states[3].angle.getRadians());
     if (Robot.count % 20 == 7) {
       //SmartDashboard.putNumber("FL", states[0].angle.getDegrees());
       //SmartDashboard.putNumber("FR", states[1].angle.getDegrees());
@@ -264,6 +275,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
   }
 
+  public double getAngleForModule(SwerveModule module, SwerveModuleState state) {
+    if (state.speedMetersPerSecond < 0.01) {
+      return module.getSteerAngle();
+    }
+    return state.angle.getRadians();
+  }
   public void drive(double str, double fwd, double rcw) {
 
     // if (str < JOYSTICK_THRESHOLD && fwd < JOYSTICK_THRESHOLD && rcw <

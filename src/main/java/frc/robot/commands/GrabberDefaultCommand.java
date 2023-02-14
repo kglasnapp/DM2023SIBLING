@@ -15,7 +15,7 @@ public class GrabberDefaultCommand extends CommandBase {
     GrabberSubsystem grabberSubsystem;
     double lastPowerLevel = 0;
 
-    double CURRENT_THRESHOLD = 4;
+    double CURRENT_THRESHOLD = 5;
     RunningAverage avg = new RunningAverage(20);
 
     BooleanSupplier openProvider;

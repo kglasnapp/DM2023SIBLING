@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -44,6 +45,7 @@ import frc.robot.subsystems.GrabberSubsystem;
 
 import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
+import frc.robot.utilities.ControllerAvg;
 //import static frc.robot.utilities.Util.logf;
 import frc.robot.utilities.KeyPadPositionSupplier;
 import frc.robot.utilities.PiecePickerPoseProvider;
@@ -66,24 +68,23 @@ public class RobotContainer {
 
   // private final XboxController m_controller = new XboxController(2);
   private final static CommandXboxController m_controller = new CommandXboxController(2);
-
+  //private final static ControllerAvg controllerAverage = new ControllerAvg(m_controller);
   private GenericHID keyPadController = new GenericHID(1);
 
   private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[] {
       new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
-          new Transform3d(new Translation3d(0.14, 0.14, 0.51), new Rotation3d()), m_drivetrainSubsystem),
+          new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
       new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
-          new Transform3d(new Translation3d(0.14, -0.14, 0.51), new Rotation3d()), m_drivetrainSubsystem),
+          new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
   });
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
-  private final ConeAlignCommand coneAlignCommand = new ConeAlignCommand(pickerPoseProvider, m_drivetrainSubsystem,
-  poseEstimator.poseEstimators[0]::getCurrentPose);
+  private final ConeAlignCommand coneAlignCommand = new ConeAlignCommand(pickerPoseProvider, m_drivetrainSubsystem,poseEstimator);
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
 
   public static boolean mrKeith = true;
-  private SlewRateLimiter sLX = new SlewRateLimiter(5);
-  private SlewRateLimiter sLY = new SlewRateLimiter(5);
+  private SlewRateLimiter sLX = new SlewRateLimiter(9);
+  private SlewRateLimiter sLY = new SlewRateLimiter(9);
   private SlewRateLimiter sRX = new SlewRateLimiter(1);
 
   /**
@@ -125,6 +126,7 @@ public class RobotContainer {
         : -modifyAxis(squareWithSign(m_controller.getRightX()))
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
         m_controller.x()));
+        // TODO: to change the turbo, change the x() above
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),
         () -> (RobotContainer.getRightBumper() ? -1 : 1) * RobotContainer.getRightTrigger()));
@@ -200,20 +202,26 @@ public class RobotContainer {
 
     m_controller.b().whileTrue(
         new StraightPathCommand(m_drivetrainSubsystem,
-            // poseEstimator.poseEstimators[0]::getCurrentPose, // to use camera 1
-            // poseEstimator.poseEstimators[1]::getCurrentPose, // to use camera 2
-            poseEstimator, // to use the aggregator
-            new Pose2d(new Translation2d(1.36, 0.55), new Rotation2d(Math.toRadians(180))))
+            poseEstimator, 
+            new Pose2d(new Translation2d(1.41, 0.55), new Rotation2d(Math.toRadians(180))))
             .andThen(new ShoulderCommand(m_armSubsystem, 165000))
             .andThen(new GrabberCommand(grabberSubsystem, true))
+            .andThen(new PrintCommand("finished grab open hand"))
             .andThen(new WaitCommand(0.5))
-            .andThen(new ExtenderCommand(m_armSubsystem, 240000))
+
+            .andThen(new PrintCommand("Finished waiting"))
+            .andThen(
+              new ExtenderCommand(m_armSubsystem, 245000))
+
             .andThen(new GrabberCommand(grabberSubsystem, false))
             .andThen(new WaitCommand(1.5))
+            .andThen(new GrabberCommand(grabberSubsystem, false))
+            .andThen(new WaitCommand(0.1))
+            .andThen(new GrabberCommand(grabberSubsystem, false))
             .andThen(new ShoulderCommand(m_armSubsystem, 201000))
             .andThen(new ExtenderCommand(m_armSubsystem, 0))
             .andThen(new StraightPathCommand(m_drivetrainSubsystem,
-            poseEstimator.poseEstimators[0]::getCurrentPose,
+            poseEstimator,
             new Pose2d(new Translation2d(1.60, 0.64), new Rotation2d(Math.toRadians(180)))))
             .andThen(new ShoulderCommand(m_armSubsystem, 0)));
 
@@ -227,7 +235,7 @@ public class RobotContainer {
 
   CommandBase getCommandFor(int pos) {
     double extenderGoals[] = new double[] {
-        468000, 125354, 0
+        468000, 140354, 0
     };
     /**
      * The shoulder command goes up, then the extender command goes, after that the
@@ -245,11 +253,9 @@ public class RobotContainer {
         new double[] { 87133 * 2.08, 66133 * 2.08, 20000 * 2.08 },
     };
     return new StraightPathCommand(m_drivetrainSubsystem,
-        // poseEstimator.poseEstimators[0]::getCurrentPose,  // to use camera 1
-        // poseEstimator.poseEstimators[1]::getCurrentPose,  // to use camera 2
-        poseEstimator, // to use aggregator
+        poseEstimator, 
         new KeyPadPositionSupplier(pos))
-        .raceWith(new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
+        .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
         .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
         .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[1][pos / 3]));
   }
