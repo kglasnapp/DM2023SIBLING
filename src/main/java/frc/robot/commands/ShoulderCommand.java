@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import static frc.robot.utilities.Util.logf;
-
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

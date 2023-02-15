@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
 
@@ -45,8 +44,6 @@ import frc.robot.subsystems.GrabberSubsystem;
 
 import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.utilities.ControllerAvg;
-//import static frc.robot.utilities.Util.logf;
 import frc.robot.utilities.KeyPadPositionSupplier;
 import frc.robot.utilities.PiecePickerPoseProvider;
 
@@ -73,9 +70,10 @@ public class RobotContainer {
 
   private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[] {
       new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
-          new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
-      new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
           new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
+      new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
+          new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
+          
   });
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();

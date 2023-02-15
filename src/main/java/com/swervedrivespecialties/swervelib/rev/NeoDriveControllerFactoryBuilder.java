@@ -93,7 +93,6 @@ public final class NeoDriveControllerFactoryBuilder {
             // Hall-Sensor Encoder Resolution: 42 counts per rev.
             // Wheel diameter 0.10033,
             // mk4i l2 gear ratio: (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
-            // TODO getPosition gives result close to meters need to validate
             return encoder.getPosition();
         }
     }

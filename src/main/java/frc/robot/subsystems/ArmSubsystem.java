@@ -107,7 +107,6 @@ public class ArmSubsystem extends SubsystemBase {
     public void setShoulderSpeed(double speed) {
         if (speed == 0) {
             shoulderMotor.set(ControlMode.Disabled, 0);
-            // TODO Mr. Keith took out next three
             //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else {
             shoulderMotor.set(ControlMode.PercentOutput, speed);
