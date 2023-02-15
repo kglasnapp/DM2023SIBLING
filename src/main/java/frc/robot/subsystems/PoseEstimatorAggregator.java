@@ -17,8 +17,8 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
     // mode -1 = aggregator uses the smar average between all the estimators
     // mode 0-n = returns the value of the estimator in the mode position. To use camera 1, 
     // set the mode to 0, camera 2 set it to 1 
-    public int defaultMode = 0;
-    public int mode = 0;
+    public int defaultMode = -1;
+    public int mode = -1;
     public int count;
     public PoseEstimatorSubsystem poseEstimators[];
     private final Field2d field2d = new Field2d();

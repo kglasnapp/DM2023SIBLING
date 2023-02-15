@@ -85,6 +85,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     AprilTagFieldLayout layout;
     try {
       layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+        //AprilTagFields.k2023ChargedUp.m_resourceFile);
       var alliance = DriverStation.getAlliance();
       // var alliance = Alliance.Blue;
       layout.setOrigin(alliance == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
@@ -141,8 +142,11 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
             // }                       
           }
           lastValueCount++;
+          try {
           poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
           avg.add(3);
+          } catch (Exception e){}
+          
         } catch (ConcurrentModificationException e) {
         }
       /** else statement for the hypotenuse */
