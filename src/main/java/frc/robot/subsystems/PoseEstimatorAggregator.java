@@ -51,13 +51,18 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
             subsystemWeight[i] = poseEstimators[i].getAvg();
             total += subsystemWeight[i];
         }
+        double a = 0;
+        double b = 0;
         for (int i = 0; i < poseEstimators.length; ++i) {
             Pose2d pose = poseEstimators[i].getCurrentPose();
             x += pose.getX() * subsystemWeight[i];
             y += pose.getY() * subsystemWeight[i];
-            angle += Util.unNormalilzeAngle(pose.getRotation().getDegrees()) * subsystemWeight[i];
+            a += Math.cos(pose.getRotation().getRadians())*subsystemWeight[i];
+            b += Math.sin(pose.getRotation().getRadians())*subsystemWeight[i];
+            // angle += Util.unNormalilzeAngle(pose.getRotation().getDegrees()) * subsystemWeight[i];
         }
-        Pose2d pose = new Pose2d(x / total, y / total, new Rotation2d(Math.toRadians(angle / total)));
+        angle = Math.atan2(b,a);
+        Pose2d pose = new Pose2d(x / total, y / total, new Rotation2d(angle));
         if (count % 20 == 0) {
             mode = (int) SmartDashboard.getNumber("VisMod",defaultMode);
             count = 0;
@@ -69,6 +74,8 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
             return poseEstimators[mode].getCurrentPose();
         }
     }
+
+    
 
     public void drawField(Pose2d pose) {
         field2d.setRobotPose(pose);

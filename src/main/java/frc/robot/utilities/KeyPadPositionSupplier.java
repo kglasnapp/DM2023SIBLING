@@ -24,17 +24,20 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
     final static double changeX = -0.04;
     final static double changeY = -0.12;
     public final static Pose2d driveTrainPoseTargets[] = new Pose2d[] {
-        new Pose2d(new Translation2d(1.88 + changeX, 3.09 + changeY), new Rotation2d(Math.toRadians(180))),        
-        new Pose2d(new Translation2d(2.05 + changeX, 3.59 + changeY), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(2.00 + changeX, 4.09 ), new Rotation2d(Math.toRadians(180))),
+        // tag id 1, 8
+        new Pose2d(new Translation2d(1.84, 7.478), new Rotation2d(Math.toRadians(180))),        
+        new Pose2d(new Translation2d(1.84, 6.938), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.84, 6.398), new Rotation2d(Math.toRadians(180))),
 
-        new Pose2d(new Translation2d(1.83, 3.24), new Rotation2d(Math.toRadians(180))), 
-        new Pose2d(new Translation2d(1.83, 2.67), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(1.83, 2.10), new Rotation2d(Math.toRadians(180))),
+        // tag id 2, 7
+        new Pose2d(new Translation2d(1.84, 5.802), new Rotation2d(Math.toRadians(180))), 
+        new Pose2d(new Translation2d(1.84, 5.262), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.84, 4.722), new Rotation2d(Math.toRadians(180))),
 
-        new Pose2d(new Translation2d(1.84, -0.27 + changeY), new Rotation2d(Math.toRadians(180))), 
-        new Pose2d(new Translation2d(2.01, 0.23 + changeY), new Rotation2d(0,0)),
-        new Pose2d(new Translation2d(2.00 + changeX, 0.73), new Rotation2d(0,0))
+        // tag id 3, 6
+        new Pose2d(new Translation2d(1.84, 4.126), new Rotation2d(Math.toRadians(180))), 
+        new Pose2d(new Translation2d(1.84, 3.586), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.84, 3.046), new Rotation2d(Math.toRadians(180)))
     };
 
     
@@ -48,7 +51,7 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
     public Pose2d get() {
         var alliance = DriverStation.getAlliance();
         Pose2d pose;
-        if (alliance == Alliance.Blue) {
+        if (alliance == Alliance.Red) {
             pose = driveTrainPoseTargets[state * 3 + pos % 3];
         } else {
             pose = driveTrainPoseTargets[state * 3 + pos % 3];

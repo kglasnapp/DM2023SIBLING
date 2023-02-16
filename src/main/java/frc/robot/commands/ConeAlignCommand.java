@@ -78,6 +78,8 @@ public class ConeAlignCommand extends CommandBase {
             atGoalX = Math.abs(coneX - 350) < 40;
             atGoalY = Math.abs(coneY - 220) < 40;
             atGoalA = Math.abs(Math.abs(coneAngle) - 90) < 10;
+            // TODO: to test, we are assuming the robot is at the right angle.
+            atGoalA = true;
             logf("atGoalX %.2f %b atGoalY %.2f %b atGoalA %.2f %b\n",coneX, atGoalX, coneY, atGoalY, coneAngle, atGoalA);
             double goalPoseX = robotPose2d.getX() + ((350 - coneX) / 100);
             double goalPoseY = robotPose2d.getY() + ((220 - (440 - coneY)) / 100);
@@ -108,7 +110,6 @@ public class ConeAlignCommand extends CommandBase {
             if (atGoalA) {
                 omegaSpeed = 0;
             }
-
             
 
             drivetrainSubsystem.drive(

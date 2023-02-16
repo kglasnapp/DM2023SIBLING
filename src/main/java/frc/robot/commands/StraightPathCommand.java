@@ -147,6 +147,7 @@ public class StraightPathCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        System.out.println("****************************************** finished path command with destination: "+destination);
         drivetrainSubsystem.stop();
     }
 }

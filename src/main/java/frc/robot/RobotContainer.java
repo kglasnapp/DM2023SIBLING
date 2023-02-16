@@ -16,8 +16,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -123,7 +125,7 @@ public class RobotContainer {
         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
         : -modifyAxis(squareWithSign(m_controller.getRightX()))
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        m_controller.x()));
+        m_controller.leftStick()));
         // TODO: to change the turbo, change the x() above
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),
@@ -194,14 +196,14 @@ public class RobotContainer {
     // m_controller.b().whileTrue(gamePiecePlacementCommand);
     
     // todo: cone align    
-    //m_controller.a().whileTrue(coneAlignCommand);
+    m_controller.a().whileTrue(coneAlignCommand);
 
     // pick up from double substation
 
-    m_controller.b().whileTrue(
+    m_controller.x().whileTrue(
         new StraightPathCommand(m_drivetrainSubsystem,
             poseEstimator, 
-            new Pose2d(new Translation2d(1.41, 0.55), new Rotation2d(Math.toRadians(180))))
+            getPickupPose(false,0))
             .andThen(new ShoulderCommand(m_armSubsystem, 165000))
             .andThen(new GrabberCommand(grabberSubsystem, true))
             .andThen(new PrintCommand("finished grab open hand"))
@@ -220,9 +222,32 @@ public class RobotContainer {
             .andThen(new ExtenderCommand(m_armSubsystem, 0))
             .andThen(new StraightPathCommand(m_drivetrainSubsystem,
             poseEstimator,
-            new Pose2d(new Translation2d(1.60, 0.64), new Rotation2d(Math.toRadians(180)))))
+            getPickupPose(false,1)))
             .andThen(new ShoulderCommand(m_armSubsystem, 0)));
-
+            m_controller.b().whileTrue(
+              new StraightPathCommand(m_drivetrainSubsystem,
+                  poseEstimator, 
+                  getPickupPose(true,0))
+                  .andThen(new ShoulderCommand(m_armSubsystem, 165000))
+                  .andThen(new GrabberCommand(grabberSubsystem, true))
+                  .andThen(new PrintCommand("finished grab open hand"))
+                  .andThen(new WaitCommand(0.5))
+      
+                  .andThen(new PrintCommand("Finished waiting"))
+                  .andThen(
+                    new ExtenderCommand(m_armSubsystem, 245000))
+      
+                  .andThen(new GrabberCommand(grabberSubsystem, false))
+                  .andThen(new WaitCommand(1.5))
+                  .andThen(new GrabberCommand(grabberSubsystem, false))
+                  .andThen(new WaitCommand(0.1))
+                  .andThen(new GrabberCommand(grabberSubsystem, false))
+                  .andThen(new ShoulderCommand(m_armSubsystem, 201000))
+                  .andThen(new ExtenderCommand(m_armSubsystem, 0))
+                  .andThen(new StraightPathCommand(m_drivetrainSubsystem,
+                  poseEstimator,
+                  getPickupPose(true,1)))
+                  .andThen(new ShoulderCommand(m_armSubsystem, 0)));
     for (int i = 0; i < 9; ++i) {
       getKeyPadControllerButton(i).whileTrue(getCommandFor(i));
     }
@@ -230,6 +255,23 @@ public class RobotContainer {
       getKeyPadControllerButton(9 + i).onTrue(new KeyPadStateCommand(i));
     }
   }
+
+  public Pose2d getPickupPose(boolean right, int phase) {
+    var alliance = DriverStation.getAlliance();
+    Pose2d pose = null;
+    if (right) {
+      pose = new Pose2d(new Translation2d(15.14, 0.55), new Rotation2d(Math.toRadians(0)));
+    } else {
+      pose = new Pose2d(new Translation2d(15.14, 1.95), new Rotation2d(Math.toRadians(0)));
+    }
+    if (phase == 1) {
+      pose = new Pose2d(pose.getX()-0.36, pose.getY(), pose.getRotation());
+    }
+    if (alliance == Alliance.Blue) {
+        pose = new Pose2d(pose.getX(), KeyPadPositionSupplier.FIELD_WIDTH - pose.getY(), pose.getRotation());
+    }
+    return pose;
+}
 
   CommandBase getCommandFor(int pos) {
     double extenderGoals[] = new double[] {
