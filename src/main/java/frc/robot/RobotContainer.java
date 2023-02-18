@@ -125,7 +125,7 @@ public class RobotContainer {
         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
         : -modifyAxis(squareWithSign(m_controller.getRightX()))
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        m_controller.leftStick()));
+        m_controller));
         // TODO: to change the turbo, change the x() above
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),

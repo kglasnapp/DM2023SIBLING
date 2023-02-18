@@ -4,6 +4,11 @@ package com.swervedrivespecialties.swervelib;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 
 public class SwerveModuleFactory<DriveConfiguration, SteerConfiguration> {
+
+    public static int TURBO = 1;
+    public static int NORMAL = 5;
+    public static int PRECISION = 10;
+
     private final ModuleConfiguration moduleConfiguration;
     private final DriveControllerFactory<?, DriveConfiguration> driveControllerFactory;
     private final SteerControllerFactory<?, SteerConfiguration> steerControllerFactory;

@@ -123,6 +123,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     photonEstimatedRobotPose = photonPoseEstimator.update();
     if (photonEstimatedRobotPose.isPresent()) {
       EstimatedRobotPose pose = photonEstimatedRobotPose.get();
+      
       // System.out.println("got a pose "+pose.estimatedPose);
       // Max distance you want a tag to be read at. Found issues after 15 feet away
       // from tag while moving.

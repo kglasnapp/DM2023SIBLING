@@ -15,6 +15,7 @@ public class PiecePickerPoseProvider implements Runnable {
     private DatagramSocket socket;
     private byte buffer[] = new byte[256];
     PieceEstimatedPose estimatedPose;
+    RunningAverage areaRunningAverage = new RunningAverage(15);
 
     public PiecePickerPoseProvider() {
         try {
@@ -37,10 +38,16 @@ public class PiecePickerPoseProvider implements Runnable {
                 double x = ByteBuffer.wrap(buffer, 8, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                 double y = ByteBuffer.wrap(buffer, 16, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                 double angle = ByteBuffer.wrap(buffer, 24, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                double area = ByteBuffer.wrap(buffer, 32, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                double avg = areaRunningAverage.add(area);
+                if (Math.abs(avg - area) > 10000) {
+                    continue;
+                }
                 if (count % 10 == 0) {
                     SmartDashboard.putNumber("CCX", x);
                     SmartDashboard.putNumber("CCY", y);
                     SmartDashboard.putNumber("CCA", angle);
+                    SmartDashboard.putNumber("CCAr", area);
                     count = 0;
                 }
                 Pose2d pose = new Pose2d(x, y, new Rotation2d(Math.toRadians(angle)));

@@ -3,6 +3,7 @@ package frc.robot.commands;
 //import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.BooleanSupplier;
@@ -16,29 +17,37 @@ public class DefaultDriveCommand extends CommandBase {
     private final DoubleSupplier m_translationXSupplier;
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
-    private final BooleanSupplier m_turboSupplier;
+    private final CommandXboxController controller;
 
     public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
                                DoubleSupplier translationXSupplier,
                                DoubleSupplier translationYSupplier,
                                DoubleSupplier rotationSupplier,
-                               BooleanSupplier turboSupplier) {
+                               CommandXboxController controller) {
         this.m_drivetrainSubsystem = drivetrainSubsystem;
         this.m_translationXSupplier = translationXSupplier;
         this.m_translationYSupplier = translationYSupplier;
         this.m_rotationSupplier = rotationSupplier;
-        this.m_turboSupplier = turboSupplier;
+        this.controller = controller;
         addRequirements(drivetrainSubsystem);
     }
 
     @Override
     public void execute() {
         // You can use `new ChassisSpeeds(...)` for robot-oriented movement instead of field-oriented movement
-        if (m_turboSupplier.getAsBoolean()) {
-            SwerveModuleFactory.powerRatio = 1;
-        } else {
-            SwerveModuleFactory.powerRatio = 5;
+        if (controller.leftStick().getAsBoolean()) {
+            SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
+        } else if (SwerveModuleFactory.powerRatio == SwerveModuleFactory.TURBO){
+            SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
         }
+        if (controller.povDown().getAsBoolean()) {
+            SwerveModuleFactory.powerRatio = SwerveModuleFactory.PRECISION;
+        }
+
+        if (controller.povUp().getAsBoolean()) {
+            SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
+        }
+        
         m_drivetrainSubsystem.drive(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                         m_translationXSupplier.getAsDouble(),

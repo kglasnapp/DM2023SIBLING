@@ -67,27 +67,38 @@ public class ConeAlignCommand extends CommandBase {
                 0.0,
                 new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
         boolean atGoalX = false;
-        boolean atGoalY = false;
-        boolean atGoalA = false;                
+        boolean atGoalY = true;
+        boolean atGoalA = true;                
         if (pickerPoseProvider.hasResult()) {
             PieceEstimatedPose target = pickerPoseProvider.getResult();
+            if (target.getTimestamp() < RobotController.getFPGATime()/1000 - 100) {
+                drivetrainSubsystem.stop();
+                return;
+            }
             lastTarget = target;
             double coneX = target.getPose().getX();
             double coneY = target.getPose().getY();
-            double coneAngle = cleanAngle(target.getPose().getRotation().getDegrees());
-            atGoalX = Math.abs(coneX - 350) < 40;
-            atGoalY = Math.abs(coneY - 220) < 40;
-            atGoalA = Math.abs(Math.abs(coneAngle) - 90) < 10;
+            double coneAngle = target.getPose().getRotation().getDegrees() + 90;
+            atGoalY = Math.abs(coneX - 340) < 40;
+            atGoalX = Math.abs(coneY - 170) < 40;
+            if (Math.abs(coneAngle) > 50) {
+                coneAngle = 0;
+            }
+            atGoalA = Math.abs(Math.abs(coneAngle)) < 10;
             // TODO: to test, we are assuming the robot is at the right angle.
-            atGoalA = true;
+            
+            double robotAngle = robotPose.getRotation().getAngle();
+            double coneXToTheRobot = (((coneX-340)*0.16) / 100);
+            double coneYToTheRobot = (((coneY-170)*0.7) / 100);
+
             logf("atGoalX %.2f %b atGoalY %.2f %b atGoalA %.2f %b\n",coneX, atGoalX, coneY, atGoalY, coneAngle, atGoalA);
-            double goalPoseX = robotPose2d.getX() + ((350 - coneX) / 100);
-            double goalPoseY = robotPose2d.getY() + ((220 - (440 - coneY)) / 100);
-            double goalPoseAngle = Math.toRadians(robotPose2d.getRotation().getDegrees() + 90 - Math.abs(coneAngle));
+            double goalPoseY = robotPose2d.getY() - (Math.sin(robotAngle)* coneYToTheRobot + Math.cos(robotAngle)*coneXToTheRobot);
+            double goalPoseX = robotPose2d.getX() - (Math.cos(robotAngle)*coneYToTheRobot - Math.sin(robotAngle)*coneXToTheRobot);
+            double goalPoseAngle = Math.toRadians(robotPose2d.getRotation().getDegrees() - coneAngle);
             
             // Drive
-            xController.setGoal(goalPoseX);
             yController.setGoal(goalPoseY);
+            xController.setGoal(goalPoseX);
             omegaController.setGoal(goalPoseAngle);
         }
         double millSecs = RobotController.getFPGATime() / 1000;
@@ -110,8 +121,7 @@ public class ConeAlignCommand extends CommandBase {
             if (atGoalA) {
                 omegaSpeed = 0;
             }
-            
-
+            // omegaSpeed = 0;
             drivetrainSubsystem.drive(
                     ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, omegaSpeed, robotPose2d.getRotation()));
         }
