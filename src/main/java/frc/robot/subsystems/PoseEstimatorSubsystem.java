@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 //import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.utilities.RunningAverage;
 
@@ -71,11 +72,10 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   // VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
 
   private final SwerveDrivePoseEstimator poseEstimator;
-
   private final Field2d field2d = new Field2d();
   public Transform3d robotToCamera;
   String name;
-
+  
   public PoseEstimatorSubsystem(String name, PhotonCamera photonCamera, Transform3d robotToCamera,
       DrivetrainSubsystem drivetrainSubsystem) {
     this.name = name;
@@ -86,9 +86,9 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     try {
       layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
         //AprilTagFields.k2023ChargedUp.m_resourceFile);
-      var alliance = DriverStation.getAlliance();
+      
       // var alliance = Alliance.Blue;
-      layout.setOrigin(alliance == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
+      layout.setOrigin(Robot.alliance == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
           : OriginPosition.kRedAllianceWallRightSide);
     } catch (IOException e) {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
@@ -120,6 +120,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    
     photonEstimatedRobotPose = photonPoseEstimator.update();
     if (photonEstimatedRobotPose.isPresent()) {
       EstimatedRobotPose pose = photonEstimatedRobotPose.get();

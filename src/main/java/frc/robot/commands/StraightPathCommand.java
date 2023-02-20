@@ -85,8 +85,8 @@ public class StraightPathCommand extends CommandBase {
             destination = destinationProvider.get();
         }
 
-        double goalX = getIntermediateGoal(destination.getX(), initialPose.getX(), 3, currentTime);
-        double goalY = getIntermediateGoal(destination.getY(), initialPose.getY(), 3, currentTime);
+        double goalX = getIntermediateGoal(destination.getX(), initialPose.getX(), 2, currentTime);
+        double goalY = getIntermediateGoal(destination.getY(), initialPose.getY(), 2, currentTime);
         double goalAngle = getIntermediateGoal(destination.getRotation().getDegrees(),
                 initialPose.getRotation().getDegrees(), 3, currentTime);
         xController.setGoal(goalX);

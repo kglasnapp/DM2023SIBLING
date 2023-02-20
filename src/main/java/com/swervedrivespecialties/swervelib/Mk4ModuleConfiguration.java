@@ -10,7 +10,11 @@ import java.util.Objects;
  */
 public class Mk4ModuleConfiguration {
     private double nominalVoltage = 12.0;
-    private double driveCurrentLimit = 80.0;
+    // TODO: here we changed the current limit
+    // based on suggestions from:
+    // https://www.chiefdelphi.com/t/swerve-drive-chatter-when-battery-voltage-gets-low/425534/27?page=2
+    private double driveCurrentLimit = 60.0;
+    // private double driveCurrentLimit = 80.0;
     private double steerCurrentLimit = 20.0;
 
     public double getNominalVoltage() {

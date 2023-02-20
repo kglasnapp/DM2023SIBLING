@@ -50,7 +50,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * This is a measure of how fast the robot should be able to drive in a straight
    * line.
    */
-  public static final double MAX_VELOCITY_METERS_PER_SECOND = 80.0 / 60.0 *
+  public static final double MAX_VELOCITY_METERS_PER_SECOND = 100.0 / 60.0 *
       SdsModuleConfigurations.MK4I_L2.getDriveReduction() *
       SdsModuleConfigurations.MK4I_L2.getWheelDiameter() * Math.PI;
 
@@ -204,6 +204,29 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // m_navx.reset();
     m_navx.zeroYaw();
   }
+
+  public void zeroGyroscope(double currentOrientation) {
+    // FIXed Remove if you are using a Pigeon
+    // m_pigeon.setFusedHeading(0.0);
+
+    // FIXed Uncomment if you are using a NavX
+    System.out.println("zero Gyro");
+
+    if (m_navx.isMagnetometerCalibrated()) {
+      // // We will only get valid fused headings if the magnetometer is calibrated
+      // System.out.println("returning the angle FUSE ZERO from the robot:
+      // "+m_navx.getAngle());
+      zeroNavx = m_navx.getFusedHeading();
+    } else {
+      zeroNavx = 0;
+    }
+    
+    zeroNavx+=currentOrientation;
+    
+    // m_navx.reset();
+    m_navx.zeroYaw();
+  }
+
 
   double zeroNavx = 0.0;
 

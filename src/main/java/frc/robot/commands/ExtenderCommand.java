@@ -34,7 +34,7 @@ public class ExtenderCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(300000, 250000);
+        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(480000, 300000);
         this.extenderInitial = armSubsystem.getExtenderPos();
         TrapezoidProfile.State extenderGoalState = new TrapezoidProfile.State(extenderGoal - extenderInitial, 0);
         extenderTrapezoidProfile = new TrapezoidProfile(constraints, extenderGoalState);

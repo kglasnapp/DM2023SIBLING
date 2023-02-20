@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -40,6 +41,7 @@ import frc.robot.commands.KeyPadStateCommand;
 
 import frc.robot.commands.ShoulderCommand;
 import frc.robot.commands.StraightPathCommand;
+import frc.robot.commands.ZeroGyroCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
@@ -74,8 +76,7 @@ public class RobotContainer {
       new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
           new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
       new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
-          new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
-          
+          new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d()), m_drivetrainSubsystem),          
   });
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
@@ -196,11 +197,12 @@ public class RobotContainer {
     // m_controller.b().whileTrue(gamePiecePlacementCommand);
     
     // todo: cone align    
-    m_controller.a().whileTrue(coneAlignCommand);
+    // m_controller.a().whileTrue(coneAlignCommand);
+    m_controller.a().whileTrue(getAutonomousCommand());
 
     // pick up from double substation
 
-    m_controller.x().whileTrue(
+    m_controller.b().whileTrue(
         new StraightPathCommand(m_drivetrainSubsystem,
             poseEstimator, 
             getPickupPose(false,0))
@@ -211,7 +213,8 @@ public class RobotContainer {
 
             .andThen(new PrintCommand("Finished waiting"))
             .andThen(
-              new ExtenderCommand(m_armSubsystem, 245000))
+              new ExtenderCommand(m_armSubsystem, 357000))
+              // new ExtenderCommand(m_armSubsystem, 245000))
 
             .andThen(new GrabberCommand(grabberSubsystem, false))
             .andThen(new WaitCommand(1.5))
@@ -224,7 +227,7 @@ public class RobotContainer {
             poseEstimator,
             getPickupPose(false,1)))
             .andThen(new ShoulderCommand(m_armSubsystem, 0)));
-            m_controller.b().whileTrue(
+          m_controller.x().whileTrue(
               new StraightPathCommand(m_drivetrainSubsystem,
                   poseEstimator, 
                   getPickupPose(true,0))
@@ -234,8 +237,10 @@ public class RobotContainer {
                   .andThen(new WaitCommand(0.5))
       
                   .andThen(new PrintCommand("Finished waiting"))
+                  
                   .andThen(
-                    new ExtenderCommand(m_armSubsystem, 245000))
+                    new ExtenderCommand(m_armSubsystem, 357000))
+                  // new ExtenderCommand(m_armSubsystem, 245000))
       
                   .andThen(new GrabberCommand(grabberSubsystem, false))
                   .andThen(new WaitCommand(1.5))
@@ -275,7 +280,7 @@ public class RobotContainer {
 
   CommandBase getCommandFor(int pos) {
     double extenderGoals[] = new double[] {
-        468000, 140354, 0
+        468000, 140354, 80000
     };
     /**
      * The shoulder command goes up, then the extender command goes, after that the
@@ -289,8 +294,8 @@ public class RobotContainer {
      * phase1: up, middle, floor
      */
     double shoulderGoals[][] = new double[][] {
-        new double[] { 104054 * 2.08, 87133 * 2.08, 87133 * 2.08 },
-        new double[] { 87133 * 2.08, 66133 * 2.08, 20000 * 2.08 },
+        new double[] { 200432, 87133 * 2.08, 73000 },
+        new double[] { 87133 * 2.08, 66133 * 2.08, 73000 },
     };
     return new StraightPathCommand(m_drivetrainSubsystem,
         poseEstimator, 
@@ -312,7 +317,23 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return new InstantCommand();
+    BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
+    ZeroGyroCommand zeroGyroCommand = new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, Math.toRadians(180));
+    KeyPadPositionSupplier.state = 2;
+    return getCommandFor(3)
+    .andThen(zeroGyroCommand)
+    .andThen(new GrabberCommand(grabberSubsystem, true))
+    .andThen(new WaitCommand(2))
+    .andThen(new ExtenderCommand(m_armSubsystem, 0))
+    // .andThen(new zeroGyroscope())
+    .andThen(Commands.parallel(
+      new StraightPathCommand(m_drivetrainSubsystem, poseEstimator, new Pose2d(1.84, 2.286, new Rotation2d(Math.toRadians(180))))),
+      new GrabberCommand(grabberSubsystem, false),
+      new ShoulderCommand(m_armSubsystem, 0)
+    )
+    .andThen(
+      new StraightPathCommand(m_drivetrainSubsystem, poseEstimator, new Pose2d(11*0.33, 2.286, new Rotation2d(Math.toRadians(180)))))      
+    .andThen(balanceCommand);
   }
 
   private static double deadband(double value, double deadband) {
