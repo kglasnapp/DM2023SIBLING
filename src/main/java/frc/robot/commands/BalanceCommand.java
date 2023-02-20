@@ -4,7 +4,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -16,8 +16,8 @@ public class BalanceCommand extends CommandBase {
     private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
     
-    private final ProfiledPIDController xController = new ProfiledPIDController(0.0035, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(0.0035, 0, 0, Y_CONSTRAINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(0.003, 0, 0, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(0.003, 0, 0, Y_CONSTRAINTS);
     
 
     DrivetrainSubsystem drivetrainSubsystem;
@@ -43,8 +43,7 @@ public class BalanceCommand extends CommandBase {
     public void initialize() {
         xController.reset(drivetrainSubsystem.m_navx.getRoll());
         yController.reset(drivetrainSubsystem.m_navx.getPitch());
-        xController.setGoal(0);
-        yController.setGoal(0);
+        
     }
 
     @Override
@@ -52,10 +51,12 @@ public class BalanceCommand extends CommandBase {
         double pitch = drivetrainSubsystem.m_navx.getPitch() - zeroPitch;
         double roll = drivetrainSubsystem.m_navx.getRoll() - zeroRoll;
         if (Robot.count % 20 == 0) {
-            //SmartDashboard.putNumber("Pitch", pitch);
-            //SmartDashboard.putNumber("Roll", roll);
+            SmartDashboard.putNumber("Pitch", pitch);
+            SmartDashboard.putNumber("Roll", roll);
         }
         
+        xController.setGoal(0);
+        yController.setGoal(0);
 
         if (Math.abs(roll) < ROLL_THRESHOLD &&
                 Math.abs(pitch) < PITCH_THRESHOLD) {
@@ -63,19 +64,19 @@ public class BalanceCommand extends CommandBase {
             return;
         }
         
-        double xSpeed = -xController.calculate(pitch); // correct direction
-        double ySpeed = yController.calculate(roll);
+        double xSpeed = -xController.calculate(roll); // correct direction
+        double ySpeed = 0; // yController.calculate(roll);
         double omegaSpeed = 0;
         
-        if (Math.abs(roll) < ROLL_THRESHOLD) {
+        if (Math.abs(pitch) < ROLL_THRESHOLD) {
             ySpeed=0;
         }
-        if (Math.abs(pitch) < PITCH_THRESHOLD) {
+        if (Math.abs(roll) < PITCH_THRESHOLD) {
             xSpeed=0;
         }
         if (Robot.count % 20 == 0) {
-            //SmartDashboard.putNumber("xSpeed", xSpeed);
-            //SmartDashboard.putNumber("ySpeed", ySpeed);
+            SmartDashboard.putNumber("xSpeed", xSpeed);
+            SmartDashboard.putNumber("ySpeed", ySpeed);
         }
 
         drivetrainSubsystem.drive(
