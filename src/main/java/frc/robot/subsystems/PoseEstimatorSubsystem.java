@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
+// import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 //import com.pathplanner.lib.PathPlannerTrajectory;
@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.utilities.CameraPoseEstimator;
 //import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.utilities.RunningAverage;
 
@@ -39,7 +40,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   private final PhotonCamera photonCamera;
   private final DrivetrainSubsystem drivetrainSubsystem;
-  private final PhotonPoseEstimator photonPoseEstimator;
+  private final CameraPoseEstimator photonPoseEstimator;
   private final RunningAverage avg = new RunningAverage(120);
 
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
@@ -95,7 +96,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       layout = null;
     }
 
-    photonPoseEstimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, this.photonCamera,
+    photonPoseEstimator = new CameraPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, this.photonCamera,
         robotToCamera);
 
     poseEstimator = new SwerveDrivePoseEstimator(

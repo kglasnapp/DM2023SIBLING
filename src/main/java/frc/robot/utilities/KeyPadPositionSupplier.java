@@ -41,8 +41,6 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
         
     };
 
-    
-
     public KeyPadPositionSupplier(int pos) {
         this.pos = pos;
     }

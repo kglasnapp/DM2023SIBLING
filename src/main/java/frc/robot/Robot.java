@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.PDHData;
+import static frc.robot.utilities.Util.logf;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -36,6 +37,7 @@ public class Robot extends TimedRobot {
   public static long count = 0;
   private final PDHData pdhData = new PDHData();
   public static Alliance alliance;
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -48,7 +50,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     alliance = DriverStation.getAlliance();
     Util.logf("Start Swerve %s\n", alliance.toString());
-    
+
     m_robotContainer = new RobotContainer();
     // testingMotors();
   }
@@ -172,11 +174,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+    Command cmd = RobotContainer.autonomousChooser.getSelected();
+    if (cmd != null) {
+      logf("Executing autonomous %s\n", cmd.getName());
+      cmd.schedule();
     }
   }
 
