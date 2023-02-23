@@ -21,6 +21,9 @@ public class GrabberDefaultCommand extends CommandBase {
     BooleanSupplier openProvider;
     BooleanSupplier closeProvider;
     BooleanSupplier stopProvider;
+    BooleanSupplier openProvider2;
+    BooleanSupplier closeProvider2;
+    BooleanSupplier stopProvider2;
 
     public enum State {
         IDLE, START_HOME_GRABBER, HOMING_GRABBER, READY, OVERCURRENT
@@ -31,11 +34,17 @@ public class GrabberDefaultCommand extends CommandBase {
     public GrabberDefaultCommand(GrabberSubsystem grabberSubsystem,
             BooleanSupplier openProvider,
             BooleanSupplier closeProvider,
-            BooleanSupplier stopProvider) {
+            BooleanSupplier stopProvider,
+            BooleanSupplier openProvider2,
+            BooleanSupplier closeProvider2,
+            BooleanSupplier stopProvider2) {
         this.grabberSubsystem = grabberSubsystem;
         this.openProvider = openProvider;
         this.closeProvider = closeProvider;
         this.stopProvider = stopProvider;
+        this.openProvider2 = openProvider2;
+        this.closeProvider2 = closeProvider2;
+        this.stopProvider2 = stopProvider2;
         addRequirements(grabberSubsystem);
     }
 
@@ -89,13 +98,13 @@ public class GrabberDefaultCommand extends CommandBase {
 
         }
 
-        if (openProvider.getAsBoolean()) {
+        if (openProvider.getAsBoolean() || openProvider2.getAsBoolean()) {
             grabberSubsystem.setGrabberPower(.6);
         }
-        if (closeProvider.getAsBoolean()) {
+        if (closeProvider.getAsBoolean() || closeProvider2.getAsBoolean()) {
             grabberSubsystem.setGrabberPower(-.6);
         }
-        if (stopProvider.getAsBoolean()) {
+        if (stopProvider.getAsBoolean() || stopProvider2.getAsBoolean()) {
             grabberSubsystem.setGrabberPower(0);
         }
     }

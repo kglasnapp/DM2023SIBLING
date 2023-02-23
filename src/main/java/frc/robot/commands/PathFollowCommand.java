@@ -143,8 +143,8 @@ public class PathFollowCommand extends CommandBase {
   public boolean isFinished() {
     double currentTime = RobotController.getFPGATime();
     var robotPose = poseProvider.get();
-    logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f>\n", (currentTime - initialTime) / 1000000,
-        robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
+    // logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f>\n", (currentTime - initialTime) / 1000000,
+    //     robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
     return xController.atGoal() && yController.atGoal() && omegaController.atGoal();
   }
 

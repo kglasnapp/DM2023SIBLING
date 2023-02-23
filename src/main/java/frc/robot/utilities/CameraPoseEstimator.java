@@ -12,7 +12,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Transform3d;
-
+import static frc.robot.utilities.Util.logf;
 /**
  * This class was created as a way to filter out images where
  * the ambiguity was too high.
@@ -24,21 +24,30 @@ public class CameraPoseEstimator extends PhotonPoseEstimator {
      * Any apriltag with an ambiguity higher than this number will be ignored.`
      */
     public final static double MAX_AMBIGUITY = 0.2;
+    private String cameraId;
 
-    public CameraPoseEstimator(AprilTagFieldLayout fieldTags, PoseStrategy strategy, PhotonCamera camera,
+    public CameraPoseEstimator(String cameraId, AprilTagFieldLayout fieldTags, PoseStrategy strategy, PhotonCamera camera,
             Transform3d robotToCamera) {
         super(fieldTags, strategy, camera, robotToCamera);
+        this.cameraId = cameraId;
     }
 
     @Override
-    public Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult) {
+    public Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult) {    
         List<PhotonTrackedTarget> targets = cameraResult.getTargets();
-        for (int i=targets.size()-1;i>0;i--) {
+        ArrayList<PhotonTrackedTarget> result = new ArrayList<>();
+        for (int i=targets.size()-1;i>=0;i--) {
             PhotonTrackedTarget target = targets.get(i);
-            if (target.getPoseAmbiguity() < MAX_AMBIGUITY) {
-                targets.remove(i);
+            if (target.getPoseAmbiguity() > MAX_AMBIGUITY) {            
+                // logf("Camera Id = %s removing target id %d with ambiguity %.2f\n", cameraId, target.getFiducialId(), target.getPoseAmbiguity());
+            } else {
+                result.add(target);
+                // logf("Camera Id = %s Not removing target id %d with ambiguity %.2f\n", cameraId, target.getFiducialId(), target.getPoseAmbiguity());
             }
+
         }
-        return super.update(cameraResult);
+        PhotonPipelineResult photonPipelineResult = new PhotonPipelineResult(cameraResult.getLatencyMillis(), result);
+        photonPipelineResult.setTimestampSeconds(cameraResult.getTimestampSeconds());
+        return super.update(photonPipelineResult);
     }
 }

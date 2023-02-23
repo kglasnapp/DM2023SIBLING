@@ -35,6 +35,7 @@ import frc.robot.Robot;
 import frc.robot.utilities.CameraPoseEstimator;
 //import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.utilities.RunningAverage;
+import static frc.robot.utilities.Util.logf;
 
 public class PoseEstimatorSubsystem extends SubsystemBase {
 
@@ -86,17 +87,15 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     AprilTagFieldLayout layout;
     try {
       layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
-        //AprilTagFields.k2023ChargedUp.m_resourceFile);
-      
-      // var alliance = Alliance.Blue;
-      layout.setOrigin(Robot.alliance == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
+      logf("In PoseEstimatorSubsystem the alliance is %s\n", Robot.alliance);
+      layout.setOrigin(DriverStation.getAlliance() == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
           : OriginPosition.kRedAllianceWallRightSide);
     } catch (IOException e) {
       DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
       layout = null;
     }
 
-    photonPoseEstimator = new CameraPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, this.photonCamera,
+    photonPoseEstimator = new CameraPoseEstimator(name, layout, PoseStrategy.LOWEST_AMBIGUITY, this.photonCamera,
         robotToCamera);
 
     poseEstimator = new SwerveDrivePoseEstimator(

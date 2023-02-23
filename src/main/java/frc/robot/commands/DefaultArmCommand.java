@@ -13,6 +13,8 @@ public class DefaultArmCommand extends CommandBase {
     ArmSubsystem armSubsystem;
     DoubleSupplier shoulderSupplier;
     DoubleSupplier extenderSupplier;
+    DoubleSupplier shoulderSupplier2;
+    DoubleSupplier extenderSupplier2;
     boolean shoulderActive = false;
     boolean extenderActive = false;
 
@@ -27,10 +29,14 @@ public class DefaultArmCommand extends CommandBase {
 
     public DefaultArmCommand(ArmSubsystem armSubsystem,
             DoubleSupplier shoulderSupplier,
-            DoubleSupplier extenderSupplier) {
+            DoubleSupplier extenderSupplier,
+            DoubleSupplier shoulderSupplier2,
+            DoubleSupplier extenderSupplier2) {
         this.armSubsystem = armSubsystem;
         this.shoulderSupplier = shoulderSupplier;
         this.extenderSupplier = extenderSupplier;
+        this.shoulderSupplier2 = shoulderSupplier2;
+        this.extenderSupplier2 = extenderSupplier2;
         addRequirements(armSubsystem);
 
     }
@@ -85,6 +91,9 @@ public class DefaultArmCommand extends CommandBase {
         }
 
         double shoulder = shoulderSupplier.getAsDouble();
+        if (shoulder == 0) {
+            shoulder = shoulderSupplier2.getAsDouble();
+        }
         if (Math.abs(shoulder) > .05) {
             armSubsystem.setShoulderSpeed(shoulder * .3);
             shoulderActive = true;
@@ -102,6 +111,9 @@ public class DefaultArmCommand extends CommandBase {
         }
 
         double extender = extenderSupplier.getAsDouble();
+        if (extender == 0) {
+            extender = extenderSupplier2.getAsDouble();
+        }
         // SmartDashboard.putNumber("Extender Speed", extender);
         if (Math.abs(extender) > .05) {
             extenderActive = true;

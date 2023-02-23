@@ -25,7 +25,7 @@ public class StraightPathCommand extends CommandBase {
             Math.toRadians(180), Math.toRadians(180));
     private final ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, X_CONSTRAINTS);
     private final ProfiledPIDController yController = new ProfiledPIDController(1, 0, 0, Y_CONSTRAINTS);
-    private final ProfiledPIDController omegaController = new ProfiledPIDController(.5, 0, 0, OMEGA_CONSTRATINTS);
+    private final ProfiledPIDController omegaController = new ProfiledPIDController(1, 0, 0, OMEGA_CONSTRATINTS);
     private final Supplier<Pose2d> poseProvider;
     Pose2d initialPose;
     Supplier<Pose2d> destinationProvider;
@@ -50,7 +50,7 @@ public class StraightPathCommand extends CommandBase {
     void init() {
         xController.setTolerance(0.005);
         yController.setTolerance(0.005);
-        omegaController.setTolerance(Units.degreesToRadians(3));
+        omegaController.setTolerance(Units.degreesToRadians(2));
         omegaController.enableContinuousInput(-Math.PI, Math.PI);
         addRequirements(drivetrainSubsystem);
     }
@@ -88,7 +88,7 @@ public class StraightPathCommand extends CommandBase {
         double goalX = getIntermediateGoal(destination.getX(), initialPose.getX(), 2, currentTime);
         double goalY = getIntermediateGoal(destination.getY(), initialPose.getY(), 2, currentTime);
         double goalAngle = getIntermediateGoal(destination.getRotation().getDegrees(),
-                initialPose.getRotation().getDegrees(), 3, currentTime);
+                initialPose.getRotation().getDegrees(), 2, currentTime);
         xController.setGoal(goalX);
         yController.setGoal(goalY);
         omegaController.setGoal(Math.toRadians(goalAngle));
@@ -137,9 +137,9 @@ public class StraightPathCommand extends CommandBase {
         boolean atGoalY = Math.abs(robotPose.getY() - destination.getY()) < 0.01;
         boolean atGoalO = Math.abs((Util.normalizeAngle(robotPose.getRotation().getDegrees() -
                 destination.getRotation().getDegrees()))) < 2;
-        logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b>\n",
-                (currentTime - initialTime) / 1000000,
-                robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), atGoalX, atGoalY, atGoalO);
+        // logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b>\n",
+        //         (currentTime - initialTime) / 1000000,
+        //         robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), atGoalX, atGoalY, atGoalO);
         return atGoalX &&
                 atGoalY &&
                 atGoalO;
