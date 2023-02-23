@@ -73,6 +73,7 @@ public class RobotContainer {
 
   // private final XboxController m_controller = new XboxController(2);
   private final static CommandXboxController m_controller = new CommandXboxController(2);
+  private final static CommandXboxController m_controller2 = new CommandXboxController(3);
   // private final static ControllerAvg controllerAverage = new
   // ControllerAvg(m_controller);
   private GenericHID keyPadController = new GenericHID(1);
@@ -105,9 +106,9 @@ public class RobotContainer {
     // Add commands to the autonomous command chooser
     autonomousChooser.setDefaultOption("CaSe 1 left", getAutonomousCommandCase1(0));
     autonomousChooser.addOption("Case 2 left", getAutonomousCommandCase2(0));
-    autonomousChooser.addOption("CaSe 1 middle", getAutonomousCommandCase1(1));
+    autonomousChooser.addOption("Case 1 middle", getAutonomousCommandCase1(1));
     autonomousChooser.addOption("Case 2 middle", getAutonomousCommandCase2(1));
-    autonomousChooser.addOption("CaSe 1 right", getAutonomousCommandCase1(2));
+    autonomousChooser.addOption("Case 1 right", getAutonomousCommandCase1(2));
     autonomousChooser.addOption("Case 2 right", getAutonomousCommandCase2(2));
     autonomousChooser.addOption("Case 3", getAutonomousCommandCase3());
 
@@ -118,7 +119,10 @@ public class RobotContainer {
     grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem,
         m_controller.povRight(),
         m_controller.povLeft(),
-        m_controller.povDown()));
+        m_controller.povDown(),
+        m_controller2.povRight(),
+        m_controller2.povLeft(),
+        m_controller2.povDown()));
 
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
@@ -153,7 +157,9 @@ public class RobotContainer {
     // TODO: to change the turbo, change the x() above
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),
-        () -> (RobotContainer.getRightBumper() ? -1 : 1) * RobotContainer.getRightTrigger()));
+        () -> (RobotContainer.getRightBumper() ? -1 : 1) * RobotContainer.getRightTrigger(),
+        () -> (RobotContainer.getLeftBumper2() ? -1 : 1) * RobotContainer.getLeftTrigger2(),
+        () -> (RobotContainer.getRightBumper2() ? -1 : 1) * RobotContainer.getRightTrigger2()));
     // Configure the button bindings
     configureButtonBindings();
     configureDashboard();
@@ -180,6 +186,22 @@ public class RobotContainer {
 
   public static boolean getLeftBumper() {
     return m_controller.getHID().getRawButton(5);
+  }
+
+  public static double getRightTrigger2() {
+    return m_controller2.getRightTriggerAxis();
+  }
+
+  public static double getLeftTrigger2() {
+    return m_controller2.getLeftTriggerAxis();
+  }
+
+  public static boolean getRightBumper2() {
+    return m_controller2.getHID().getRawButton(6);
+  }
+
+  public static boolean getLeftBumper2() {
+    return m_controller2.getHID().getRawButton(5);
   }
 
   public static int getPov() {
@@ -221,7 +243,33 @@ public class RobotContainer {
 
     // todo: cone align
     // m_controller.a().whileTrue(coneAlignCommand);
-    m_controller.a().whileTrue(getAutonomousCommandCase2(1));
+    
+    // controller 2 a = zero the arm
+    m_controller2.a().whileTrue(new ExtenderCommand(m_armSubsystem, 0).andThen(new ShoulderCommand(m_armSubsystem, 0)));
+    // controller 2 y = pick up from floor position 
+    m_controller2.y().whileTrue(new ShoulderCommand(m_armSubsystem, 60352)
+    .andThen(new GrabberCommand(grabberSubsystem, true))        
+    .andThen(new WaitCommand(1))
+    .andThen(new ShoulderCommand(m_armSubsystem, 40352))
+    .andThen(new ExtenderCommand(m_armSubsystem, 183023*16/36)));
+
+    m_controller.a().whileTrue(
+      
+            new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+                new Pose2d(2.08,
+                    1.80,
+                    new Rotation2d(Math.toRadians(98))))
+        .andThen(new ShoulderCommand(m_armSubsystem, 60352))
+        .andThen(new GrabberCommand(grabberSubsystem, true))        
+        .andThen(new WaitCommand(1))
+        .andThen(new ShoulderCommand(m_armSubsystem, 40352))
+        .andThen(new ExtenderCommand(m_armSubsystem, 183023*16/36))
+        .andThen(new GrabberCommand(grabberSubsystem, false)) // this one was
+        .andThen(new WaitCommand(2))
+        .andThen(new ExtenderCommand(m_armSubsystem, 0))
+            .andThen(Commands.parallel(                
+                new ShoulderCommand(m_armSubsystem, 0))));
+      //getAutonomousCommandCase2(1));
 
     // pick up from double substation
 
@@ -236,7 +284,7 @@ public class RobotContainer {
 
             .andThen(new PrintCommand("Finished waiting"))
             .andThen(
-                new ExtenderCommand(m_armSubsystem, 357000))
+                new ExtenderCommand(m_armSubsystem, 357000 * 16/36))
             // new ExtenderCommand(m_armSubsystem, 245000))
 
             .andThen(new GrabberCommand(grabberSubsystem, false))
@@ -262,7 +310,7 @@ public class RobotContainer {
             .andThen(new PrintCommand("Finished waiting"))
 
             .andThen(
-                new ExtenderCommand(m_armSubsystem, 357000))
+                new ExtenderCommand(m_armSubsystem, 357000 * 16/36))
             // new ExtenderCommand(m_armSubsystem, 245000))
 
             .andThen(new GrabberCommand(grabberSubsystem, false))
@@ -303,7 +351,7 @@ public class RobotContainer {
 
   CommandBase getCommandFor(int pos) {
     double extenderGoals[] = new double[] {
-        468000, 140354, 80000
+        468000*16/36, 140354*16/36, 80000*16/36
     };
     /**
      * The shoulder command goes up, then the extender command goes, after that the
@@ -320,10 +368,10 @@ public class RobotContainer {
         new double[] { 200432, 87133 * 2.08, 73000 },
         new double[] { 87133 * 2.08, 66133 * 2.08, 73000 },
     };
-    return new StraightPathCommand(m_drivetrainSubsystem,
+    return Commands.parallel(new StraightPathCommand(m_drivetrainSubsystem,
         poseEstimator,
-        new KeyPadPositionSupplier(pos))
-        .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
+        new KeyPadPositionSupplier(pos)),
+        new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
         .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
         .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[1][pos / 3]));
   }
@@ -397,10 +445,10 @@ public class RobotContainer {
                 new Pose2d(StagingLocations.translations[3].getX() - 0.70,
                     StagingLocations.translations[3].getY(),
                     new Rotation2d())))
-        .andThen(new ShoulderCommand(m_armSubsystem, 30000))
+        .andThen(new ShoulderCommand(m_armSubsystem, 28352))
         .andThen(new GrabberCommand(grabberSubsystem, true))
         .andThen(new WaitCommand(2))
-        .andThen(new ExtenderCommand(m_armSubsystem, 20000))
+        .andThen(new ExtenderCommand(m_armSubsystem, 183023 * 16/36))
         .andThen(new GrabberCommand(grabberSubsystem, true)
         .andThen(new ExtenderCommand(m_armSubsystem, 0))
             .andThen(Commands.parallel(                
