@@ -5,12 +5,14 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Robot;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.utilities.PiecePickerPoseProvider;
 import frc.robot.utilities.PiecePickerPoseProvider.PieceEstimatedPose;
@@ -58,6 +60,39 @@ public class ConeAlignCommand extends CommandBase {
         yController.reset(robotPose.getY());
     }
 
+    public static Pose2d transformConeToField(double coneXToTheRobot, double coneYToTheRobot, Pose2d robotPose2d, double coneAngleInField) {
+        double robotAngle = robotPose2d.getRotation().getRadians();
+        double goalPoseX = robotPose2d.getX() + Math.sin(robotAngle)*coneXToTheRobot + Math.cos(robotAngle)*coneYToTheRobot;
+        double goalPoseY = robotPose2d.getY() - Math.cos(robotAngle)*coneXToTheRobot + Math.sin(robotAngle)*coneYToTheRobot;
+        return new Pose2d(goalPoseX, goalPoseY, new Rotation2d(coneAngleInField));
+    }
+
+    public static void main(String arg[]) throws Exception {
+        Pose2d robotPose[] = {
+            new Pose2d(0,0,new Rotation2d(Math.toRadians(0))),
+            new Pose2d(0,0,new Rotation2d(Math.toRadians(45))),
+            new Pose2d(0,0,new Rotation2d(Math.toRadians(-45))),
+            new Pose2d(0,0,new Rotation2d(Math.toRadians(180)))
+        };
+        for (Pose2d pose2d : robotPose) {
+            System.out.println(transformConeToField(5,5, pose2d,0));
+        }
+        for (Pose2d pose2d : robotPose) {
+            System.out.println(transformConeToField(5,10, pose2d,0));
+        }
+    }
+
+    @Override
+    public boolean isFinished() {
+        double coneX = lastTarget.getPose().getX();
+        double coneY = lastTarget.getPose().getY();
+        double coneAngle = lastTarget.getPose().getRotation().getDegrees() + 90;
+        boolean atGoalY = Math.abs(coneX - 340) < 40;
+        boolean atGoalX = Math.abs(270-coneY) < 40;
+        boolean atGoalA = Math.abs(coneAngle) < 10;
+        return atGoalA && atGoalX && atGoalY;
+    }
+
     @Override
     public void execute() {
         var robotPose2d = poseProvider.get();
@@ -80,7 +115,7 @@ public class ConeAlignCommand extends CommandBase {
             double coneY = target.getPose().getY();
             double coneAngle = target.getPose().getRotation().getDegrees() + 90;
             atGoalY = Math.abs(coneX - 340) < 40;
-            atGoalX = Math.abs(coneY - 170) < 40;
+            atGoalX = Math.abs(270-coneY) < 40;
             if (Math.abs(coneAngle) > 50) {
                 coneAngle = 0;
             }
@@ -89,17 +124,24 @@ public class ConeAlignCommand extends CommandBase {
             
             double robotAngle = robotPose.getRotation().getAngle();
             double coneXToTheRobot = (((coneX-340)*0.16) / 100);
-            double coneYToTheRobot = (((coneY-170)*0.7) / 100);
-
-            logf("atGoalX %.2f %b atGoalY %.2f %b atGoalA %.2f %b\n",coneX, atGoalX, coneY, atGoalY, coneAngle, atGoalA);
-            double goalPoseY = robotPose2d.getY() - (Math.sin(robotAngle)* coneYToTheRobot + Math.cos(robotAngle)*coneXToTheRobot);
-            double goalPoseX = robotPose2d.getX() - (Math.cos(robotAngle)*coneYToTheRobot - Math.sin(robotAngle)*coneXToTheRobot);
+            double coneYToTheRobot = (((270-coneY)*0.7) / 100);
             double goalPoseAngle = Math.toRadians(robotPose2d.getRotation().getDegrees() - coneAngle);
+
+            Pose2d coneInFieldPose = transformConeToField(coneXToTheRobot, coneYToTheRobot, robotPose2d, goalPoseAngle);
+
+            // double goalPoseX = robotPose2d.getX() - (Math.cos(robotAngle)*coneYToTheRobot - Math.sin(robotAngle)*coneXToTheRobot);
+            // double goalPoseY = robotPose2d.getY() - (Math.sin(robotAngle)* coneYToTheRobot + Math.cos(robotAngle)*coneXToTheRobot);
             
+            
+            //double goalPoseY = robotPose2d.getY() - (Math.sin(robotAngle)* coneXToTheRobot + Math.cos(robotAngle)*coneYToTheRobot);
+            //double goalPoseX = robotPose2d.getX() - (Math.cos(robotAngle)*coneXToTheRobot - Math.sin(robotAngle)*coneYToTheRobot);
+            if(Robot.count % 20 == 5) {
+               logf("cone X:%.2f Y:%.2f goal X:%.2f Y:%.2f atGoalX:%.2f %b Y:%.2f %b A:%.2f %b\n",coneXToTheRobot, coneYToTheRobot, coneInFieldPose.getX(), coneInFieldPose.getY(), coneX, atGoalX, coneY, atGoalY, coneAngle, atGoalA);
+            }
             // Drive
-            yController.setGoal(goalPoseY);
-            xController.setGoal(goalPoseX);
-            omegaController.setGoal(goalPoseAngle);
+            yController.setGoal(coneInFieldPose.getY());
+            xController.setGoal(coneInFieldPose.getX());
+            omegaController.setGoal(coneInFieldPose.getRotation().getRadians());
         }
         double millSecs = RobotController.getFPGATime() / 1000;
         if (lastTarget == null || lastTarget.getTimestamp() <= millSecs - 2000) {

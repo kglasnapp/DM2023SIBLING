@@ -2,11 +2,11 @@ import math
 robotY = 10
 robotX = 10
 robotAngle = -90
-coneXToTheRobot = 5
+coneXToTheRobot = 15
 coneYToTheRobot = 5
 coneAngle = 0
 hyp = math.sqrt(coneXToTheRobot * coneXToTheRobot + coneYToTheRobot * coneYToTheRobot)
-print(hyp)
+print("Hyp:%.2f ConeX:%.2f ConeY:%.2f" % (hyp, coneXToTheRobot, coneYToTheRobot))
 for robotAngle in range(-180,181,5):
     robotAngle = math.radians(robotAngle)
     deltaAngle = math.atan2(coneYToTheRobot, coneXToTheRobot)

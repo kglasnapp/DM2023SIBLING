@@ -16,6 +16,7 @@ import static frc.robot.utilities.Util.logf;
 public class GrabberSubsystem extends SubsystemBase {
     public static final int GRABBER_MOTOR_ID = 15;
    
+    public static double startGrab = 0;    
     private PID grabberPid;
     public TalonSRX grabberMotor;
     public double lastGrabberStopPosition;
@@ -70,7 +71,7 @@ public class GrabberSubsystem extends SubsystemBase {
         return lastPowerLevel;
     }
     public void setGrabberPower(double speed) {
-        logf("------ setting speed for grabber: %.2f\n",speed);
+        //logf("------ setting speed for grabber: %.2f\n",speed);
         if (speed == 0) {
             grabberMotor.set(ControlMode.Disabled, 0);
         } else {

@@ -6,6 +6,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch RobotContainer",
+      "request": "launch",
+      "mainClass": "frc.robot.RobotContainer",
+      "projectName": "2023-swerve-comp"
+    },
+    {
+      "type": "java",
+      "name": "Launch ConeAlignCommand",
+      "request": "launch",
+      "mainClass": "frc.robot.commands.ConeAlignCommand",
+      "projectName": "2023-swerve-comp"
+    },
+    {
+      "type": "java",
       "name": "Launch PiecePickerPoseProvider",
       "request": "launch",
       "mainClass": "frc.robot.utilities.PiecePickerPoseProvider",

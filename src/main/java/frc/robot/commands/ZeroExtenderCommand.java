@@ -1,0 +1,29 @@
+package frc.robot.commands;
+
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.ArmSubsystem;
+
+public class ZeroExtenderCommand extends CommandBase {
+    
+    ArmSubsystem armSubsystem;
+
+    public ZeroExtenderCommand(ArmSubsystem armSubsystem) {
+        this.armSubsystem = armSubsystem;       
+        addRequirements(armSubsystem);
+    }
+
+    @Override
+    public void execute() {
+        armSubsystem.setExtenderSpeed(-0.6);
+    }
+    
+    @Override
+    public boolean isFinished() {
+        return armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        armSubsystem.setExtenderSpeed(0);
+    }
+}

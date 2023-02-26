@@ -25,19 +25,19 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
     final static double changeY = -0.12;
     public final static Pose2d driveTrainPoseTargets[] = new Pose2d[] {
         // tag id 3, 6 (tested 6 and it worked)
-        new Pose2d(new Translation2d(1.84, 3.046), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(1.84, 3.586), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(1.84, 4.126), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.72, 3.046), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.72, 3.586), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.72, 4.126), new Rotation2d(Math.toRadians(180))),
 
         // tag id 2, 7
-        new Pose2d(new Translation2d(1.84, 4.722), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(1.84, 5.262), new Rotation2d(Math.toRadians(180))),        
-        new Pose2d(new Translation2d(1.84, 5.802), new Rotation2d(Math.toRadians(180))), 
+        new Pose2d(new Translation2d(1.72, 4.722), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.72, 5.262), new Rotation2d(Math.toRadians(180))),        
+        new Pose2d(new Translation2d(1.72, 5.802), new Rotation2d(Math.toRadians(180))), 
         
          // tag id 1, 8
-         new Pose2d(new Translation2d(1.84, 6.398), new Rotation2d(Math.toRadians(180))),        
-         new Pose2d(new Translation2d(1.84, 6.938), new Rotation2d(Math.toRadians(180))),
-         new Pose2d(new Translation2d(1.84, 7.478), new Rotation2d(Math.toRadians(180)))
+         new Pose2d(new Translation2d(1.72, 6.398), new Rotation2d(Math.toRadians(180))),        
+         new Pose2d(new Translation2d(1.72, 6.938), new Rotation2d(Math.toRadians(180))),
+         new Pose2d(new Translation2d(1.72, 7.478), new Rotation2d(Math.toRadians(180)))
         
     };
 

@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
@@ -68,7 +69,7 @@ public class GrabberDefaultCommand extends CommandBase {
                 state = State.READY;
                 grabberSubsystem.zeroEncoder();
                 grabberSubsystem.setGrabberPower(0);
-                logf("Grabber Homed\n");
+                logf("Grabber Homed %.2f\n", avgCurrent);
             }
         }
         if (grabberSubsystem.getForwardLimitSwitch()) {
@@ -82,7 +83,8 @@ public class GrabberDefaultCommand extends CommandBase {
             SmartDashboard.putNumber("Pres PL", presentPowerLevel);
         }
         if (state == State.READY) {
-            if (avgCurrent > CURRENT_THRESHOLD) {
+            double currentTime = RobotController.getFPGATime() / 1000;
+            if (avgCurrent > CURRENT_THRESHOLD) { //} && currentTime - GrabberSubsystem.startGrab > 20) {
                 logf("Current %.2f found to be large\n", avgCurrent);
                 state = State.OVERCURRENT;
                 lastPowerLevel = grabberSubsystem.getLastPowerLevel();

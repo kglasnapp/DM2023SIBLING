@@ -77,7 +77,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   public Transform3d robotToCamera;
   String name;
-  
+
   public PoseEstimatorSubsystem(String name, PhotonCamera photonCamera, Transform3d robotToCamera,
       DrivetrainSubsystem drivetrainSubsystem) {
     this.name = name;
@@ -120,59 +120,59 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    
+
     photonEstimatedRobotPose = photonPoseEstimator.update();
     if (photonEstimatedRobotPose.isPresent()) {
       EstimatedRobotPose pose = photonEstimatedRobotPose.get();
-      
+
       // System.out.println("got a pose "+pose.estimatedPose);
       // Max distance you want a tag to be read at. Found issues after 15 feet away
       // from tag while moving.
-      
-      
-      // if (Math.hypot(pose.estimatedPose.getX(), pose.estimatedPose.getY()) < 5.25) {
-      
-      
-        // Error with WPI code https://github.com/wpilibsuite/allwpilib/issues/4952
+
+      // if (Math.hypot(pose.estimatedPose.getX(), pose.estimatedPose.getY()) < 5.25)
+      // {
+
+      // Error with WPI code https://github.com/wpilibsuite/allwpilib/issues/4952
+      try {
+        // System.out.println("the distance is less than 15 feet");
+        if (!lastValue) {
+          // if (lastValueCount > 10) {
+          SmartDashboard.putBoolean(name, true);
+          lastValue = true;
+          lastValueCount = 0;
+          // }
+        }
+        lastValueCount++;
         try {
-          //System.out.println("the distance is less than 15 feet");
-          if (!lastValue) {            
-            // if (lastValueCount > 10) {
-              SmartDashboard.putBoolean(name, true);
-              lastValue = true;
-              lastValueCount = 0;
-            // }                       
-          }
-          lastValueCount++;
-          try {
           poseEstimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
           avg.add(3);
-          } catch (Exception e){}
-          
-        } catch (ConcurrentModificationException e) {
+        } catch (Exception e) {
         }
+
+      } catch (ConcurrentModificationException e) {
+      }
       /** else statement for the hypotenuse */
       // } else {
-      //   avg.add(1);
-      //   if (lastValue) {          
-      //     // if (lastValueCount > 10) {
-      //       SmartDashboard.putBoolean(name, false);
-      //       lastValue = false;
-      //       lastValueCount = 0;
-      //     // } else {
-      //       lastValueCount++;
-      //     // }
-      //   }
+      // avg.add(1);
+      // if (lastValue) {
+      // // if (lastValueCount > 10) {
+      // SmartDashboard.putBoolean(name, false);
+      // lastValue = false;
+      // lastValueCount = 0;
+      // // } else {
+      // lastValueCount++;
+      // // }
+      // }
       // }
     } else {
       avg.add(1);
-      if (lastValue) {        
+      if (lastValue) {
         // if (lastValueCount > 10) {
-          SmartDashboard.putBoolean(name, false);
-          lastValue = false;
-          lastValueCount = 0;
+        SmartDashboard.putBoolean(name, false);
+        lastValue = false;
+        lastValueCount = 0;
         // } else {
-          lastValueCount++;
+        lastValueCount++;
         // }
       }
     }

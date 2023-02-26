@@ -16,8 +16,8 @@ public class BalanceCommand extends CommandBase {
     private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
     
-    private final ProfiledPIDController xController = new ProfiledPIDController(0.003, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(0.003, 0, 0, Y_CONSTRAINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(0.005, 0, 0, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(0.005, 0, 0, Y_CONSTRAINTS);
     
 
     DrivetrainSubsystem drivetrainSubsystem;

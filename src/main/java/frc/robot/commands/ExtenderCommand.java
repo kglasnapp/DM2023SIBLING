@@ -12,7 +12,7 @@ public class ExtenderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * inches)
      */
-    public final static double TOLERANCE = 15000;
+    public final static double TOLERANCE = 5000;
     ArmSubsystem armSubsystem;
     double extenderGoal;
 

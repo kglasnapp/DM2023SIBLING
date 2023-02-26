@@ -86,6 +86,10 @@ public class DefaultArmCommand extends CommandBase {
             armSubsystem.zeroEncoder(armSubsystem.shoulderMotor);
         }
 
+        if (armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {
+            armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
+        }
+
         if (homeState != State.READY) {
             return;
         }

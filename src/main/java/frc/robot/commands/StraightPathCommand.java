@@ -50,7 +50,7 @@ public class StraightPathCommand extends CommandBase {
     void init() {
         xController.setTolerance(0.005);
         yController.setTolerance(0.005);
-        omegaController.setTolerance(Units.degreesToRadians(2));
+        omegaController.setTolerance(Units.degreesToRadians(1));
         omegaController.enableContinuousInput(-Math.PI, Math.PI);
         addRequirements(drivetrainSubsystem);
     }
@@ -136,7 +136,7 @@ public class StraightPathCommand extends CommandBase {
         boolean atGoalX = Math.abs(robotPose.getX() - destination.getX()) < 0.01;
         boolean atGoalY = Math.abs(robotPose.getY() - destination.getY()) < 0.01;
         boolean atGoalO = Math.abs((Util.normalizeAngle(robotPose.getRotation().getDegrees() -
-                destination.getRotation().getDegrees()))) < 2;
+                destination.getRotation().getDegrees()))) < 1;
         // logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b>\n",
         //         (currentTime - initialTime) / 1000000,
         //         robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), atGoalX, atGoalY, atGoalO);
