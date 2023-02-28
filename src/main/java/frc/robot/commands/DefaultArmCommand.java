@@ -119,7 +119,7 @@ public class DefaultArmCommand extends CommandBase {
             extender = extenderSupplier2.getAsDouble();
         }
         // SmartDashboard.putNumber("Extender Speed", extender);
-        if (Math.abs(extender) > .05) {
+        if (Math.abs(extender) > .05 && armSubsystem.getShoulderPos() > ExtenderCommand.SHOULDER_THRESHOLD) {
             extenderActive = true;
             armSubsystem.setExtenderSpeed(extender * 1.0);
             armSubsystem.lastExtenderStopPosition = armSubsystem.getExtenderPos();

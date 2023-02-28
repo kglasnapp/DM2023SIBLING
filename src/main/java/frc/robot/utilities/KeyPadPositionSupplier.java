@@ -51,7 +51,7 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
         var alliance = DriverStation.getAlliance();
         Pose2d pose;
         if (alliance == Alliance.Red) {
-            pose = driveTrainPoseTargets[state * 3 + pos % 3];
+            pose = driveTrainPoseTargets[(2-state) * 3 + 2-(pos % 3)];
         } else {
             pose = driveTrainPoseTargets[state * 3 + pos % 3];
             pose = new Pose2d(pose.getX(), FIELD_WIDTH - pose.getY(), pose.getRotation());

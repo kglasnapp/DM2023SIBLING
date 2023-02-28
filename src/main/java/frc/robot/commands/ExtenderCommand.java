@@ -12,7 +12,8 @@ public class ExtenderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * inches)
      */
-    public final static double TOLERANCE = 5000;
+    public final static double TOLERANCE = 3000;
+    public final static double SHOULDER_THRESHOLD = 25000;
     ArmSubsystem armSubsystem;
     double extenderGoal;
 
@@ -43,6 +44,9 @@ public class ExtenderCommand extends CommandBase {
 
     @Override
     public void execute() {
+        if (armSubsystem.getShoulderPos() < SHOULDER_THRESHOLD) {
+            return;
+        }
         double currentTime = RobotController.getFPGATime();
         double elapsedSec = (currentTime - initialTime) / 1000000;
 

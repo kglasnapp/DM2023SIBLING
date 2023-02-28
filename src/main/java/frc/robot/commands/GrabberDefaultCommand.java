@@ -16,7 +16,7 @@ public class GrabberDefaultCommand extends CommandBase {
     GrabberSubsystem grabberSubsystem;
     double lastPowerLevel = 0;
 
-    double CURRENT_THRESHOLD = 5;
+    double CURRENT_THRESHOLD = 6.5;
     RunningAverage avg = new RunningAverage(20);
 
     BooleanSupplier openProvider;
@@ -77,13 +77,13 @@ public class GrabberDefaultCommand extends CommandBase {
         }
 
         double presentPowerLevel = grabberSubsystem.getLastPowerLevel();
-        if (Robot.count % 15 == 7) {
+        if (Robot.count % 4 == 2) {
             SmartDashboard.putString("Gab State", state.toString());
             SmartDashboard.putNumber("Avg Cur", avgCurrent);
             SmartDashboard.putNumber("Pres PL", presentPowerLevel);
         }
         if (state == State.READY) {
-            double currentTime = RobotController.getFPGATime() / 1000;
+            //double currentTime = RobotController.getFPGATime() / 1000;
             if (avgCurrent > CURRENT_THRESHOLD) { //} && currentTime - GrabberSubsystem.startGrab > 20) {
                 logf("Current %.2f found to be large\n", avgCurrent);
                 state = State.OVERCURRENT;
@@ -101,10 +101,10 @@ public class GrabberDefaultCommand extends CommandBase {
         }
 
         if (openProvider.getAsBoolean() || openProvider2.getAsBoolean()) {
-            grabberSubsystem.setGrabberPower(.6);
+            grabberSubsystem.setGrabberPower(.8);
         }
         if (closeProvider.getAsBoolean() || closeProvider2.getAsBoolean()) {
-            grabberSubsystem.setGrabberPower(-.6);
+            grabberSubsystem.setGrabberPower(-.8);
         }
         if (stopProvider.getAsBoolean() || stopProvider2.getAsBoolean()) {
             grabberSubsystem.setGrabberPower(0);

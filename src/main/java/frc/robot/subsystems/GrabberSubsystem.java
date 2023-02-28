@@ -111,9 +111,10 @@ public class GrabberSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Display Grabber Data
-        if (Robot.count % 15 == 5) {
-            double statCurrent = grabberMotor.getStatorCurrent();
-            SmartDashboard.putNumber("GrbStatCur", statCurrent);
+        // if (Robot.count % 15 == 5) {
+            // double statCurrent = grabberMotor.getStatorCurrent();
+            // SmartDashboard.putNumber("GrbStatCur", statCurrent);
+
             //double current = grabberMotor.getSupplyCurrent();
             //SmartDashboard.putNumber("GrbSuppCur", current);
             //boolean forwardLimit = getForwardLimitSwitch();
@@ -122,7 +123,7 @@ public class GrabberSubsystem extends SubsystemBase {
             //SmartDashboard.putBoolean("GrbRevL", reverseLimit);
             //double position = getGrabberPos();
             //SmartDashboard.putNumber("GrbPos", position);
-        }
+        // }
 
     }
 }
