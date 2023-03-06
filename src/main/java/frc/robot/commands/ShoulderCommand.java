@@ -55,7 +55,8 @@ public class ShoulderCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return (Math.abs(armSubsystem.getShoulderPos() - shoulderGoal) < TOLERANCE);
+        return (Math.abs(armSubsystem.getShoulderPos() - shoulderGoal) < TOLERANCE) || 
+        armSubsystem.getForwardLimitSwitch(armSubsystem.shoulderMotor);
     }
 
     @Override

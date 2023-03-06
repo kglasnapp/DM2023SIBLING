@@ -34,9 +34,11 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.BalanceCommand;
+import frc.robot.commands.ChangeTurboModeCommand;
 import frc.robot.commands.ConeAlignCommand;
 import frc.robot.commands.DefaultArmCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GrabberCommand;
 import frc.robot.commands.GrabberDefaultCommand;
@@ -117,7 +119,7 @@ public class RobotContainer {
 
     // autonomousChooser.addOption("Case 2 left", getAutonomousCommandCase2(0));
     // autonomousChooser.addOption("Case 1 middle", getAutonomousCommandCase1(1));
-    // autonomousChooser.addOption("Case 2 middle", getAutonomousCommandCase2(1));
+    autonomousChooser.addOption("Case 2 middle", getAutonomousCommandCase2(1));
     // autonomousChooser.addOption("Case 2 right", getAutonomousCommandCase2(2));
     // autonomousChooser.addOption("Case 3", getAutonomousCommandCase3());
 
@@ -318,7 +320,7 @@ public class RobotContainer {
         Commands.parallel(new StraightPathCommand(m_drivetrainSubsystem,
             poseEstimator,
             pose2d1),
-            new ShoulderCommand(m_armSubsystem, 165000),
+            new ShoulderCommand(m_armSubsystem, 175000),
             new GrabberCommand(grabberSubsystem, true))
             .andThen(new GrabberCommand(grabberSubsystem, true))
             .andThen(new GrabberCommand(grabberSubsystem, true))
@@ -327,7 +329,7 @@ public class RobotContainer {
 
             .andThen(new PrintCommand("Finished waiting"))
             .andThen(
-                new ExtenderCommand(m_armSubsystem, 105000))
+                new ExtenderCommand(m_armSubsystem, 126000))
             // new ExtenderCommand(m_armSubsystem, 245000))
 
             .andThen(new GrabberCommand(grabberSubsystem, false))
@@ -364,7 +366,7 @@ public class RobotContainer {
       if (right) {
         pose = new Pose2d(new Translation2d(15.14, 0.55), new Rotation2d(Math.toRadians(0)));
       } else {
-        pose = new Pose2d(new Translation2d(15.14, 1.95), new Rotation2d(Math.toRadians(0)));
+        pose = new Pose2d(new Translation2d(15.14, 1.88), new Rotation2d(Math.toRadians(0)));
       }
       if (phase == 1) {
         pose = new Pose2d(pose.getX() - 0.36, pose.getY(), pose.getRotation());
@@ -373,7 +375,61 @@ public class RobotContainer {
     return pose;
   }
 
+
   CommandBase getCommandFor(int pos) {
+    double extenderGoals[] = new double[] {
+        130000, 20000, 0
+    };
+    /**
+     * The shoulder command goes up, then the extender command goes, after that the
+     * shoulder command goes down.
+     * Going up is considered: phase 0.
+     * Going down after the extender command is: phase 1.
+     * Those two phases have a target pos that the shoulder encoder needs to
+     * achieve.
+     * Those goals are configured in this array.
+     * phase0: up, middle, floor
+     * phase1: up, middle, floor
+     */
+    double shoulderGoals[][] = new double[][] {
+        // new double[] { 191432 * 1.1, 87133 * 2.08 * 1.1, 73000 * 1.1},   // used to adjust for forward bend
+        // new double[] { 150000 * 1.1, 66133 * 2.08 * 1.1, 73000 * 1.1},
+        new double[] { 191432, 87133 * 2.08, 73000 },   //this is the old one - pre bent
+        new double[] { 150000, 66133 * 2.08, 73000 },
+    };
+    return new CommandBase() {
+      @Override
+      public void initialize() {
+        DefaultDriveCommand.autonomous = true;
+        SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
+      }
+
+      @Override
+      public boolean isFinished() {
+        return true;
+      }
+
+    }.andThen(
+        Commands.parallel(
+        new PrintCommand("Going to coordinate "+new KeyPadPositionSupplier(pos).get()),
+        new StraightPathCommand(m_drivetrainSubsystem,
+            poseEstimator,
+            new KeyPadPositionSupplier(pos)),
+            new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
+            .andThen(new DriveCommand(m_drivetrainSubsystem, -0.2, 0, 0))
+            .andThen(new WaitCommand(1))
+            .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0))
+            .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
+            .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[1][pos / 3])))
+        .finallyDo(new BooleanConsumer() {
+          public void accept(boolean value) {
+            DefaultDriveCommand.autonomous = false;
+          }
+        });
+
+  }
+
+  CommandBase getCommandForAutonomous(int pos) {
     double extenderGoals[] = new double[] {
         130000, 20000, 0
     };
@@ -409,6 +465,9 @@ public class RobotContainer {
             poseEstimator,
             new KeyPadPositionSupplier(pos)),
             new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
+            .andThen(new DriveCommand(m_drivetrainSubsystem, 0.2, 0, 0))
+            .andThen(new WaitCommand(1))
+            .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0))
             .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
             .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[1][pos / 3])))
         .finallyDo(new BooleanConsumer() {
@@ -458,7 +517,7 @@ public class RobotContainer {
       }
 
     }.andThen(
-        getCommandFor(pos))
+      getCommandForAutonomous(pos))
         .andThen(new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, Math.toRadians(180)))
         .andThen(new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, Math.toRadians(180)))
         .andThen(new GrabberCommand(grabberSubsystem, true))
@@ -517,13 +576,14 @@ public class RobotContainer {
         // .andThen(new zeroGyroscope())
         .andThen(Commands.parallel(
             new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
-                new Pose2d(1.84, 2.286, new Rotation2d(Math.toRadians(180))))),
+                new Pose2d(3.88, 2.86, new Rotation2d(Math.toRadians(180))))),
             new GrabberCommand(grabberSubsystem, false),
             new ShoulderCommand(m_armSubsystem, 0))
+        .andThen(new ChangeTurboModeCommand())
         .andThen(
             new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
-                new Pose2d(11 * 0.33, 2.286, new Rotation2d(Math.toRadians(180)))))
-        .andThen(balanceCommand));
+                new Pose2d(3.88, 2.82, new Rotation2d(Math.toRadians(180))))));
+        // .andThen(balanceCommand));
     command.setName("Case 2 on state " + state);
     return command;
   }

@@ -64,7 +64,8 @@ public class ExtenderCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return (Math.abs(armSubsystem.getExtenderPos() - extenderGoal) < TOLERANCE);
+        return (Math.abs(armSubsystem.getExtenderPos() - extenderGoal) < TOLERANCE) || 
+            armSubsystem.getForwardLimitSwitch(armSubsystem.extenderMotor);
     }
 
     @Override
