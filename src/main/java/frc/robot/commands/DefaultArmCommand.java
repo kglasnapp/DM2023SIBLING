@@ -22,7 +22,7 @@ public class DefaultArmCommand extends CommandBase {
     double EXTENDER_THRESHOLD = 50;
 
     public enum State {
-        IDLE, START_HOME_EXTENDER, HOMING_EXTENDER, HOMING_SHOULDER, READY
+        IDLE, START_HOME_EXTENDER, HOMING_EXTENDER, HOMING_EXTENDER_2, HOMING_SHOULDER, READY
     }
 
     State homeState = State.START_HOME_EXTENDER;
@@ -58,6 +58,12 @@ public class DefaultArmCommand extends CommandBase {
         }
         if (homeState == State.HOMING_EXTENDER) {
             if (armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {
+                homeState = State.HOMING_EXTENDER_2;
+                armSubsystem.setExtenderSpeed(0.1); // KAG added 1/24
+            }
+        }
+        if (homeState == State.HOMING_EXTENDER_2) {
+            if (!armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {                
                 homeState = State.HOMING_SHOULDER;
                 armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
                 armSubsystem.setExtenderSpeed(0); // KAG added 1/24
@@ -86,9 +92,9 @@ public class DefaultArmCommand extends CommandBase {
             armSubsystem.zeroEncoder(armSubsystem.shoulderMotor);
         }
 
-        if (armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {
-            armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
-        }
+        // if (armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {
+        //     armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
+        // }
 
         if (homeState != State.READY) {
             return;
@@ -118,6 +124,13 @@ public class DefaultArmCommand extends CommandBase {
         if (extender == 0) {
             extender = extenderSupplier2.getAsDouble();
         }
+        // as we are not zeroing when we hit the limit switch anymore
+        // we don't need to prevent it from going beyond zero.
+        // // if we are close to zero on the encoder, and we try to go farther
+        // // back, we stop.
+        // if (armSubsystem.getExtenderPos() < 20000 && extender < 0) {
+        //     extender = 0;
+        // }
         // SmartDashboard.putNumber("Extender Speed", extender);
         if (Math.abs(extender) > .05 && armSubsystem.getShoulderPos() > ExtenderCommand.SHOULDER_THRESHOLD) {
             extenderActive = true;

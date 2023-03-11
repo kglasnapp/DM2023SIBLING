@@ -77,6 +77,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   public Transform3d robotToCamera;
   String name;
+  AprilTagFieldLayout layout;
 
   public PoseEstimatorSubsystem(String name, PhotonCamera photonCamera, Transform3d robotToCamera,
       DrivetrainSubsystem drivetrainSubsystem) {
@@ -84,7 +85,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     this.photonCamera = photonCamera;
     this.robotToCamera = robotToCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
-    AprilTagFieldLayout layout;
+    
     try {
       layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
       logf("In PoseEstimatorSubsystem the alliance is %s\n", Robot.alliance);
@@ -117,9 +118,16 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   boolean lastValue = false;
   int lastValueCount = 0;
-
+  int count = 0;
   @Override
   public void periodic() {
+
+    if (count % 50 == 0) {
+      layout.setOrigin(DriverStation.getAlliance() == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
+          : OriginPosition.kRedAllianceWallRightSide);
+    }
+
+    count++;
 
     photonEstimatedRobotPose = photonPoseEstimator.update();
     if (photonEstimatedRobotPose.isPresent()) {

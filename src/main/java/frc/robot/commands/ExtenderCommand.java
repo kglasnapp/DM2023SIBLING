@@ -12,8 +12,8 @@ public class ExtenderCommand extends CommandBase {
      * TOLERACE is the error that we are ok with at the end of the command (in
      * inches)
      */
-    public final static double TOLERANCE = 3000;
-    public final static double SHOULDER_THRESHOLD = 25000;
+    public final static double TOLERANCE = 500;
+    public final static double SHOULDER_THRESHOLD = 1000;
     ArmSubsystem armSubsystem;
     double extenderGoal;
 

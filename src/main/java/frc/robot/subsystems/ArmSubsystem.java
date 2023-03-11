@@ -23,6 +23,9 @@ public class ArmSubsystem extends SubsystemBase {
     public static final int SHOULDER_MOTOR_ID = 10;
     public static final int EXTENDER_MOTOR_ID = 11;
 
+    public static final int SHOULDER_MOTOR_MASTER = 14;
+    public static final int SHOULDER_MOTOR_SLAVE = 13;
+
     private PID shoulderPid;
     private PID extenderPid;
     // private double lastSpeed = 0;
@@ -34,19 +37,38 @@ public class ArmSubsystem extends SubsystemBase {
     public double lastExtenderStopPosition;
     public double lastShoulderStopPosition;
 
+    boolean useTwoMotors = false;
+
     public ArmSubsystem() {
-        shoulderMotor = new TalonFX(SHOULDER_MOTOR_ID);
+        shoulderPid = new PID("ShlPos", .3, 0, 0, 0, 0, -0.7, 0.7, false);
+        if (useTwoMotors) {
+            shoulderMotor = new TalonFX(SHOULDER_MOTOR_MASTER);
+            TalonFX motor2 = new TalonFX(SHOULDER_MOTOR_SLAVE);
+            shoulderMotor.setInverted(true);
+            
+        //    motor2.follow(shoulderMotor);
+            motor2.configFactoryDefault();
+            motor2.setInverted(true);
+            setBrakeMode(motor2, true);
+            shoulderMotor.configNeutralDeadband(0.2);
+            //PIDToFX(motor2, shoulderPid, 0, Constants.kTimeoutMs);
+            motor2.set(ControlMode.Follower, SHOULDER_MOTOR_MASTER);
+        } else {
+            shoulderMotor = new TalonFX(10);
+            shoulderMotor.setInverted(true);
+        }
         shoulderMotor.configFactoryDefault();
-        setCurrentLimits(shoulderMotor);
+        setCurrentLimits(shoulderMotor,10);
         enableLimitSwitch(shoulderMotor);
         setBrakeMode(shoulderMotor, true);
-        shoulderPid = new PID("ShlPos", .15, 0, 0, 0, 0, -0.3, 0.3, false);
+        
         PIDToFX(shoulderMotor, shoulderPid, 0, Constants.kTimeoutMs);
+        
         logf("Shoulder Motor Enabled\n");
 
         extenderMotor = new TalonFX(EXTENDER_MOTOR_ID);
         extenderMotor.configFactoryDefault();
-        setCurrentLimits(extenderMotor);
+        setCurrentLimits(extenderMotor,10);
         enableLimitSwitch(extenderMotor);
         setBrakeMode(extenderMotor, true);
         //extenderPid = new PID("ExtPos", 0.5, 0, 0, 0, 0, -0.6, 0.6, false);
@@ -97,16 +119,19 @@ public class ArmSubsystem extends SubsystemBase {
         }
     }
 
-    public void setCurrentLimits(TalonFX motor) {
-        SupplyCurrentLimitConfiguration currLimitCfg = new SupplyCurrentLimitConfiguration(true, 10, 10, .2);
+    public void setCurrentLimits(TalonFX motor, double current) {
+        SupplyCurrentLimitConfiguration currLimitCfg = new SupplyCurrentLimitConfiguration(true, current, current, .2);
         motor.configSupplyCurrentLimit(currLimitCfg);
-        StatorCurrentLimitConfiguration statCurrentLimitCfg = new StatorCurrentLimitConfiguration(true, 10, 10, .2);
-        motor.configGetStatorCurrentLimit(statCurrentLimitCfg);
+       StatorCurrentLimitConfiguration statCurrentLimitCfg = new StatorCurrentLimitConfiguration(true, current, current, .2);
+       motor.configGetStatorCurrentLimit(statCurrentLimitCfg);
     }
 
     public void setShoulderSpeed(double speed) {
         if (speed == 0) {
-            shoulderMotor.set(ControlMode.Disabled, 0);
+            //shoulderMotor.set(ControlMode.Disabled, 0);
+            System.out.println("Setting velocity to zero (((()))))))");
+            //shoulderMotor.selectProfileSlot(EXTENDER_MOTOR_ID, DEVICE_NUMBER);
+            shoulderMotor.set(ControlMode.Velocity, 0);        
             //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else {
             shoulderMotor.set(ControlMode.PercentOutput, speed);
@@ -147,6 +172,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void setEncoderPosition(TalonFX motor, double position) {
         motor.setSelectedSensorPosition(position);
+        //motor.set(ControlMode.Velocity, 0);
         //getSensorCollection().setIntegratedSensorPosition(position, Constants.kTimeoutMs);
         if (motor == shoulderMotor) {
             //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
@@ -169,8 +195,9 @@ public class ArmSubsystem extends SubsystemBase {
         srx.config_kD(slot, pid.kD, timeout);
         srx.config_kF(slot, pid.kFF, timeout);
         srx.config_IntegralZone(slot, (int) pid.kIz, timeout);
-        srx.configAllowableClosedloopError(slot, pid.allowableCloseLoopError, timeout);
+        srx.configAllowableClosedloopError(slot, 400, timeout);
         srx.configMaxIntegralAccumulator(slot, pid.maxIntegralAccumulation, timeout);
+        srx.configClosedloopRamp(0);
         logf("Setup %s PID slot %d %s\n", pid.name, slot, pid.getPidData());
     }
 

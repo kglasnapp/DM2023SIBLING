@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.function.Supplier;
+
 import org.photonvision.PhotonCamera;
 
 import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
@@ -109,12 +111,13 @@ public class RobotContainer {
 
     // Add commands to the autonomous command chooser
     autonomousChooser.setDefaultOption("Case 1  left",
-        getAutonomousCommandCase1(0).andThen(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+        getAutonomousCommandCase1(0).andThen(new StraightPathCommand(m_drivetrainSubsystem, 
+                                                                           getPoseEstimatorForTarget(poseEstimator, 2),
             getFinalPoseForCase1(0))));
 
     autonomousChooser.setDefaultOption("Case 1  middle", getAutonomousCommandCase1(1));
     autonomousChooser.setDefaultOption("CaSe 1  right", getAutonomousCommandCase1(2)
-        .andThen(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+        .andThen(new StraightPathCommand(m_drivetrainSubsystem, getPoseEstimatorForTarget(poseEstimator, 0),
             getFinalPoseForCase1(2))));
 
     // autonomousChooser.addOption("Case 2 left", getAutonomousCommandCase2(0));
@@ -283,6 +286,8 @@ public class RobotContainer {
 
     m_controller2.b().whileTrue(getAutonomousCommandCase3());
 
+    m_controller2.x().whileTrue(new ShoulderCommand(m_armSubsystem, 171000));
+
     m_controller.povRight().whileTrue(pickUpFromRight());
     m_controller.povLeft().whileTrue(pickUpFromLeft());
     for (int i = 0; i < 9; ++i) {
@@ -413,7 +418,7 @@ public class RobotContainer {
         Commands.parallel(
         new PrintCommand("Going to coordinate "+new KeyPadPositionSupplier(pos).get()),
         new StraightPathCommand(m_drivetrainSubsystem,
-            poseEstimator,
+            getPoseEstimatorForTarget(poseEstimator, pos),
             new KeyPadPositionSupplier(pos)),
             new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
             .andThen(new DriveCommand(m_drivetrainSubsystem, -0.2, 0, 0))
@@ -429,6 +434,36 @@ public class RobotContainer {
 
   }
 
+  /**
+   * This method returns the pose provider to use depending on which target are we going after.
+   * If the robot is going after a cone post on the left, we use the pose estimator with the camera on the right.
+   * IF the robot is going after a cube (center) we use the aggregator of both cameras.
+   * If the robot is going after a cone post on the right, we use the pose estimator with the camera on the left.
+   * pos is the number pressed in the keypad.
+   * 0 to 2 in the first row
+   * 3 to 5 in the second
+   * 6 to 8 in the last one.
+   * 0 % 3 = 0
+   * 3 % 3 = 0
+   * 6 % 3 = 0
+   * and the rest accordingly.
+   * @param poseEstimatorAggregator
+   * @param pos
+   * @return
+   */
+  Supplier<Pose2d> getPoseEstimatorForTarget(PoseEstimatorAggregator poseEstimatorAggregator, int pos) {
+    // pos is in the left, we use camera on the right
+    if (pos % 3 == 0) {
+      return poseEstimatorAggregator.poseEstimators[1]::getCurrentPose;
+    }
+    // pos is in the center, we use both cameras
+    if (pos % 3 == 1) {
+      return poseEstimatorAggregator;
+    }
+    // we use the caemra on the left.
+    return poseEstimator.poseEstimators[0]::getCurrentPose;
+  }
+ 
   CommandBase getCommandForAutonomous(int pos) {
     double extenderGoals[] = new double[] {
         130000, 20000, 0
@@ -462,7 +497,7 @@ public class RobotContainer {
 
     }.andThen(
         Commands.parallel(new StraightPathCommand(m_drivetrainSubsystem,
-            poseEstimator,
+            getPoseEstimatorForTarget(poseEstimator, pos),
             new KeyPadPositionSupplier(pos)),
             new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
             .andThen(new DriveCommand(m_drivetrainSubsystem, 0.2, 0, 0))
@@ -575,13 +610,13 @@ public class RobotContainer {
         .andThen(new ZeroExtenderCommand(m_armSubsystem))
         // .andThen(new zeroGyroscope())
         .andThen(Commands.parallel(
-            new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+            new StraightPathCommand(m_drivetrainSubsystem, getPoseEstimatorForTarget(poseEstimator, 0),
                 new Pose2d(3.88, 2.86, new Rotation2d(Math.toRadians(180))))),
             new GrabberCommand(grabberSubsystem, false),
             new ShoulderCommand(m_armSubsystem, 0))
         .andThen(new ChangeTurboModeCommand())
         .andThen(
-            new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+            new StraightPathCommand(m_drivetrainSubsystem, getPoseEstimatorForTarget(poseEstimator, 0),
                 new Pose2d(3.88, 2.82, new Rotation2d(Math.toRadians(180))))));
         // .andThen(balanceCommand));
     command.setName("Case 2 on state " + state);
@@ -611,12 +646,12 @@ public class RobotContainer {
         // 7.4,
         // new Rotation2d(Math.toRadians(180)))))
         .andThen(
-            new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+            new StraightPathCommand(m_drivetrainSubsystem, getPoseEstimatorForTarget(poseEstimator, 0),
                 new Pose2d(4.4,
                     5.3,
                     new Rotation2d(Math.toRadians(0)))))
         .andThen(
-            new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+            new StraightPathCommand(m_drivetrainSubsystem, getPoseEstimatorForTarget(poseEstimator, 0),
                 new Pose2d(6.4,
                     5.3,
                     new Rotation2d(Math.toRadians(0)))))
@@ -628,7 +663,7 @@ public class RobotContainer {
         .andThen(new ZeroExtenderCommand(m_armSubsystem))
         .andThen(Commands.parallel(
             new ShoulderCommand(m_armSubsystem, 190432),
-            new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+            new StraightPathCommand(m_drivetrainSubsystem, getPoseEstimatorForTarget(poseEstimator, 0),
                 new Pose2d(3.2, 5.3,
                     new Rotation2d(Math.toRadians(0))))))
         .andThen(getCommandFor(4))

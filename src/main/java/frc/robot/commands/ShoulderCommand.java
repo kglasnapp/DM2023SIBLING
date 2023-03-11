@@ -7,12 +7,14 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
 
+import static frc.robot.utilities.Util.logf;
+
 public class ShoulderCommand extends CommandBase {
     /**
      * TOLERACE is the error that we are ok with at the end of the command (in
      * incshes)
      */
-    public final static double TOLERANCE = 5000;
+    public final static double TOLERANCE = 500;
     private TrapezoidProfile shoulderTrapezoidProfile;
     ArmSubsystem armSubsystem; 
     double shoulderInitial;
@@ -28,7 +30,7 @@ public class ShoulderCommand extends CommandBase {
     @Override
     public void initialize() {
         this.shoulderInitial = armSubsystem.getShoulderPos();
-        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(300000, 150000);
+        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(14000, 2000);
         TrapezoidProfile.State shoulderGoalState = new TrapezoidProfile.State(shoulderGoal - shoulderInitial, 0);
         shoulderTrapezoidProfile = new TrapezoidProfile(constraints, shoulderGoalState);
         initialTime = RobotController.getFPGATime();
@@ -37,7 +39,7 @@ public class ShoulderCommand extends CommandBase {
     @Override
     public void execute() {
         double currentTime = RobotController.getFPGATime();
-        double elapsedSec = (currentTime - initialTime) / 1000000;
+        double elapsedSec = 2*(currentTime - initialTime) / 1000000;
         TrapezoidProfile.State intermediateShoulderState = shoulderTrapezoidProfile.calculate(elapsedSec);
         double intermediateShoulderGoal = intermediateShoulderState.position;
         armSubsystem.setMotorToPosition(armSubsystem.shoulderMotor, (intermediateShoulderGoal + shoulderInitial));
@@ -48,8 +50,8 @@ public class ShoulderCommand extends CommandBase {
             SmartDashboard.putNumber("Shld Pos", position);
             // SmartDashboard.putNumber("Shld Int Goal", intermediateShoulderGoal);
             // SmartDashboard.putNumber("Shld Fin Goal", shoulderGoal);
-            // logf("Time:%.1f Shoulder Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
-            //         intermediateShoulderGoal + shoulderInitial, shoulderGoal, shoulderInitial);
+            logf("Time:%.1f Shoulder Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
+                    intermediateShoulderGoal + shoulderInitial, shoulderGoal, shoulderInitial);
         }
     }
 
@@ -61,7 +63,7 @@ public class ShoulderCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        armSubsystem.setShoulderSpeed(0);        
+       //armSubsystem.setShoulderSpeed(0);        
         //SmartDashboard.putNumber("ShlSpd", 0);
     }
 
