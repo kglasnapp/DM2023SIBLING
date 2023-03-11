@@ -30,7 +30,7 @@ public class ShoulderCommand extends CommandBase {
     @Override
     public void initialize() {
         this.shoulderInitial = armSubsystem.getShoulderPos();
-        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(14000, 2000);
+        TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(150000, 75000);
         TrapezoidProfile.State shoulderGoalState = new TrapezoidProfile.State(shoulderGoal - shoulderInitial, 0);
         shoulderTrapezoidProfile = new TrapezoidProfile(constraints, shoulderGoalState);
         initialTime = RobotController.getFPGATime();

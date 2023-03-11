@@ -286,7 +286,7 @@ public class RobotContainer {
 
     m_controller2.b().whileTrue(getAutonomousCommandCase3());
 
-    m_controller2.x().whileTrue(new ShoulderCommand(m_armSubsystem, 171000));
+    m_controller2.x().whileTrue(new ShoulderCommand(m_armSubsystem, 241000));
 
     m_controller.povRight().whileTrue(pickUpFromRight());
     m_controller.povLeft().whileTrue(pickUpFromLeft());

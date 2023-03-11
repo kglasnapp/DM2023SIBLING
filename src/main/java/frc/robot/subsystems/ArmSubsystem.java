@@ -40,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase {
     boolean useTwoMotors = false;
 
     public ArmSubsystem() {
-        shoulderPid = new PID("ShlPos", .3, 0, 0, 0, 0, -0.7, 0.7, false);
+        shoulderPid = new PID("ShlPos", .1, 0, 0, 0, 0, -0.7, 0.7, false);
         if (useTwoMotors) {
             shoulderMotor = new TalonFX(SHOULDER_MOTOR_MASTER);
             TalonFX motor2 = new TalonFX(SHOULDER_MOTOR_SLAVE);
@@ -50,7 +50,7 @@ public class ArmSubsystem extends SubsystemBase {
             motor2.configFactoryDefault();
             motor2.setInverted(true);
             setBrakeMode(motor2, true);
-            shoulderMotor.configNeutralDeadband(0.2);
+            shoulderMotor.configNeutralDeadband(0.04);
             //PIDToFX(motor2, shoulderPid, 0, Constants.kTimeoutMs);
             motor2.set(ControlMode.Follower, SHOULDER_MOTOR_MASTER);
         } else {

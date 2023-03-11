@@ -18,7 +18,7 @@ public class DefaultArmCommand extends CommandBase {
     boolean shoulderActive = false;
     boolean extenderActive = false;
 
-    double SHOULDER_THRESHOLD = 500;
+    double SHOULDER_THRESHOLD = 35000;
     double EXTENDER_THRESHOLD = 50;
 
     public enum State {
@@ -105,7 +105,7 @@ public class DefaultArmCommand extends CommandBase {
             shoulder = shoulderSupplier2.getAsDouble();
         }
         if (Math.abs(shoulder) > .05) {
-            armSubsystem.setShoulderSpeed(shoulder * .3);
+            armSubsystem.setShoulderSpeed(shoulder * 1);
             shoulderActive = true;
             armSubsystem.lastShoulderStopPosition = armSubsystem.getShoulderPos();
            // logf("Shoulder Speed %.2f\n", shoulder * .3);
