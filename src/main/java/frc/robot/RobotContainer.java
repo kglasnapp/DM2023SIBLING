@@ -284,9 +284,13 @@ public class RobotContainer {
         .andThen(new ShoulderCommand(m_armSubsystem, 40352))
         .andThen(new ExtenderCommand(m_armSubsystem, 183023 * 16 / 36)));
 
-    m_controller2.b().whileTrue(getAutonomousCommandCase3());
+    //m_controller2.b().whileTrue(getAutonomousCommandCase3());
+     m_controller2.b().whileTrue(new ShoulderCommand(m_armSubsystem, 245000));
 
-    m_controller2.x().whileTrue(new ShoulderCommand(m_armSubsystem, 241000));
+   // m_controller2.x().whileTrue(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator, 
+   //     new Pose2d(2.29, 7, new Rotation2d(Math.toRadians(180)))));
+      //new ShouldeCommand(m_armSubsystem, 241000));
+   m_controller2.x().whileTrue(new ShoulderCommand(m_armSubsystem, 185500));
 
     m_controller.povRight().whileTrue(pickUpFromRight());
     m_controller.povLeft().whileTrue(pickUpFromLeft());
@@ -308,12 +312,12 @@ public class RobotContainer {
 
   public CommandBase pickUpFrom(Pose2d pose2d1, Pose2d pose2d2) {
 
-    SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
+    SwerveModuleFactory.powerRatio = 3.5;
     return new CommandBase() {
       @Override
       public void initialize() {
         DefaultDriveCommand.autonomous = true;
-        SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
+        SwerveModuleFactory.powerRatio = 3.5;
       }
 
       @Override
@@ -325,29 +329,14 @@ public class RobotContainer {
         Commands.parallel(new StraightPathCommand(m_drivetrainSubsystem,
             poseEstimator,
             pose2d1),
-            new ShoulderCommand(m_armSubsystem, 175000),
-            new GrabberCommand(grabberSubsystem, true))
-            .andThen(new GrabberCommand(grabberSubsystem, true))
-            .andThen(new GrabberCommand(grabberSubsystem, true))
-            .andThen(new PrintCommand("finished grab open hand"))
-            .andThen(new WaitCommand(0.5))
-
-            .andThen(new PrintCommand("Finished waiting"))
+            new ShoulderCommand(m_armSubsystem, 195000),
+            new GrabberCommand(grabberSubsystem, false))
             .andThen(
-                new ExtenderCommand(m_armSubsystem, 126000))
-            // new ExtenderCommand(m_armSubsystem, 245000))
-
-            .andThen(new GrabberCommand(grabberSubsystem, false))
-            .andThen(new WaitCommand(2))
-            .andThen(new GrabberCommand(grabberSubsystem, false))
-            .andThen(new WaitCommand(0.1))
-            .andThen(new GrabberCommand(grabberSubsystem, false))
+                new ExtenderCommand(m_armSubsystem, 186000))
+            .andThen(new WaitCommand(0.25))
             .andThen(new ShoulderCommand(m_armSubsystem, 201000))
             .andThen(new ZeroExtenderCommand(m_armSubsystem))
-            .andThen(Commands.parallel(new StraightPathCommand(m_drivetrainSubsystem,
-                poseEstimator,
-                pose2d2)),
-                new ShoulderCommand(m_armSubsystem, 0))
+            .andThen(new ShoulderCommand(m_armSubsystem, 0))
             .finallyDo(new BooleanConsumer() {
               public void accept(boolean value) {
                 DefaultDriveCommand.autonomous = false;
@@ -383,7 +372,7 @@ public class RobotContainer {
 
   CommandBase getCommandFor(int pos) {
     double extenderGoals[] = new double[] {
-        130000, 20000, 0
+        180000, 45000, 0
     };
     /**
      * The shoulder command goes up, then the extender command goes, after that the
@@ -399,8 +388,8 @@ public class RobotContainer {
     double shoulderGoals[][] = new double[][] {
         // new double[] { 191432 * 1.1, 87133 * 2.08 * 1.1, 73000 * 1.1},   // used to adjust for forward bend
         // new double[] { 150000 * 1.1, 66133 * 2.08 * 1.1, 73000 * 1.1},
-        new double[] { 191432, 87133 * 2.08, 73000 },   //this is the old one - pre bent
-        new double[] { 150000, 66133 * 2.08, 73000 },
+        new double[] { 250000, 185000, 67000 },   //this is the old one - pre bent
+        new double[] { 215000, 138000, 67000 },
     };
     return new CommandBase() {
       @Override
@@ -421,9 +410,9 @@ public class RobotContainer {
             getPoseEstimatorForTarget(poseEstimator, pos),
             new KeyPadPositionSupplier(pos)),
             new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
-            .andThen(new DriveCommand(m_drivetrainSubsystem, -0.2, 0, 0))
-            .andThen(new WaitCommand(1))
-            .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0))
+            // .andThen(new DriveCommand(m_drivetrainSubsystem, -0.2, 0, 0))
+            // .andThen(new WaitCommand(1))
+            // .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0))
             .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
             .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[1][pos / 3])))
         .finallyDo(new BooleanConsumer() {
@@ -452,21 +441,26 @@ public class RobotContainer {
    * @return
    */
   Supplier<Pose2d> getPoseEstimatorForTarget(PoseEstimatorAggregator poseEstimatorAggregator, int pos) {
+    return poseEstimatorAggregator;
     // pos is in the left, we use camera on the right
-    if (pos % 3 == 0) {
-      return poseEstimatorAggregator.poseEstimators[1]::getCurrentPose;
-    }
-    // pos is in the center, we use both cameras
-    if (pos % 3 == 1) {
-      return poseEstimatorAggregator;
-    }
-    // we use the caemra on the left.
-    return poseEstimator.poseEstimators[0]::getCurrentPose;
+    // if (pos % 3 == 2) {
+    //   System.out.println("using camera 2");
+    //   return poseEstimatorAggregator.poseEstimators[1]::getCurrentPose;
+    // }
+    // // pos is in the center, we use both cameras
+    // if (pos % 3 == 1) {
+    //   System.out.println("using both cameras");
+    //   return poseEstimator.poseEstimators[1]::getCurrentPose;
+    //   // return poseEstimatorAggregator;
+    // }
+    // // we use the caemra on the left.
+    // System.out.println("using camera 1");
+    // return poseEstimator.poseEstimators[1]::getCurrentPose;
   }
  
   CommandBase getCommandForAutonomous(int pos) {
     double extenderGoals[] = new double[] {
-        130000, 20000, 0
+        201000, 45000, 0
     };
     /**
      * The shoulder command goes up, then the extender command goes, after that the
@@ -480,8 +474,8 @@ public class RobotContainer {
      * phase1: up, middle, floor
      */
     double shoulderGoals[][] = new double[][] {
-        new double[] { 191432, 87133 * 2.08, 73000 },
-        new double[] { 150000, 66133 * 2.08, 73000 },
+        new double[] { 220000, 185000, 73000 },
+        new double[] { 195000, 170000, 73000 },
     };
     return new CommandBase() {
       @Override
@@ -498,7 +492,7 @@ public class RobotContainer {
     }.andThen(
         Commands.parallel(new StraightPathCommand(m_drivetrainSubsystem,
             getPoseEstimatorForTarget(poseEstimator, pos),
-            new KeyPadPositionSupplier(pos)),
+            new KeyPadPositionSupplier(pos)),            
             new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
             .andThen(new DriveCommand(m_drivetrainSubsystem, 0.2, 0, 0))
             .andThen(new WaitCommand(1))

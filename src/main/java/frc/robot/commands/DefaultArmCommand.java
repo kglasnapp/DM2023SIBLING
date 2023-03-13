@@ -58,8 +58,12 @@ public class DefaultArmCommand extends CommandBase {
         }
         if (homeState == State.HOMING_EXTENDER) {
             if (armSubsystem.getReverseLimitSwitch(armSubsystem.extenderMotor)) {
-                homeState = State.HOMING_EXTENDER_2;
-                armSubsystem.setExtenderSpeed(0.1); // KAG added 1/24
+                homeState = State.HOMING_SHOULDER;
+                armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
+                armSubsystem.setExtenderSpeed(0); // KAG added 1/24
+               // logf("++++++++++++++++++++Extender Homed\n");            
+                armSubsystem.setMotorToPosition(armSubsystem.extenderMotor, 0);
+                armSubsystem.setShoulderSpeed(-0.3);
             }
         }
         if (homeState == State.HOMING_EXTENDER_2) {
@@ -68,7 +72,7 @@ public class DefaultArmCommand extends CommandBase {
                 armSubsystem.zeroEncoder(armSubsystem.extenderMotor);
                 armSubsystem.setExtenderSpeed(0); // KAG added 1/24
                // logf("++++++++++++++++++++Extender Homed\n");
-                armSubsystem.setExtenderSpeed(0);
+                armSubsystem.setExtenderSpeed(-0.1);
                 armSubsystem.setMotorToPosition(armSubsystem.extenderMotor, 0);
                 armSubsystem.setShoulderSpeed(-0.3);
                // logf("++++++++++++++++++++Start homing shoulder\n");
@@ -100,29 +104,31 @@ public class DefaultArmCommand extends CommandBase {
             return;
         }
 
-        double shoulder = shoulderSupplier.getAsDouble();
-        if (shoulder == 0) {
-            shoulder = shoulderSupplier2.getAsDouble();
+        double shoulderButtonPressSpeed = shoulderSupplier.getAsDouble();
+        if (shoulderButtonPressSpeed == 0) {
+            shoulderButtonPressSpeed = shoulderSupplier2.getAsDouble();
         }
-        if (Math.abs(shoulder) > .05) {
-            armSubsystem.setShoulderSpeed(shoulder * 1);
+        if (Math.abs(shoulderButtonPressSpeed) > .05) {
+            armSubsystem.setShoulderSpeed(shoulderButtonPressSpeed * 0.6);
             shoulderActive = true;
             armSubsystem.lastShoulderStopPosition = armSubsystem.getShoulderPos();
            // logf("Shoulder Speed %.2f\n", shoulder * .3);
         } else {
-            if (shoulderActive) {
-                if (Math.abs(
-                        armSubsystem.getShoulderPos() - armSubsystem.lastShoulderStopPosition) > SHOULDER_THRESHOLD) {
-                    shoulderActive = false;
-                    armSubsystem.setShoulderSpeed(0);
-                    armSubsystem.setEncoderPosition(armSubsystem.shoulderMotor, armSubsystem.lastShoulderStopPosition);
-                }
-            }
+            armSubsystem.setShoulderSpeed(0);
+            shoulderActive = false;
+            // if (shoulderActive) {
+            //     if (Math.abs(
+            //             armSubsystem.getShoulderPos() - armSubsystem.lastShoulderStopPosition) > SHOULDER_THRESHOLD) {
+            //         shoulderActive = false;
+                    
+            //         armSubsystem.setEncoderPosition(armSubsystem.shoulderMotor, armSubsystem.lastShoulderStopPosition);
+            //     }
+            // }
         }
 
-        double extender = extenderSupplier.getAsDouble();
-        if (extender == 0) {
-            extender = extenderSupplier2.getAsDouble();
+        double extenderButtonPressSpeed = extenderSupplier.getAsDouble();
+        if (extenderButtonPressSpeed == 0) {
+            extenderButtonPressSpeed = extenderSupplier2.getAsDouble();
         }
         // as we are not zeroing when we hit the limit switch anymore
         // we don't need to prevent it from going beyond zero.
@@ -132,23 +138,25 @@ public class DefaultArmCommand extends CommandBase {
         //     extender = 0;
         // }
         // SmartDashboard.putNumber("Extender Speed", extender);
-        if (Math.abs(extender) > .05 && armSubsystem.getShoulderPos() > ExtenderCommand.SHOULDER_THRESHOLD) {
+        if (Math.abs(extenderButtonPressSpeed) > .05 && armSubsystem.getShoulderPos() > ExtenderCommand.SHOULDER_THRESHOLD) {
             extenderActive = true;
-            armSubsystem.setExtenderSpeed(extender * 1.0);
+            armSubsystem.setExtenderSpeed(extenderButtonPressSpeed * 1.0);
             armSubsystem.lastExtenderStopPosition = armSubsystem.getExtenderPos();
            // logf("Extender Speed %.2f\n", extender * .9);
         } else {
+            armSubsystem.setExtenderSpeed(0);
+            extenderActive = false;
             // Was taking too much time to set speed to zero so add extenderActive test
-            if (extenderActive) {
-                if (Math.abs(
-                        armSubsystem.getExtenderPos() - armSubsystem.lastExtenderStopPosition) > EXTENDER_THRESHOLD) {
-                    extenderActive = false;
-                    armSubsystem.setExtenderSpeed(0);
-                    // armSubsystem.setMotorToPosition(armSubsystem.extenderMotor,
-                    // armSubsystem.lastExtenderStopPosition);
-                    // armSubsystem.setMotorToPosition(armSubsystem.extenderMotor,-500 );
-                }
-            }
+            // if (extenderActive) {
+            //     if (Math.abs(
+            //             armSubsystem.getExtenderPos() - armSubsystem.lastExtenderStopPosition) > EXTENDER_THRESHOLD) {
+            //         extenderActive = false;
+            //         armSubsystem.setExtenderSpeed(0);
+            //         // armSubsystem.setMotorToPosition(armSubsystem.extenderMotor,
+            //         // armSubsystem.lastExtenderStopPosition);
+            //         // armSubsystem.setMotorToPosition(armSubsystem.extenderMotor,-500 );
+            //     }
+            // }
         }
     }
 }

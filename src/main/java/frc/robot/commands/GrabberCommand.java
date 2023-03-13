@@ -22,12 +22,13 @@ public class GrabberCommand extends CommandBase {
 
     @Override
     public void execute() {
-        double speed = 0.6;
+        double speed = 1;
         if (open) {
-            speed = -0.6;
-        } 
-        logf("grabber command: %b state = %s\n", open, GrabberDefaultCommand.state);        
-        grabberSubsystem.setGrabberPower(speed);
+            GrabberDefaultCommand.startDropping();
+        } else {
+            logf("grabber command: %b state = %s\n", open, GrabberDefaultCommand.state);        
+            grabberSubsystem.setGrabberPower(speed);
+        }
     }
 
     @Override

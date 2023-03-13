@@ -31,6 +31,7 @@ public class ShoulderCommand extends CommandBase {
     public void initialize() {
         this.shoulderInitial = armSubsystem.getShoulderPos();
         TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(150000, 75000);
+        //TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(60000, 20000);
         TrapezoidProfile.State shoulderGoalState = new TrapezoidProfile.State(shoulderGoal - shoulderInitial, 0);
         shoulderTrapezoidProfile = new TrapezoidProfile(constraints, shoulderGoalState);
         initialTime = RobotController.getFPGATime();
@@ -50,15 +51,17 @@ public class ShoulderCommand extends CommandBase {
             SmartDashboard.putNumber("Shld Pos", position);
             // SmartDashboard.putNumber("Shld Int Goal", intermediateShoulderGoal);
             // SmartDashboard.putNumber("Shld Fin Goal", shoulderGoal);
-            logf("Time:%.1f Shoulder Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
-                    intermediateShoulderGoal + shoulderInitial, shoulderGoal, shoulderInitial);
+            // logf("Time:%.1f Shoulder Pos:%.2f intGoal+initial:%.2f goal:%.2f initial:%.2f\n", elapsedSec, position,
+            //         intermediateShoulderGoal + shoulderInitial, shoulderGoal, shoulderInitial);
         }
     }
 
     @Override
     public boolean isFinished() {
+        double position = armSubsystem.getShoulderPos();
+
         return (Math.abs(armSubsystem.getShoulderPos() - shoulderGoal) < TOLERANCE) || 
-        armSubsystem.getForwardLimitSwitch(armSubsystem.shoulderMotor);
+        (armSubsystem.getForwardLimitSwitch(armSubsystem.shoulderMotor) && position < shoulderGoal);
     }
 
     @Override

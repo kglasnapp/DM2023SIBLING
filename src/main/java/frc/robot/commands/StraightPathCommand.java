@@ -78,7 +78,7 @@ public class StraightPathCommand extends CommandBase {
 
     @Override
     public void execute() {
-        logf("executing path follow command\n");
+        // logf("executing path follow command\n");
         double currentTime = RobotController.getFPGATime() - initialTime;
 
         if (destinationProvider != null) {

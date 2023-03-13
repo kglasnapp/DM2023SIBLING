@@ -13,11 +13,13 @@ import java.util.function.BooleanSupplier;
 
 public class GrabberDefaultCommand extends CommandBase {
 
-    GrabberSubsystem grabberSubsystem;
+    static GrabberSubsystem grabberSubsystem;
     double lastPowerLevel = 0;
 
     double CURRENT_THRESHOLD = 6.5;
     RunningAverage avg = new RunningAverage(20);
+    
+    static double timer = 0;
 
     BooleanSupplier openProvider;
     BooleanSupplier closeProvider;
@@ -26,8 +28,8 @@ public class GrabberDefaultCommand extends CommandBase {
     BooleanSupplier closeProvider2;
     BooleanSupplier stopProvider2;
 
-    public enum State {
-        IDLE, START_HOME_GRABBER, HOMING_GRABBER, READY, OVERCURRENT
+    public static enum State {
+        IDLE, START_HOME_GRABBER, HOMING_GRABBER, READY, OVERCURRENT, DROPPING
     }
 
     static State state = State.START_HOME_GRABBER;
@@ -54,24 +56,15 @@ public class GrabberDefaultCommand extends CommandBase {
         grabberSubsystem.lastGrabberStopPosition = grabberSubsystem.getGrabberPos();
         logf("Default Grabber Init\n");
         avg.init();
-        state = State.START_HOME_GRABBER;
+        state = State.READY;
     }
+    
+    
 
     @Override
     public void execute() {
         double avgCurrent = Math.abs(avg.add(grabberSubsystem.getStatorCurrent()));
-        if (state == State.START_HOME_GRABBER) {
-            grabberSubsystem.setGrabberPower(0.6);
-            state = State.HOMING_GRABBER;
-        }
-        if (state == State.HOMING_GRABBER) {
-            if (avgCurrent > CURRENT_THRESHOLD) {
-                state = State.READY;
-                grabberSubsystem.zeroEncoder();
-                grabberSubsystem.setGrabberPower(0);
-                logf("Grabber Homed %.2f\n", avgCurrent);
-            }
-        }
+        
         if (grabberSubsystem.getForwardLimitSwitch()) {
             grabberSubsystem.zeroEncoder();
         }
@@ -83,31 +76,40 @@ public class GrabberDefaultCommand extends CommandBase {
             SmartDashboard.putNumber("Pres PL", presentPowerLevel);
         }
         if (state == State.READY) {
-            //double currentTime = RobotController.getFPGATime() / 1000;
-            if (avgCurrent > CURRENT_THRESHOLD) { //} && currentTime - GrabberSubsystem.startGrab > 20) {
-                logf("Current %.2f found to be large\n", avgCurrent);
+            if (avgCurrent > CURRENT_THRESHOLD) {
+                timer = RobotController.getFPGATime() / 1000;
                 state = State.OVERCURRENT;
-                lastPowerLevel = grabberSubsystem.getLastPowerLevel();
-                grabberSubsystem.setGrabberPower(0);
             }
         }
         if (state == State.OVERCURRENT) {
-            if (Math.abs(presentPowerLevel) > 0 && avgCurrent < 2.0) {
-                grabberSubsystem.setGrabberPower(presentPowerLevel);
+           if (timer + 3000 < RobotController.getFPGATime() / 1000) {
+                grabberSubsystem.setGrabberPower(0);
                 state = State.READY;
-                logf("Set New Power Level  %.2f after over current lastest %.2f\n", presentPowerLevel, avgCurrent);
-            }
+           }
+        }
 
+        if (state == State.DROPPING) {
+            System.out.println("dropping");
+            if (timer + 4000 < RobotController.getFPGATime() / 1000) {
+                grabberSubsystem.setGrabberPower(0);
+                state = State.READY;
+           }
         }
 
         if (openProvider.getAsBoolean() || openProvider2.getAsBoolean()) {
             grabberSubsystem.setGrabberPower(.8);
         }
         if (closeProvider.getAsBoolean() || closeProvider2.getAsBoolean()) {
-            grabberSubsystem.setGrabberPower(-.8);
+            startDropping();
         }
         if (stopProvider.getAsBoolean() || stopProvider2.getAsBoolean()) {
             grabberSubsystem.setGrabberPower(0);
         }
+    }
+
+    public static void startDropping() {
+        grabberSubsystem.setGrabberPower(-.8);
+        timer = RobotController.getFPGATime() / 1000;
+        state = State.DROPPING;
     }
 }

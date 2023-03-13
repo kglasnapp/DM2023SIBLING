@@ -128,10 +128,10 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void setShoulderSpeed(double speed) {
         if (speed == 0) {
-            //shoulderMotor.set(ControlMode.Disabled, 0);
+            shoulderMotor.set(ControlMode.Disabled, 0);
             System.out.println("Setting velocity to zero (((()))))))");
             //shoulderMotor.selectProfileSlot(EXTENDER_MOTOR_ID, DEVICE_NUMBER);
-            shoulderMotor.set(ControlMode.Velocity, 0);        
+            // shoulderMotor.set(ControlMode.Velocity, 0);        
             //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else {
             shoulderMotor.set(ControlMode.PercentOutput, speed);
@@ -237,8 +237,7 @@ public class ArmSubsystem extends SubsystemBase {
         //     // setShoulderVelocity(0.3);
         //     return;
         // }
-
-        
+        double positionShl = getShoulderPos();
         // Display Shoulder Data
         if (Robot.count % 15 == 5) {
             double current = shoulderMotor.getStatorCurrent();
@@ -246,9 +245,9 @@ public class ArmSubsystem extends SubsystemBase {
             boolean forwardLimit = getForwardLimitSwitch(shoulderMotor);
             SmartDashboard.putBoolean("ShlForL", forwardLimit);
             boolean reverseLimit = getReverseLimitSwitch(shoulderMotor);
-            SmartDashboard.putBoolean("ShlRevL", reverseLimit);
-            double position = getShoulderPos();
-            SmartDashboard.putNumber("ShlPos", position);
+            SmartDashboard.putBoolean("ShlRevL", reverseLimit);           
+            SmartDashboard.putNumber("ShlPos", positionShl);
+            // logf("Shoulder pos: %.1f \n", positionShl);
         }
 
         // Display Eextender Data
@@ -259,8 +258,8 @@ public class ArmSubsystem extends SubsystemBase {
             SmartDashboard.putBoolean("ExtForL", forwardLimit);
             boolean reverseLimit = getReverseLimitSwitch(extenderMotor);
             SmartDashboard.putBoolean("ExtRevL", reverseLimit);
-            double position = getExtenderPos();
-            SmartDashboard.putNumber("ExtPos", position);
+            double positionExt = getExtenderPos();
+            SmartDashboard.putNumber("ExtPos", positionExt);
         }
 
         // if (RobotContainer.mrKeith) {

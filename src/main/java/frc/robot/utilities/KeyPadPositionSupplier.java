@@ -30,9 +30,9 @@ public class KeyPadPositionSupplier implements Supplier<Pose2d> {
         new Pose2d(new Translation2d(1.72, 4.126), new Rotation2d(Math.toRadians(180))),
 
         // tag id 2, 7
-        new Pose2d(new Translation2d(1.72, 4.722), new Rotation2d(Math.toRadians(180))),
-        new Pose2d(new Translation2d(1.72, 5.262), new Rotation2d(Math.toRadians(180))),        
-        new Pose2d(new Translation2d(1.72, 5.802), new Rotation2d(Math.toRadians(180))), 
+        new Pose2d(new Translation2d(1.72, 4.58), new Rotation2d(Math.toRadians(180))),
+        new Pose2d(new Translation2d(1.72, 5.24), new Rotation2d(Math.toRadians(180))),        
+        new Pose2d(new Translation2d(1.72, 5.76), new Rotation2d(Math.toRadians(180))), 
         
          // tag id 1, 8
          new Pose2d(new Translation2d(1.72, 6.398), new Rotation2d(Math.toRadians(180))),        

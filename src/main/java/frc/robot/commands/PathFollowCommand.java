@@ -98,7 +98,7 @@ public class PathFollowCommand extends CommandBase {
 
   @Override
   public void execute() {
-    logf("executing path follow command\n");
+    // logf("executing path follow command\n");
     double currentTime = RobotController.getFPGATime();
     Trajectory.State goal = trajectory.sample((currentTime - initialTime) / 1000000);
 
