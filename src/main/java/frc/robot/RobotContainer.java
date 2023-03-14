@@ -302,7 +302,7 @@ public class RobotContainer {
    // m_controller2.x().whileTrue(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator, 
    //     new Pose2d(2.29, 7, new Rotation2d(Math.toRadians(180)))));
       //new ShouldeCommand(m_armSubsystem, 241000));
-   m_controller2.x().whileTrue(new GrabberCommand(grabberSubsystem, true).andThen(new ShoulderCommand(m_armSubsystem, 195500)));
+   m_controller2.x().whileTrue(new GrabberCommand(grabberSubsystem, false).andThen(new ShoulderCommand(m_armSubsystem, 195500)));
 
 
 
@@ -386,8 +386,9 @@ public class RobotContainer {
 
   CommandBase getCommandFor(int pos) {
     double extenderGoals[] = new double[] {
-        180000, 45000, 0
+        190000, 45000, 0
     };
+
     /**
      * The shoulder command goes up, then the extender command goes, after that the
      * shoulder command goes down.
@@ -424,9 +425,9 @@ public class RobotContainer {
             getPoseEstimatorForTarget(poseEstimator, pos),
             new KeyPadPositionSupplier(pos)),
             new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
-            // .andThen(new DriveCommand(m_drivetrainSubsystem, -0.2, 0, 0))
-            // .andThen(new WaitCommand(1))
-            // .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0))
+            .andThen(new DriveCommand(m_drivetrainSubsystem, -0.2, 0, 0))
+            .andThen(new WaitCommand(1))
+            .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0))
             .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
             .andThen(new ShoulderCommand(m_armSubsystem, shoulderGoals[1][pos / 3])))
         .finallyDo(new BooleanConsumer() {
@@ -474,7 +475,7 @@ public class RobotContainer {
  
   CommandBase getCommandForAutonomous(int pos) {
     double extenderGoals[] = new double[] {
-        201000, 45000, 0
+        1250000, 45000, 0
     };
     /**
      * The shoulder command goes up, then the extender command goes, after that the
@@ -488,8 +489,8 @@ public class RobotContainer {
      * phase1: up, middle, floor
      */
     double shoulderGoals[][] = new double[][] {
-        new double[] { 220000, 185000, 73000 },
-        new double[] { 195000, 170000, 73000 },
+        new double[] { 250000, 185000, 67000 },
+        new double[] { 215000, 138000, 67000 },
     };
     return new CommandBase() {
       @Override
