@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
+
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -27,6 +29,7 @@ public class BalanceCommand extends CommandBase {
 
     public BalanceCommand(DrivetrainSubsystem drivetrainSubsystem) {
         this.drivetrainSubsystem = drivetrainSubsystem;
+        SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL; 
         addRequirements(drivetrainSubsystem);
         xController.setTolerance(2);
         yController.setTolerance(2);

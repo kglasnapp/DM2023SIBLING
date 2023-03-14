@@ -12,7 +12,9 @@ public class SwerveModuleFactory<DriveConfiguration, SteerConfiguration> {
     private final ModuleConfiguration moduleConfiguration;
     private final DriveControllerFactory<?, DriveConfiguration> driveControllerFactory;
     private final SteerControllerFactory<?, SteerConfiguration> steerControllerFactory;
-public static double powerRatio = 5;
+    
+    public static double powerRatio = SwerveModuleFactory.TURBO;
+    
     public SwerveModuleFactory(ModuleConfiguration moduleConfiguration,
             DriveControllerFactory<?, DriveConfiguration> driveControllerFactory,
             SteerControllerFactory<?, SteerConfiguration> steerControllerFactory) {

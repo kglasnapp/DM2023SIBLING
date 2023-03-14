@@ -129,7 +129,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void setShoulderSpeed(double speed) {
         if (speed == 0) {
             shoulderMotor.set(ControlMode.Disabled, 0);
-            System.out.println("Setting velocity to zero (((()))))))");
+            //System.out.println("Setting velocity to zero (((()))))))");
             //shoulderMotor.selectProfileSlot(EXTENDER_MOTOR_ID, DEVICE_NUMBER);
             // shoulderMotor.set(ControlMode.Velocity, 0);        
             //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();

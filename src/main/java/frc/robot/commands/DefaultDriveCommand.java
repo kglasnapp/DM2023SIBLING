@@ -26,18 +26,18 @@ public class DefaultDriveCommand extends CommandBase {
     private final DoubleSupplier m_translationXSupplier;
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
-    private final CommandXboxController controller;
+    private final BooleanSupplier precisionActivator;
 
     public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
             DoubleSupplier translationXSupplier,
             DoubleSupplier translationYSupplier,
             DoubleSupplier rotationSupplier,
-            CommandXboxController controller) {
+            BooleanSupplier precisionActivator) {
         this.m_drivetrainSubsystem = drivetrainSubsystem;
         this.m_translationXSupplier = translationXSupplier;
         this.m_translationYSupplier = translationYSupplier;
         this.m_rotationSupplier = rotationSupplier;
-        this.controller = controller;
+        this.precisionActivator = precisionActivator;
         addRequirements(drivetrainSubsystem);
     }
 
@@ -46,18 +46,12 @@ public class DefaultDriveCommand extends CommandBase {
         // You can use `new ChassisSpeeds(...)` for robot-oriented movement instead of
         // field-oriented movement
         if (!autonomous) {
-            if (controller.leftStick().getAsBoolean()) {
+            if (precisionActivator.getAsBoolean()) {
                 SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
             } else if (SwerveModuleFactory.powerRatio == SwerveModuleFactory.NORMAL) {
                 SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
             }
-            // if (controller.povDown().getAsBoolean()) {
-            //     SwerveModuleFactory.powerRatio = SwerveModuleFactory.PRECISION;
-            // }
-
-            if (controller.povUp().getAsBoolean()) {
-                SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
-            }
+            
         }
         m_drivetrainSubsystem.drive(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
