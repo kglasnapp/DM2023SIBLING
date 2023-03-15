@@ -288,7 +288,7 @@ public class RobotContainer {
 
     // controller 2 a = zero the arm
     m_controller2.a()
-        .whileTrue(new ZeroExtenderCommand(m_armSubsystem).andThen(new ShoulderCommand(m_armSubsystem, 0)));
+        .whileTrue(new ZeroExtenderCommand(m_armSubsystem).andThen(new ZeroShoulderCommand(m_armSubsystem)));
     // controller 2 y = pick up from floor position
     // m_controller2.y().whileTrue(new ShoulderCommand(m_armSubsystem, 60352)
     //     .andThen(new GrabberCommand(grabberSubsystem, true))
@@ -354,6 +354,7 @@ public class RobotContainer {
             .finallyDo(new BooleanConsumer() {
               public void accept(boolean value) {
                 DefaultDriveCommand.autonomous = false;
+                SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
               }
             }));
   }
