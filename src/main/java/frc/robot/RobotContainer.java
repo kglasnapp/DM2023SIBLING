@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.BalanceCommand;
+import frc.robot.commands.ChangeNormalModeCommand;
 import frc.robot.commands.ChangeTurboModeCommand;
 import frc.robot.commands.ConeAlignCommand;
 import frc.robot.commands.DefaultArmCommand;
@@ -390,6 +391,8 @@ public class RobotContainer {
         190000, 45000, 0
     };
 
+    
+
     /**
      * The shoulder command goes up, then the extender command goes, after that the
      * shoulder command goes down.
@@ -426,7 +429,7 @@ public class RobotContainer {
             getPoseEstimatorForTarget(poseEstimator, pos),
             new KeyPadPositionSupplier(pos)),
             new ShoulderCommand(m_armSubsystem, shoulderGoals[0][pos / 3]))
-            .andThen(new DriveCommand(m_drivetrainSubsystem, -0.2, 0, 0))
+            .andThen(new DriveCommand(m_drivetrainSubsystem, 0.2, 0, 0))
             .andThen(new WaitCommand(1))
             .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0))
             .andThen(new ExtenderCommand(m_armSubsystem, extenderGoals[pos / 3]))
@@ -563,8 +566,8 @@ public class RobotContainer {
 
     }.andThen(
       getCommandForAutonomous(pos))
-        .andThen(new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, Math.toRadians(180)))
-        .andThen(new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, Math.toRadians(180)))
+        .andThen(new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, (180)))
+        .andThen(new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, (180)))
         .andThen(new GrabberCommand(grabberSubsystem, true))
         .andThen(new WaitCommand(2))
         .andThen(new ZeroExtenderCommand(m_armSubsystem))
@@ -587,7 +590,7 @@ public class RobotContainer {
     } else {
       if (state == 0) {
         return new Pose2d(6.4,
-        3.096,
+        1.096, // just changed this value at 4:54
             new Rotation2d(Math.toRadians(180)));
       } else {
         return new Pose2d(6.4,
@@ -598,7 +601,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommandCase2Red() {
-    CommandBase command =  new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, Math.toRadians(180))
+    CommandBase command =  new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand,(180))
     .andThen(new GrabberCommand(grabberSubsystem, false))
     .andThen(new KeyPadStateCommand(1))
     .andThen(getCommandFor(1))
@@ -609,7 +612,10 @@ public class RobotContainer {
       new Pose2d(new Translation2d(2.1, 5.24), new Rotation2d(Math.toRadians(180)))
     ))
     .andThen(new ZeroShoulderCommand(m_armSubsystem)) 
-    //.andThen(new ChangeTurboModeCommand())
+    .andThen(new ChangeTurboModeCommand())
+    .andThen(new DriveCommand(m_drivetrainSubsystem, -1,0,0))
+    .andThen(new WaitCommand(0.5))
+    .andThen(new ChangeNormalModeCommand())
     .andThen(new DriveCommand(m_drivetrainSubsystem, -1,0,0))
     .andThen(new WaitCommand(3))
     // .andThen(new DriveCommand(m_drivetrainSubsystem, -0.05,0,0))        
@@ -621,7 +627,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommandCase2Blue() {
-    CommandBase command =  new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, Math.toRadians(180))
+    CommandBase command =  new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, (180))
     .andThen(new GrabberCommand(grabberSubsystem, false))
     .andThen(new KeyPadStateCommand(1))
     .andThen(getCommandFor(1))
