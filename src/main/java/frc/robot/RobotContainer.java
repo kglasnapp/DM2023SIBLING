@@ -110,7 +110,7 @@ public class RobotContainer {
   public RobotContainer() {
 
     // A chooser for autonomous commands
-
+    autonomousChooser.setDefaultOption("Simple Case", getAutonomousSimpleCommand());
     // Add commands to the autonomous command chooser
     autonomousChooser.setDefaultOption("Case 1  left",
         getAutonomousCommandCase1(0).andThen(new StraightPathCommand(m_drivetrainSubsystem, 
@@ -529,6 +529,17 @@ public class RobotContainer {
   Trigger getKeyPadControllerButton(int buttonId) {
     return keyPadController.button(buttonId + 1, CommandScheduler.getInstance().getDefaultButtonLoop())
         .castTo(Trigger::new);
+  }
+
+  Command getAutonomousSimpleCommand() {
+    return new GrabberCommand(grabberSubsystem, false)
+      .andThen(new ShoulderCommand(m_armSubsystem, 4000000))
+      .andThen(new ExtenderCommand(m_armSubsystem, 400000000))
+      .andThen(new WaitCommand(1))
+      .andThen(new GrabberCommand(grabberSubsystem, true))
+      .andThen(new WaitCommand(1))
+      .andThen(new ZeroExtenderCommand(m_armSubsystem))
+      .andThen(new ZeroShoulderCommand(m_armSubsystem));
   }
 
   /**
