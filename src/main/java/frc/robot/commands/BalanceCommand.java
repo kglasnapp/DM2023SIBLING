@@ -45,8 +45,7 @@ public class BalanceCommand extends CommandBase {
     @Override
     public void initialize() {
         xController.reset(drivetrainSubsystem.m_navx.getRoll());
-        yController.reset(drivetrainSubsystem.m_navx.getPitch());
-        
+        yController.reset(drivetrainSubsystem.m_navx.getPitch());        
     }
 
     @Override

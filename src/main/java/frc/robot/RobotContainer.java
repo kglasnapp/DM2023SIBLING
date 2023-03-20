@@ -46,7 +46,7 @@ import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GrabberCommand;
 import frc.robot.commands.GrabberDefaultCommand;
 import frc.robot.commands.KeyPadStateCommand;
-
+import frc.robot.commands.RobotOrientedDriveCommand;
 import frc.robot.commands.ShoulderCommand;
 import frc.robot.commands.StraightPathCommand;
 import frc.robot.commands.ZeroExtenderCommand;
@@ -60,6 +60,7 @@ import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.FieldConstants.Community;
 import frc.robot.subsystems.FieldConstants.StagingLocations;
+import frc.robot.utilities.AutonomousCommandFactory;
 import frc.robot.utilities.KeyPadPositionSupplier;
 import frc.robot.utilities.PiecePickerPoseProvider;
 
@@ -110,15 +111,22 @@ public class RobotContainer {
   public RobotContainer() {
 
     // A chooser for autonomous commands
-    autonomousChooser.setDefaultOption("Simple Case", getAutonomousSimpleCommand());
+    autonomousChooser.setDefaultOption("Simple Case", 
+        AutonomousCommandFactory.getAutonomousSimpleCommand(m_armSubsystem, grabberSubsystem));
+    autonomousChooser.addOption("Simple Case and Left out", 
+        AutonomousCommandFactory.getAutonomousSimpleAndLeftOutCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem));
+    autonomousChooser.addOption("Simple Case and Right out", 
+        AutonomousCommandFactory.getAutonomousSimpleAndRightOutCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem));
+    
+    
     // Add commands to the autonomous command chooser
-    autonomousChooser.setDefaultOption("Case 1  left",
+    autonomousChooser.addOption("Case 1  left",
         getAutonomousCommandCase1(0).andThen(new StraightPathCommand(m_drivetrainSubsystem, 
                                                                            getPoseEstimatorForTarget(poseEstimator, 2),
             getFinalPoseForCase1(0))));
 
-    autonomousChooser.setDefaultOption("Case 1  middle", getAutonomousCommandCase1(1));
-    autonomousChooser.setDefaultOption("CaSe 1  right", getAutonomousCommandCase1(2)
+    autonomousChooser.addOption("Case 1  middle", getAutonomousCommandCase1(1));
+    autonomousChooser.addOption("CaSe 1  right", getAutonomousCommandCase1(2)
         .andThen(new StraightPathCommand(m_drivetrainSubsystem, getPoseEstimatorForTarget(poseEstimator, 0),
             getFinalPoseForCase1(2))));
 
@@ -181,13 +189,13 @@ public class RobotContainer {
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((m_controller.getRightX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        m_controller2.y()));
+        m_controller2.leftBumper()));
 
     // TODO: to change the turbo, change the x() above
     m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
         () -> (RobotContainer.getLeftBumper() ? -1 : 1) * RobotContainer.getLeftTrigger(),
         () -> (RobotContainer.getRightBumper() ? -1 : 1) * RobotContainer.getRightTrigger(),
-        () -> (RobotContainer.getLeftBumper2() ? -1 : 1) * RobotContainer.getLeftTrigger2(),
+        () -> RobotContainer.getLeftTrigger2(),
         () -> (RobotContainer.getRightBumper2() ? -1 : 1) * RobotContainer.getRightTrigger2()));
     // Configure the button bindings
     configureButtonBindings();
@@ -286,6 +294,9 @@ public class RobotContainer {
         .andThen(new WaitCommand(1))
         .andThen(new ShoulderCommand(m_armSubsystem, 37352))
         .andThen(new ExtenderCommand(m_armSubsystem, 91000))));
+
+        m_controller2.y().onTrue(new RobotOrientedDriveCommand(m_drivetrainSubsystem, 
+           -5, 0, 0, 4000));
 
     // controller 2 a = zero the arm
     m_controller2.a()
@@ -530,17 +541,8 @@ public class RobotContainer {
     return keyPadController.button(buttonId + 1, CommandScheduler.getInstance().getDefaultButtonLoop())
         .castTo(Trigger::new);
   }
-
-  Command getAutonomousSimpleCommand() {
-    return new GrabberCommand(grabberSubsystem, false)
-      .andThen(new ShoulderCommand(m_armSubsystem, 4000000))
-      .andThen(new ExtenderCommand(m_armSubsystem, 400000000))
-      .andThen(new WaitCommand(1))
-      .andThen(new GrabberCommand(grabberSubsystem, true))
-      .andThen(new WaitCommand(1))
-      .andThen(new ZeroExtenderCommand(m_armSubsystem))
-      .andThen(new ZeroShoulderCommand(m_armSubsystem));
-  }
+ 
+  
 
   /**
    * the state can be 0, 1, or 2. It means the position where the robot is setup
@@ -628,7 +630,7 @@ public class RobotContainer {
     .andThen(new WaitCommand(0.5))
     .andThen(new ChangeNormalModeCommand())
     .andThen(new DriveCommand(m_drivetrainSubsystem, -1,0,0))
-    .andThen(new WaitCommand(3))
+    .andThen(new WaitCommand(2.5))
     // .andThen(new DriveCommand(m_drivetrainSubsystem, -0.05,0,0))        
     // .andThen(new WaitCommand(2))
     .andThen(new DriveCommand(m_drivetrainSubsystem, 0,0,0));     
@@ -649,12 +651,15 @@ public class RobotContainer {
       new Pose2d(new Translation2d(2.1, KeyPadPositionSupplier.FIELD_WIDTH - 5.24), new Rotation2d(Math.toRadians(180)))
     ))
     .andThen(new ZeroShoulderCommand(m_armSubsystem)) 
-    //.andThen(new ChangeTurboModeCommand())
+    .andThen(new ChangeTurboModeCommand())
     .andThen(new DriveCommand(m_drivetrainSubsystem, -1,0,0))
-    .andThen(new WaitCommand(3))
+    .andThen(new WaitCommand(0.5))
+    .andThen(new ChangeNormalModeCommand())
+    .andThen(new DriveCommand(m_drivetrainSubsystem, -1,0,0))
+    .andThen(new WaitCommand(2.5))
     // .andThen(new DriveCommand(m_drivetrainSubsystem, -0.05,0,0))        
     // .andThen(new WaitCommand(2))
-    .andThen(new DriveCommand(m_drivetrainSubsystem, 0,0,0));      
+    .andThen(new DriveCommand(m_drivetrainSubsystem, 0,0,0));     
     // .andThen(new BalanceCommand(m_drivetrainSubsystem))
     command.setName("Case 2 blue");
     return command;

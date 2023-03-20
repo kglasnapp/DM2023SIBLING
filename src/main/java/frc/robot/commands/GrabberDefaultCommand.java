@@ -89,7 +89,6 @@ public class GrabberDefaultCommand extends CommandBase {
         }
 
         if (state == State.DROPPING) {
-            System.out.println("dropping");
             if (timer + 4000 < RobotController.getFPGATime() / 1000) {
                 grabberSubsystem.setGrabberPower(0);
                 state = State.READY;
