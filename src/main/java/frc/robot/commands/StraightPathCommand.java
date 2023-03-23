@@ -23,9 +23,9 @@ public class StraightPathCommand extends CommandBase {
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
     private static final TrapezoidProfile.Constraints OMEGA_CONSTRATINTS = new TrapezoidProfile.Constraints(
             Math.toRadians(180), Math.toRadians(180));
-    private final ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(1, 0, 0, Y_CONSTRAINTS);
-    private final ProfiledPIDController omegaController = new ProfiledPIDController(1, 0, 0, OMEGA_CONSTRATINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(0.5, 0, 0, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(0.5, 0, 0, Y_CONSTRAINTS);
+    private final ProfiledPIDController omegaController = new ProfiledPIDController(0.5, 0, 0, OMEGA_CONSTRATINTS);
     private final Supplier<Pose2d> poseProvider;
     Pose2d initialPose;
     Supplier<Pose2d> destinationProvider;
@@ -65,7 +65,7 @@ public class StraightPathCommand extends CommandBase {
         xController.reset(initialPose.getX());
         yController.reset(initialPose.getY());
         logf("Init Path Follow pose:<%.2f,%.2f,%.2f>\n", initialPose.getX(), initialPose.getY(),
-                initialPose.getRotation().getDegrees());
+                initialPose.getRotation().getDegrees());                
     }
 
     double getIntermediateGoal(double endPosition, double initialPosition, double targetTime, double currentTime) {

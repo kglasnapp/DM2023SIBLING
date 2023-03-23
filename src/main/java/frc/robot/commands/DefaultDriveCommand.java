@@ -4,11 +4,12 @@ package frc.robot.commands;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Robot;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
+import static frc.robot.utilities.Util.logf;
 import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
 
 public class DefaultDriveCommand extends CommandBase {
@@ -51,7 +52,14 @@ public class DefaultDriveCommand extends CommandBase {
             } else if (SwerveModuleFactory.powerRatio == SwerveModuleFactory.NORMAL) {
                 SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
             }
-            
+
+        }
+        if (Robot.count % 20 == 0) {
+            if (m_translationXSupplier.getAsDouble() != 0 &&
+                    m_translationYSupplier.getAsDouble() != 0) {
+                logf("Robot Oriented Speed X: %.2f y:%.2f angle:%.2f\n", m_translationXSupplier.getAsDouble(),
+                        m_translationYSupplier.getAsDouble(), m_rotationSupplier.getAsDouble());
+            }
         }
         m_drivetrainSubsystem.drive(
                 ChassisSpeeds.fromFieldRelativeSpeeds(

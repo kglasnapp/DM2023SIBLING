@@ -4,6 +4,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import static frc.robot.utilities.Util.logf;
 
 public class RobotOrientedDriveCommand extends CommandBase {
 
@@ -28,16 +29,17 @@ public class RobotOrientedDriveCommand extends CommandBase {
     @Override
     public void initialize() {
         initTime = RobotController.getFPGATime()/1000;
-        
+        logf("Robot Oriented Speed X: %.4f y:%.4f angle:%.4f\n", xSpeed, ySpeed, angleSpeed);
+         drivetrainSubsystem.drive(
+            new ChassisSpeeds(
+                        xSpeed,
+                        ySpeed,
+                        angleSpeed)); 
     }
 
     @Override
     public void execute() {
-        drivetrainSubsystem.drive(
-            new ChassisSpeeds(
-                        xSpeed,
-                        ySpeed,
-                        angleSpeed));                        
+                              
         isFinished = true;
     }
 

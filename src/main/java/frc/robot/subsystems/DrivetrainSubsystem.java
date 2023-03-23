@@ -86,7 +86,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   // FIXed Remove if you are using a Pigeon
   // private final PigeonIMU m_pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
   // FIXed Uncomment if you are using a NavX
-  public final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
+  public final AHRS m_navx = new AHRS(); // NavX connected over MXP
 
   // These are our modules. We initialize them in the constructor.
   private final SwerveModule m_frontLeftModule;
@@ -190,7 +190,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     // FIXed Uncomment if you are using a NavX
     System.out.println("zero Gyro");
-
+    currentOrientation = 0;
     if (m_navx.isMagnetometerCalibrated()) {
       // // We will only get valid fused headings if the magnetometer is calibrated
       // System.out.println("returning the angle FUSE ZERO from the robot:
@@ -221,13 +221,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
       zeroNavx = 0;
     }
     
-    zeroNavx+=currentOrientation;
+    this.currentOrientation = currentOrientation;
     
     // m_navx.reset();
     m_navx.zeroYaw();
   }
 
-
+  double currentOrientation = 0.0;
   double zeroNavx = 0.0;
 
   public Rotation2d getGyroscopeRotation() {
@@ -239,7 +239,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // // We will only get valid fused headings if the magnetometer is calibrated
       // System.out.println("returning the angle FUSE ZERO from the robot:
       // "+m_navx.getAngle());
-      return Rotation2d.fromDegrees(-m_navx.getFusedHeading() + zeroNavx);
+      
+      return Rotation2d.fromDegrees(-m_navx.getFusedHeading() + zeroNavx + currentOrientation);
     }
     //
     // // We have to invert the angle of the NavX so that rotating the robot
@@ -248,7 +249,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // TODO we may need to better caliabrate the NAVX due to the fact we are executing this code
     // KAG System.out.println("returning the angle from the robot: " + m_navx.getAngle());
     // WE may need to fix this and 
-    return Rotation2d.fromDegrees(-m_navx.getYaw());
+    
+    return Rotation2d.fromDegrees(-m_navx.getYaw() + currentOrientation);
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
