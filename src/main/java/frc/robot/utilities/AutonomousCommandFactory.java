@@ -1,18 +1,26 @@
 package frc.robot.utilities;
 
+import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.BalanceCommand;
+import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GrabberCommand;
 import frc.robot.commands.RobotOrientedDriveCommand;
 import frc.robot.commands.ShoulderCommand;
+import frc.robot.commands.StraightPathCommand;
 import frc.robot.commands.ZeroExtenderCommand;
 import frc.robot.commands.ZeroShoulderCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.PoseEstimatorAggregator;
 
 public class AutonomousCommandFactory {
 
@@ -43,7 +51,61 @@ public class AutonomousCommandFactory {
           .andThen(new GrabberCommand(grabberSubsystem, true))
           .andThen(new WaitCommand(1))
           .andThen(new ZeroExtenderCommand(m_armSubsystem))
-          .andThen(new ZeroShoulderCommand(m_armSubsystem))
-          .andThen(new BalanceCommand(m_drivetrainSubsystem));
+          .andThen(new ZeroShoulderCommand(m_armSubsystem));
       } 
+
+      public static Command getSetPositionAndBalanceCommand(DrivetrainSubsystem m_drivetrainSubsystem,
+                                                            PoseEstimatorAggregator poseEstimator) {
+        return new CommandBase() {
+          @Override
+          public void initialize() {
+            DefaultDriveCommand.autonomous = true;
+            SwerveModule.powerRatio = SwerveModule.NORMAL;
+          }
+    
+          @Override
+          public boolean isFinished() {
+            return true;
+          }
+    
+        }.andThen(
+        new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+        new Pose2d(2.0, 5.21, new Rotation2d(Math.toRadians(177)))))
+        .andThen(new CommandBase() {
+          @Override
+          public void initialize() {
+            DefaultDriveCommand.autonomous = false;
+            SwerveModule.powerRatio = SwerveModule.TURBO;
+          }
+    
+          @Override
+          public boolean isFinished() {
+            return true;
+          }
+    
+        })
+        .andThen(new BalanceCommand(m_drivetrainSubsystem));
+      }
+
+     public static Command pickupCubeCommand(DrivetrainSubsystem m_drivetrainSubsystem,
+      ArmSubsystem m_armSubsystem, GrabberSubsystem grabberSubsystem,
+      PoseEstimatorAggregator poseEstimator) {
+        return new CommandBase() {
+          @Override
+          public void initialize() {
+            DefaultDriveCommand.autonomous = true;
+            SwerveModule.powerRatio = SwerveModule.NORMAL;
+          }
+    
+          @Override
+          public boolean isFinished() {
+            return true;
+          }
+        }.andThen(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+        new Pose2d(2, 6.28, new Rotation2d(Math.toRadians(180)))))
+        .andThen(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+        new Pose2d(6.84, 6.28, new Rotation2d(Math.toRadians(0)))))
+        .andThen(new ShoulderCommand(m_armSubsystem, 32400))
+        .andThen(new ExtenderCommand(m_armSubsystem, 3500));
+      }
 }

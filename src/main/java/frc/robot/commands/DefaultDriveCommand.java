@@ -1,16 +1,17 @@
 package frc.robot.commands;
 
-//import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Robot;
-import frc.robot.subsystems.DrivetrainSubsystem;
+import static frc.robot.utilities.Util.logf;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import static frc.robot.utilities.Util.logf;
-import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+//import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Robot;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.utilities.SwerveModule;
 
 public class DefaultDriveCommand extends CommandBase {
 
@@ -46,11 +47,12 @@ public class DefaultDriveCommand extends CommandBase {
     public void execute() {
         // You can use `new ChassisSpeeds(...)` for robot-oriented movement instead of
         // field-oriented movement
+        
         if (!autonomous) {
             if (precisionActivator.getAsBoolean()) {
-                SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
-            } else if (SwerveModuleFactory.powerRatio == SwerveModuleFactory.NORMAL) {
-                SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
+                SwerveModule.powerRatio = SwerveModule.NORMAL;
+            } else if (SwerveModule.powerRatio == SwerveModule.NORMAL) {
+                SwerveModule.powerRatio = SwerveModule.TURBO;
             }
 
         }

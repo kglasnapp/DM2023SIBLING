@@ -23,8 +23,8 @@ public class StraightPathCommand extends CommandBase {
     private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
     private static final TrapezoidProfile.Constraints OMEGA_CONSTRATINTS = new TrapezoidProfile.Constraints(
             Math.toRadians(180), Math.toRadians(180));
-    private final ProfiledPIDController xController = new ProfiledPIDController(0.5, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(0.5, 0, 0, Y_CONSTRAINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(0.75, 0, 0, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(0.75, 0, 0, Y_CONSTRAINTS);
     private final ProfiledPIDController omegaController = new ProfiledPIDController(0.5, 0, 0, OMEGA_CONSTRATINTS);
     private final Supplier<Pose2d> poseProvider;
     Pose2d initialPose;

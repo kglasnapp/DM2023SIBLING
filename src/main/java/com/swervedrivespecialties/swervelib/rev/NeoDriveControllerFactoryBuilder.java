@@ -59,7 +59,7 @@ public final class NeoDriveControllerFactoryBuilder {
 
             // Setup encoder
             RelativeEncoder encoder = motor.getEncoder();
-            // TODO Code to set the position converstion factor 
+            
             double positionConversionFactor = Math.PI * moduleConfiguration.getWheelDiameter()
                     * moduleConfiguration.getDriveReduction();
             encoder.setPositionConversionFactor(positionConversionFactor);

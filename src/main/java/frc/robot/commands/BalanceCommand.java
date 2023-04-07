@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.utilities.SwerveModule;
 
 import static frc.robot.utilities.Util.logf;
 
@@ -27,7 +28,8 @@ public class BalanceCommand extends CommandBase {
     double initTime = 0;
 
     public static enum State {
-        FAST_BACK, SLOW_BACK, CHECK_IF_NEED_RETRY, RETRY, BALANCING, LOCK_WHEELS, LOCK_WHEELS_COMPLETE, FINISHED
+        FAST_BACK, SLOW_BACK, CHECK_IF_NEED_RETRY, RETRY, BALANCING, 
+        LOCK_WHEELS, LOCK_WHEELS_COMPLETE, CHECK_BALANCE, FINISHED
     }
 
     static State state = State.FAST_BACK;
@@ -39,7 +41,7 @@ public class BalanceCommand extends CommandBase {
 
     public BalanceCommand(DrivetrainSubsystem drivetrainSubsystem) {
         this.drivetrainSubsystem = drivetrainSubsystem;
-        SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
+        SwerveModule.powerRatio = SwerveModule.NORMAL;
         addRequirements(drivetrainSubsystem);
         xController.setTolerance(2);
         yController.setTolerance(2);
@@ -56,8 +58,7 @@ public class BalanceCommand extends CommandBase {
     public void initialize() {
         zeroGyroscope();
         initTime = RobotController.getFPGATime() / 1000;
-        state = State.FAST_BACK;
-        // 2.41, 3.71, 170degrees 
+        state = State.FAST_BACK;       
     }
 
     @Override
@@ -93,13 +94,33 @@ public class BalanceCommand extends CommandBase {
             return;                                    
         }
         if (state == State.LOCK_WHEELS_COMPLETE) {
-            if (RobotController.getFPGATime() / 1000 - initTime > 100) {
-                state = State.FINISHED;
+            if (RobotController.getFPGATime() / 1000 - initTime > 100) {                
+                state = State.CHECK_BALANCE;
+                initTime = RobotController.getFPGATime() / 1000;
                 drivetrainSubsystem.stop();
             }
         }
+        if (state == State.CHECK_BALANCE) {
+            if (RobotController.getFPGATime() / 1000 - initTime > 800) {                
+                if (Math.abs(roll)<3) {
+                    state = State.FINISHED;
+                } else {
+                    initTime = (RobotController.getFPGATime() / 1000) - 800;
+                    double speed = 0.015;
+                    if (roll < 0) {
+                        speed = -0.015;
+                    }
+                    drivetrainSubsystem.drive(
+                            new ChassisSpeeds(
+                                    speed,
+                                    0,
+                                    0));
+                    state = State.SLOW_BACK;                                    
+                }
+            }
+        }
         if (state == State.SLOW_BACK) {
-            if (RobotController.getFPGATime() / 1000 - initTime > 1600) {
+            if (Math.abs(roll)< 8 || RobotController.getFPGATime() / 1000 - initTime > 1600) {
                 state = State.LOCK_WHEELS;
                 drivetrainSubsystem.drive(
                             new ChassisSpeeds(

@@ -12,7 +12,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Transform3d;
-import static frc.robot.utilities.Util.logf;
 /**
  * This class was created as a way to filter out images where
  * the ambiguity was too high.

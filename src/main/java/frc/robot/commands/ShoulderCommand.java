@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.ArmSubsystem;
 
-import static frc.robot.utilities.Util.logf;
-
 public class ShoulderCommand extends CommandBase {
     /**
      * TOLERACE is the error that we are ok with at the end of the command (in

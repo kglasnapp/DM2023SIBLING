@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * It uses the state to know which set of targets it will go after.
  */
 public class KeyPadPositionSupplier implements Supplier<Pose2d> {
-    public static final double FIELD_WIDTH = 8.0137;
+    public static final double FIELD_WIDTH = 7.8137;
     /**
      * The state can be 0, 1, or 2.
      * 0 is the left most group of 9 nodes. 1 is the center, and 2 is the right most.

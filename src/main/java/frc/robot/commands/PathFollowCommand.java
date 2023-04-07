@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static frc.robot.Util.logf;
+
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -18,7 +20,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import static frc.robot.Util.logf;
 
 public class PathFollowCommand extends CommandBase {
   DrivetrainSubsystem drivetrainSubsystem;
@@ -141,8 +142,8 @@ public class PathFollowCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    double currentTime = RobotController.getFPGATime();
-    var robotPose = poseProvider.get();
+    // double currentTime = RobotController.getFPGATime();
+    // var robotPose = poseProvider.get();
     // logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f>\n", (currentTime - initialTime) / 1000000,
     //     robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
     return xController.atGoal() && yController.atGoal() && omegaController.atGoal();

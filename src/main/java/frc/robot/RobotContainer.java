@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -46,6 +47,7 @@ import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GrabberCommand;
 import frc.robot.commands.GrabberDefaultCommand;
 import frc.robot.commands.KeyPadStateCommand;
+import frc.robot.commands.RotateCommand;
 import frc.robot.commands.RobotOrientedDriveCommand;
 import frc.robot.commands.ShoulderCommand;
 import frc.robot.commands.StraightPathCommand;
@@ -63,6 +65,7 @@ import frc.robot.subsystems.FieldConstants.StagingLocations;
 import frc.robot.utilities.AutonomousCommandFactory;
 import frc.robot.utilities.KeyPadPositionSupplier;
 import frc.robot.utilities.PiecePickerPoseProvider;
+import frc.robot.utilities.SwerveModule;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -87,11 +90,23 @@ public class RobotContainer {
   // ControllerAvg(m_controller);
   private GenericHID keyPadController = new GenericHID(1);
 
+  private Transform3d competitionCamerasTransform[] = {
+    new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()),
+    new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d())
+  };
+
+  private Transform3d siblingCamerasTransform[] = {
+    new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()),
+    new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d())
+  };
+
+  DigitalInput digitalInput = new DigitalInput(0);
+
   private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[] {
       new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
-          new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
+          digitalInput.get()?siblingCamerasTransform[0]:competitionCamerasTransform[0], m_drivetrainSubsystem),
       new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
-          new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d()), m_drivetrainSubsystem),
+          digitalInput.get()?siblingCamerasTransform[1]:competitionCamerasTransform[1], m_drivetrainSubsystem),
   });
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
@@ -112,7 +127,9 @@ public class RobotContainer {
 
     // A chooser for autonomous commands
     autonomousChooser.setDefaultOption("Simple Case",
-        AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem));
+        AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
+        .andThen(AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator))
+      );
     autonomousChooser.addOption("Simple Case and Left out",
         AutonomousCommandFactory.getAutonomousSimpleAndLeftOutCommand(m_drivetrainSubsystem, m_armSubsystem,
             grabberSubsystem));
@@ -177,15 +194,15 @@ public class RobotContainer {
 
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
         m_drivetrainSubsystem,
-        () -> (SwerveModuleFactory.powerRatio == 1 ? -modifyAxis((sLY.calculate(m_controller.getLeftY())))
+        () -> (SwerveModule.powerRatio == 1 ? -modifyAxis((sLY.calculate(m_controller.getLeftY())))
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((m_controller.getLeftY()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        () -> (SwerveModuleFactory.powerRatio == 1 ? -modifyAxis((sLX.calculate(m_controller.getLeftX())))
+        () -> (SwerveModule.powerRatio == 1 ? -modifyAxis((sLX.calculate(m_controller.getLeftX())))
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((m_controller.getLeftX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        () -> (SwerveModuleFactory.powerRatio == 1
+        () -> (SwerveModule.powerRatio == 1
             ? -modifyAxis((sRX.calculate(m_controller.getRightX())))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((m_controller.getRightX()))
@@ -282,7 +299,8 @@ public class RobotContainer {
 
     );
 
-    m_controller.y().whileTrue(new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, 180));
+    m_controller.y().whileTrue(new RotateCommand(m_drivetrainSubsystem));
+      //new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, 180));
     // balanceCommand.andThen(new PrintCommand("Finished Balancing")));
 
     // todo: cone align
@@ -293,36 +311,10 @@ public class RobotContainer {
         .andThen(new ShoulderCommand(m_armSubsystem, 37352))
         .andThen(new ExtenderCommand(m_armSubsystem, 91000))));
 
-    m_controller2.y().whileTrue(
-      new CommandBase() {
-        @Override
-        public void initialize() {
-          DefaultDriveCommand.autonomous = true;
-          SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
-        }
-  
-        @Override
-        public boolean isFinished() {
-          return true;
-        }
-  
-      }.andThen(
-      new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
-      new Pose2d(2.41, 3.50, new Rotation2d(Math.toRadians(170)))))
-      .andThen(new CommandBase() {
-        @Override
-        public void initialize() {
-          DefaultDriveCommand.autonomous = false;
-          SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
-        }
-  
-        @Override
-        public boolean isFinished() {
-          return true;
-        }
-  
-      })
-      .andThen(new BalanceCommand(m_drivetrainSubsystem)));
+    m_controller2.y().whileTrue(AutonomousCommandFactory.pickupCubeCommand(m_drivetrainSubsystem, 
+      m_armSubsystem, grabberSubsystem, poseEstimator));
+      
+    //AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator));
     // new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
     // new Pose2d( poseEstimator.get().getX(), poseEstimator.get().getY(), new
     // Rotation2d(Math.toRadians(160))))
@@ -371,7 +363,7 @@ public class RobotContainer {
       @Override
       public void initialize() {
         DefaultDriveCommand.autonomous = true;
-        SwerveModuleFactory.powerRatio = 3.5;
+        SwerveModule.powerRatio = 3.5;
       }
 
       @Override
@@ -394,7 +386,7 @@ public class RobotContainer {
             .finallyDo(new BooleanConsumer() {
               public void accept(boolean value) {
                 DefaultDriveCommand.autonomous = false;
-                SwerveModuleFactory.powerRatio = SwerveModuleFactory.TURBO;
+                SwerveModule.powerRatio = SwerveModule.TURBO;
               }
             }));
   }
@@ -451,7 +443,7 @@ public class RobotContainer {
       @Override
       public void initialize() {
         DefaultDriveCommand.autonomous = true;
-        SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
+        SwerveModule.powerRatio = SwerveModule.NORMAL;
       }
 
       @Override
@@ -541,7 +533,7 @@ public class RobotContainer {
       @Override
       public void initialize() {
         DefaultDriveCommand.autonomous = true;
-        SwerveModuleFactory.powerRatio = SwerveModuleFactory.NORMAL;
+        SwerveModule.powerRatio = SwerveModule.NORMAL;
       }
 
       @Override

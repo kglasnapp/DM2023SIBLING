@@ -35,22 +35,22 @@ public final class Constants {
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 1; // FIXed Set front left module drive motor ID
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 2; // FIXed Set front left module steer motor ID
     public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 1; // FIXed Set front left steer encoder ID
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(45 + 5 + 180 +10 - 5-6); // FIXed Measure and set front left steer offset
+    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(47.988); //48.340); // FIXed Measure and set front left steer offset
 
     public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 3; // FIXed Set front right drive motor ID
     public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 4; // FIXed Set front right steer motor ID
     public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 3; // FIXed Set front right steer encoder ID
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(64.68 + 5 + 5 + 10 - 5 -6); // FIXed Measure and set front right steer offset
+    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(307.617); //305.859); // FIXed Measure and set front right steer offset
 
     public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 5; // FIXed Set back left drive motor ID
     public static final int BACK_LEFT_MODULE_STEER_MOTOR = 6; // FIXed Set back left steer motor ID
     public static final int BACK_LEFT_MODULE_STEER_ENCODER = 5; // FIXed Set back left steer encoder ID
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(-30 + 45 + 10 + 3 -70 + 12 - 5 ); // FIXed Measure and set back left steer offset
+    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(345.146); //161.543); // FIXed Measure and set back left steer offset
 
     public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 7; // FIXed Set back right drive motor ID
     public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 8; // FIXed Set back right steer motor ID
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 7; // FIXed Set back right steer encoder ID
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(339.16 - 45 + 10 + 180 - 20); // FIXed Measure and set back right steer offset
+    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(281.865); //275.977); // FIXed Measure and set back right steer offset
     public static boolean logging = false;
     public static String robotType = "Swerve";
     public static final int kTimeoutMs = 20;

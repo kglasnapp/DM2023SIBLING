@@ -5,15 +5,10 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 
 public class SwerveModuleFactory<DriveConfiguration, SteerConfiguration> {
 
-    public static double TURBO = 1.25;
-    public static double NORMAL = 5;
-    public static double PRECISION = 10;
-
     private final ModuleConfiguration moduleConfiguration;
     private final DriveControllerFactory<?, DriveConfiguration> driveControllerFactory;
     private final SteerControllerFactory<?, SteerConfiguration> steerControllerFactory;
     
-    public static double powerRatio = SwerveModuleFactory.TURBO;
     
     public SwerveModuleFactory(ModuleConfiguration moduleConfiguration,
             DriveControllerFactory<?, DriveConfiguration> driveControllerFactory,
@@ -102,7 +97,7 @@ public class SwerveModuleFactory<DriveConfiguration, SteerConfiguration> {
                 steerAngle += 2.0 * Math.PI;
             }
             // TODO Adjust the drive train speed
-            driveController.setReferenceVoltage(driveVoltage / powerRatio);
+            driveController.setReferenceVoltage(driveVoltage);
             steerController.setReferenceAngle(steerAngle);
         }
     }
