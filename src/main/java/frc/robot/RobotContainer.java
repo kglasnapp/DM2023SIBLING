@@ -8,8 +8,6 @@ import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
 
-import com.swervedrivespecialties.swervelib.SwerveModuleFactory;
-
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -47,9 +44,11 @@ import frc.robot.commands.ExtenderCommand;
 import frc.robot.commands.GrabberCommand;
 import frc.robot.commands.GrabberDefaultCommand;
 import frc.robot.commands.KeyPadStateCommand;
+import frc.robot.commands.RearGrabberDefaultCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.commands.RobotOrientedDriveCommand;
 import frc.robot.commands.ShoulderCommand;
+import frc.robot.commands.StopGrabberCommand;
 import frc.robot.commands.StraightPathCommand;
 import frc.robot.commands.ZeroExtenderCommand;
 import frc.robot.commands.ZeroGyroCommand;
@@ -60,8 +59,7 @@ import frc.robot.subsystems.GrabberSubsystem;
 
 import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.FieldConstants.Community;
-import frc.robot.subsystems.FieldConstants.StagingLocations;
+import frc.robot.subsystems.RearGrabberSubsystem;
 import frc.robot.utilities.AutonomousCommandFactory;
 import frc.robot.utilities.KeyPadPositionSupplier;
 import frc.robot.utilities.PiecePickerPoseProvider;
@@ -80,6 +78,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+  final DigitalInput digitalInput = new DigitalInput(0);
+  private final RearGrabberSubsystem rearGrabberSubsystem = 
+    digitalInput.get()?new RearGrabberSubsystem():null;
 
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
 
@@ -100,7 +101,7 @@ public class RobotContainer {
     new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d())
   };
 
-  DigitalInput digitalInput = new DigitalInput(0);
+  
 
   private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[] {
       new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
@@ -167,6 +168,9 @@ public class RobotContainer {
         m_controller2.povLeft(),
         m_controller2.povDown()));
 
+    if (rearGrabberSubsystem != null) {
+      rearGrabberSubsystem.setDefaultCommand(new RearGrabberDefaultCommand(rearGrabberSubsystem,  m_controller2));
+    }
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
@@ -295,8 +299,11 @@ public class RobotContainer {
     // m_controller.x().whileTrue(pathFollowCommand);
 
     m_controller.x().whileTrue(
-        getAutonomousCommandCase2Blue()
-
+      //remove autonomous command
+      new ShoulderCommand(m_armSubsystem, 75000)
+      .andThen(new GrabberCommand(grabberSubsystem, true)).andThen(new WaitCommand(0.25))
+      .andThen(new StopGrabberCommand(grabberSubsystem))
+      .andThen((new ZeroExtenderCommand(m_armSubsystem).andThen(new ZeroShoulderCommand(m_armSubsystem))))
     );
 
     m_controller.y().whileTrue(new RotateCommand(m_drivetrainSubsystem));
@@ -311,8 +318,11 @@ public class RobotContainer {
         .andThen(new ShoulderCommand(m_armSubsystem, 37352))
         .andThen(new ExtenderCommand(m_armSubsystem, 91000))));
 
-    m_controller2.y().whileTrue(AutonomousCommandFactory.pickupCubeCommand(m_drivetrainSubsystem, 
-      m_armSubsystem, grabberSubsystem, poseEstimator));
+    m_controller2.y().whileTrue(new ShoulderCommand(m_armSubsystem, 199600));
+
+      //shoulder pos 199600
+      // AutonomousCommandFactory.pickupCubeCommand(m_drivetrainSubsystem, 
+    //   m_armSubsystem, grabberSubsystem, poseEstimator)
       
     //AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator));
     // new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
@@ -747,7 +757,7 @@ public class RobotContainer {
 
   private static double modifyAxis(double value) {
     // Deadband
-    value = deadband(value, 0.05);
+    value = deadband(value, 0.08);
 
     // Square the axis
     value = Math.copySign(value * value, value);

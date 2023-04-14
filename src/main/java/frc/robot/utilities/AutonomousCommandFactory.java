@@ -28,7 +28,7 @@ public class AutonomousCommandFactory {
                                                  ArmSubsystem m_armSubsystem, 
                                                  GrabberSubsystem grabberSubsystem) {
         return getAutonomousSimpleCommand(m_drivetrainSubsystem,m_armSubsystem, grabberSubsystem)
-          .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, 0, -0.02, 0, 750.0))          
+          .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, 0, -0.02, 0, 800.0))          
           .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, -0.02, 0, 0, 5500))          
           .andThen (new RobotOrientedDriveCommand(m_drivetrainSubsystem, 0, 0, 0, 500));
       }
@@ -69,8 +69,10 @@ public class AutonomousCommandFactory {
           }
     
         }.andThen(
-        new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
-        new Pose2d(2.0, 5.21, new Rotation2d(Math.toRadians(177)))))
+        new RobotOrientedDriveCommand(m_drivetrainSubsystem, -0.1, 0, 0, 2000))
+        //comment out drive tpo location then drive straight back instead
+        // new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+        // new Pose2d(2.0, 2.4, new Rotation2d(Math.toRadians(177)))))
         .andThen(new CommandBase() {
           @Override
           public void initialize() {

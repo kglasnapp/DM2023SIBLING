@@ -32,7 +32,7 @@ public class GrabberDefaultCommand extends CommandBase {
         IDLE, START_HOME_GRABBER, HOMING_GRABBER, READY, OVERCURRENT, DROPPING
     }
 
-    static State state = State.START_HOME_GRABBER;
+    public static State state = State.START_HOME_GRABBER;
 
     public GrabberDefaultCommand(GrabberSubsystem grabberSubsystem,
             BooleanSupplier openProvider,

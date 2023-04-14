@@ -77,7 +77,7 @@ public class SwerveModule {
     public static final double angleConversionFactor = 360.0 * angleGearRatio;
 
     /* Swerve Profiling Values */
-    public static final double maxSpeed = 14.5 / 0.305; // meters per second
+    public static final double maxSpeed = 19.5 / 0.305; // meters per second
     public static final double maxAngularVelocity = 11.5;
     
 
@@ -220,7 +220,7 @@ public class SwerveModule {
             double absoluteAngle = getCanCoder().getDegrees();
             integratedAngleEncoder.setPosition(absoluteAngle); 
             // currentAngle = absoluteAngle;           
-            System.out.println("***** Reset Module "+moduleNumber+" angleMotorId = "+angleMotor.getDeviceId()+" absolute angle = "+absoluteAngle+ " integrated angle = "+integratedAngleEncoder.getPosition());
+            //System.out.println("***** Reset Module "+moduleNumber+" angleMotorId = "+angleMotor.getDeviceId()+" absolute angle = "+absoluteAngle+ " integrated angle = "+integratedAngleEncoder.getPosition());
         }
     } else {
         resetIteration = 0;
