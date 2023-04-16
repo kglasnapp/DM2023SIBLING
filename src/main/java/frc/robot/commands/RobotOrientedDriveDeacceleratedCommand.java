@@ -1,12 +1,13 @@
 package frc.robot.commands;
 
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import static frc.robot.utilities.Util.logf;
 
-public class RobotOrientedDriveCommand extends CommandBase {
+public class RobotOrientedDriveDeacceleratedCommand extends CommandBase {
 
     DrivetrainSubsystem drivetrainSubsystem;
     double xSpeed;
@@ -15,14 +16,20 @@ public class RobotOrientedDriveCommand extends CommandBase {
     double duration;
     double initTime = 0;
     boolean isFinished = false;
+    double ax = 0;
+    double ay = 0;
+    double aAngle = 0;
 
-    public RobotOrientedDriveCommand(DrivetrainSubsystem drivetrainSubsystem, double xSpeed, double ySpeed, double angleSpeed,
+    public RobotOrientedDriveDeacceleratedCommand(DrivetrainSubsystem drivetrainSubsystem, double xSpeed, double ySpeed, double angleSpeed,
                                     double duration) {
         this.drivetrainSubsystem = drivetrainSubsystem;
         this.xSpeed = xSpeed;
         this.ySpeed = ySpeed;
         this.angleSpeed = angleSpeed;
         this.duration = duration;
+        ax = xSpeed/duration;
+        ay = ySpeed/duration;
+        aAngle = angleSpeed/duration;
         addRequirements(drivetrainSubsystem);
     }
 
@@ -39,7 +46,13 @@ public class RobotOrientedDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-                             
+        double t = RobotController.getFPGATime()/1000 - initTime;
+        drivetrainSubsystem.drive(
+            new ChassisSpeeds(
+                        xSpeed - ax*t,
+                        ySpeed - ay*t,
+                        angleSpeed - aAngle*t));                       
+        
     }
 
     @Override
@@ -53,3 +66,6 @@ public class RobotOrientedDriveCommand extends CommandBase {
     }
     
 }
+
+
+

@@ -126,16 +126,21 @@ public class RobotContainer {
    */
   public RobotContainer() {
 
+    
+    autonomousChooser.setDefaultOption("Over and Balance",
+    AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
+    .andThen(AutonomousCommandFactory.getOverAndBalanceCommand(m_drivetrainSubsystem, poseEstimator))
+  );
     // A chooser for autonomous commands
-    autonomousChooser.setDefaultOption("Simple Case",
+    autonomousChooser.setDefaultOption("Middle Balance",
         AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
         .andThen(AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator))
       );
     autonomousChooser.addOption("Simple Case and Left out",
-        AutonomousCommandFactory.getAutonomousSimpleAndLeftOutCommand(m_drivetrainSubsystem, m_armSubsystem,
+        AutonomousCommandFactory.getAutonomousAcceleratedAndLeftOutCommand(m_drivetrainSubsystem, m_armSubsystem,
             grabberSubsystem));
     autonomousChooser.addOption("Simple Case and Right out",
-        AutonomousCommandFactory.getAutonomousSimpleAndRightOutCommand(m_drivetrainSubsystem, m_armSubsystem,
+        AutonomousCommandFactory.getAutonomousSimpleAndRightDeacceleratedOutCommand(m_drivetrainSubsystem, m_armSubsystem,
             grabberSubsystem));
 
     // Add commands to the autonomous command chooser

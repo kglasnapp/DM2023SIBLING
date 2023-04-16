@@ -300,29 +300,29 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // drive(m_chassisSpeeds.vyMetersPerSecond, m_chassisSpeeds.vxMetersPerSecond,
     // m_chassisSpeeds.omegaRadiansPerSecond);
 
-    if (Robot.count % 20 == 0) {
-      // System.out.println("In DrivetrainSubsystem chassis speeds =
-      // "+m_chassisSpeeds);
-      for (SwerveModule mod : swerveModules) {
-        SmartDashboard.putNumber(
-            "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-        SmartDashboard.putNumber(
-            "Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
-        SmartDashboard.putNumber(
-            "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
-      }
-    }
+    // if (Robot.count % 20 == 0) {
+    //   // System.out.println("In DrivetrainSubsystem chassis speeds =
+    //   // "+m_chassisSpeeds);
+    //   for (SwerveModule mod : swerveModules) {
+    //     SmartDashboard.putNumber(
+    //         "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+    //     SmartDashboard.putNumber(
+    //         "Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
+    //     SmartDashboard.putNumber(
+    //         "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
+    //   }
+    // }
 
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
-    if (Robot.count % 20 == 0) {
-      for (int i = 0; i < states.length; i++) {
-        SwerveModuleState state = states[i];
-        logf("id:%d sp:%.2f ang:%.2f deg:%.2f enc:%.2f\n", i, state.speedMetersPerSecond, state.angle.getDegrees(),
-        swerveModules[i].getAngle().getDegrees(), swerveModules[i].getPosition() );
-      }
-    }
+    // if (Robot.count % 20 == 0) {
+    //   for (int i = 0; i < states.length; i++) {
+    //     SwerveModuleState state = states[i];
+    //     logf("id:%d sp:%.2f ang:%.2f deg:%.2f cur:%.2f enc:%.2f\n", i, state.speedMetersPerSecond, state.angle.getDegrees(),
+    //     swerveModules[i].getAngle().getDegrees(), swerveModules[i].getCurrent(), swerveModules[i].getPosition() );
+    //   }
+    // }
 
     // SwerveModuleState[] states = drive();
 

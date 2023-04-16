@@ -41,7 +41,7 @@ public class BalanceCommand extends CommandBase {
 
     public BalanceCommand(DrivetrainSubsystem drivetrainSubsystem) {
         this.drivetrainSubsystem = drivetrainSubsystem;
-        SwerveModule.powerRatio = SwerveModule.NORMAL;
+        //SwerveModule.powerRatio = SwerveModule.NORMAL;
         addRequirements(drivetrainSubsystem);
         xController.setTolerance(2);
         yController.setTolerance(2);
@@ -75,7 +75,7 @@ public class BalanceCommand extends CommandBase {
                             -0.02,
                             0,
                             0));
-            if (RobotController.getFPGATime() / 1000 - initTime > 2700) {
+            if (RobotController.getFPGATime() / 1000 - initTime > 2000) {
                 state = State.SLOW_BACK;
                 drivetrainSubsystem.drive(
                             new ChassisSpeeds(
@@ -122,7 +122,7 @@ public class BalanceCommand extends CommandBase {
             }
         }
         if (state == State.SLOW_BACK) {
-            if (Math.abs(roll)< 8 || RobotController.getFPGATime() / 1000 - initTime > 1600) {
+            if (Math.abs(roll)< 8 || RobotController.getFPGATime() / 1000 - initTime > 1300) {
                 state = State.LOCK_WHEELS;
                 drivetrainSubsystem.drive(
                             new ChassisSpeeds(

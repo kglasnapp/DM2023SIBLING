@@ -24,7 +24,7 @@ public class SwerveModule {
   public static double NORMAL = 5;
   public static double PRECISION = 10;
 
-  public static double powerRatio = SwerveModule.NORMAL;
+  public static double powerRatio = SwerveModule.TURBO;
 
     public static CTREConfigs ctreConfigs = new CTREConfigs();
 
@@ -271,5 +271,9 @@ public class SwerveModule {
 
     public double getPosition() {
         return driveEncoder.getPosition();
+    }
+
+    public double getCurrent() {
+      return driveMotor.getOutputCurrent();
     }
 }
