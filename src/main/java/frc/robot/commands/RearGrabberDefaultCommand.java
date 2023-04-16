@@ -25,7 +25,7 @@ public class RearGrabberDefaultCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        // rearGrabberSubsystem.setTiltPosition(200);
+        rearGrabberSubsystem.setTiltPosition(160);
         rearGrabberSubsystem.setIntakePower(0);
         state = STATE.RAISED;
         logf("Init Rear Grab Default %d\n", Robot.count);
@@ -36,8 +36,8 @@ public class RearGrabberDefaultCommand extends CommandBase {
         double joyX = controller2.getLeftX();
         double joyY = controller2.getLeftY();
         if (Robot.count % 50 == 0) {
-            logf("Rear Grabber State:%s joyX:%.2f joyY:%.2f Tilt Pos:%.2f\n", GrabberDefaultCommand.state, joyX, joyY,
-                    rearGrabberSubsystem.getTiltPos());
+            logf("Rear Grabber State:%s joyX:%.2f joyY:%.2f Tilt Pos:%.2f Last:%.2f Cur:%.2f\n", GrabberDefaultCommand.state, joyX, joyY,
+                    rearGrabberSubsystem.getTiltPos(), rearGrabberSubsystem.getLastTiltPos(), rearGrabberSubsystem.getTiltCurrent());
         }
         if (joyX < -0.8) {
             rearGrabberSubsystem.setIntakePower(-1);
@@ -47,11 +47,11 @@ public class RearGrabberDefaultCommand extends CommandBase {
             rearGrabberSubsystem.setIntakePower(0);
         }
 
-        if (joyY < -0.8) {
-            // rearGrabberSubsystem.setTiltPosition(-200);
-        }
         if (joyY > .8) {
-            // rearGrabberSubsystem.setTiltPosition(-20);
+            rearGrabberSubsystem.setTiltPosition(460);
+        }
+        if (joyY < -0.8) {
+             rearGrabberSubsystem.setTiltPosition(148);
         }
     }
 

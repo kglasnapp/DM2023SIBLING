@@ -78,9 +78,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
-  final DigitalInput digitalInput = new DigitalInput(0);
+  final DigitalInput robotIDCheck = new DigitalInput(0); // robotIDCheck.get returns true for the sibling, false for comp bot
   private final RearGrabberSubsystem rearGrabberSubsystem = 
-    digitalInput.get()?new RearGrabberSubsystem():null;
+    robotIDCheck.get()?new RearGrabberSubsystem():null;
 
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
 
@@ -105,9 +105,9 @@ public class RobotContainer {
 
   private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[] {
       new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
-          digitalInput.get()?siblingCamerasTransform[0]:competitionCamerasTransform[0], m_drivetrainSubsystem),
+          robotIDCheck.get()?siblingCamerasTransform[0]:competitionCamerasTransform[0], m_drivetrainSubsystem),
       new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
-          digitalInput.get()?siblingCamerasTransform[1]:competitionCamerasTransform[1], m_drivetrainSubsystem),
+          robotIDCheck.get()?siblingCamerasTransform[1]:competitionCamerasTransform[1], m_drivetrainSubsystem),
   });
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
@@ -318,10 +318,11 @@ public class RobotContainer {
         .andThen(new ShoulderCommand(m_armSubsystem, 37352))
         .andThen(new ExtenderCommand(m_armSubsystem, 91000))));
 
-    m_controller2.y().whileTrue(new ShoulderCommand(m_armSubsystem, 199600));
+    m_controller2.y().whileTrue(new ShoulderCommand(m_armSubsystem, robotIDCheck.get()?210000:199600));
 
       //shoulder pos 199600
       // AutonomousCommandFactory.pickupCubeCommand(m_drivetrainSubsystem, 
+
     //   m_armSubsystem, grabberSubsystem, poseEstimator)
       
     //AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator));
@@ -340,14 +341,15 @@ public class RobotContainer {
     // .andThen(new ExtenderCommand(m_armSubsystem, 183023 * 16 / 36)));
 
     // m_controller2.b().whileTrue(getAutonomousCommandCase3());
-    m_controller2.b().whileTrue(new ShoulderCommand(m_armSubsystem, 245000));
+    m_controller2.b().whileTrue(new ShoulderCommand(m_armSubsystem, robotIDCheck.get()?255000: 245000));
+    
 
     // m_controller2.x().whileTrue(new StraightPathCommand(m_drivetrainSubsystem,
     // poseEstimator,
     // new Pose2d(2.29, 7, new Rotation2d(Math.toRadians(180)))));
     // new ShouldeCommand(m_armSubsystem, 241000));
     m_controller2.x()
-        .whileTrue(new GrabberCommand(grabberSubsystem, false).andThen(new ShoulderCommand(m_armSubsystem, 195500)));
+        .whileTrue(new GrabberCommand(grabberSubsystem, false).andThen(new ShoulderCommand(m_armSubsystem, robotIDCheck.get()?207000: 195500)));
 
     m_controller.povRight().whileTrue(pickUpFromRight());
     m_controller.povLeft().whileTrue(pickUpFromLeft());

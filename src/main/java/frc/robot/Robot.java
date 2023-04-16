@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.PDHData;
 import static frc.robot.utilities.Util.logf;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 
@@ -44,6 +45,7 @@ public class Robot extends TimedRobot {
   private AddressableLED m_led;
   private AddressableLEDBuffer m_ledBuffer;
   private int color = 0;
+  Command cmd;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -61,6 +63,8 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     // testingMotors();
     initNeoPixel();
+
+    CameraServer.startAutomaticCapture();
   }
 
   SparkMaxPIDController controller;
@@ -207,6 +211,10 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
+    if (cmd != null) {
+      logf("Executing disabled init %s\n", cmd.getName());
+      cmd.cancel();
+    }
   }
 
   @Override
@@ -219,7 +227,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    Command cmd = RobotContainer.autonomousChooser.getSelected();
+    cmd = RobotContainer.autonomousChooser.getSelected();
     if (cmd != null) {
       logf("Executing autonomous %s\n", cmd.getName());
       cmd.schedule();

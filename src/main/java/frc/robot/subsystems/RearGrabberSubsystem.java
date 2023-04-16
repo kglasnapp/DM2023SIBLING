@@ -35,7 +35,8 @@ public class RearGrabberSubsystem extends SubsystemBase {
         rearGrabberTiltMotor.configContinuousCurrentLimit(10);
         enableLimitSwitch(rearGrabberTiltMotor);
         setBrakeMode(rearGrabberTiltMotor, true);
-        grabberPid = new PID("RGrbPos", 2, 0, 0, 0, 0, -0.3, 0.3, false);
+        grabberPid = new PID("RGrbPos", .6, .001, 3, 0.0, 0, -0.3, 0.3, false);
+        grabberPid = new PID("RGrbPos", 1.2, .0005, 5, 0.0, 0, -0.6, 0.6, false);
         PIDToSRX(rearGrabberTiltMotor, grabberPid, 0, 20);
         rearGrabberTiltMotor.configSelectedFeedbackSensor(FeedbackDevice.Analog);
 
@@ -63,6 +64,10 @@ public class RearGrabberSubsystem extends SubsystemBase {
         return rearGrabberTiltMotor.getSensorCollection().getAnalogInRaw();
     }
 
+    public double getLastTiltPos() {
+        return lastGrabberStopPosition;
+    }
+
     public void setTiltPosition(double position) {
         rearGrabberTiltMotor.set(ControlMode.Position, position);
         lastGrabberStopPosition = position;
@@ -76,6 +81,10 @@ public class RearGrabberSubsystem extends SubsystemBase {
             rearGrabberTiltMotor.set(ControlMode.PercentOutput, speed);
         }
         lastPowerLevel = speed;
+    }
+
+    public double getTiltCurrent() {
+        return rearGrabberTiltMotor.getSupplyCurrent();
     }
 
     private boolean getForwardLimitSwitchTilt() {
@@ -108,9 +117,6 @@ public class RearGrabberSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     @Override
     public void periodic() {
-        int pos = -100;
-        // rearGrabberTiltMotor.set(TalonSRXControlMode.Position, pos);
-        // Display Grabber Data
         if (Robot.count % 15 == 5) {
             double statCurrent = rearGrabberTiltMotor.getStatorCurrent();
             SmartDashboard.putNumber("GrStC", statCurrent);

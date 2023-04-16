@@ -39,6 +39,8 @@ import frc.robot.Robot;
 import frc.robot.utilities.SwerveModule;
 import frc.robot.utilities.SwerveModuleConstants;
 
+import static frc.robot.utilities.Util.logf;
+
 //import java.util.Arrays;
 
 public class DrivetrainSubsystem extends SubsystemBase {
@@ -140,65 +142,69 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // you MUST change it. If you do not, your code will crash on startup.
     // FIXed Setup motor configuration
     m_frontLeftModule = new SwerveModule(0, new SwerveModuleConstants(
-      FRONT_LEFT_MODULE_DRIVE_MOTOR, FRONT_LEFT_MODULE_STEER_MOTOR, FRONT_LEFT_MODULE_STEER_ENCODER, FRONT_LEFT_MODULE_STEER_OFFSET));
+        FRONT_LEFT_MODULE_DRIVE_MOTOR, FRONT_LEFT_MODULE_STEER_MOTOR, FRONT_LEFT_MODULE_STEER_ENCODER,
+        FRONT_LEFT_MODULE_STEER_OFFSET));
 
     m_frontRightModule = new SwerveModule(1, new SwerveModuleConstants(
-        FRONT_RIGHT_MODULE_DRIVE_MOTOR, FRONT_RIGHT_MODULE_STEER_MOTOR, FRONT_RIGHT_MODULE_STEER_ENCODER, FRONT_RIGHT_MODULE_STEER_OFFSET));
+        FRONT_RIGHT_MODULE_DRIVE_MOTOR, FRONT_RIGHT_MODULE_STEER_MOTOR, FRONT_RIGHT_MODULE_STEER_ENCODER,
+        FRONT_RIGHT_MODULE_STEER_OFFSET));
 
     m_backLeftModule = new SwerveModule(2, new SwerveModuleConstants(
-          BACK_LEFT_MODULE_DRIVE_MOTOR, BACK_LEFT_MODULE_STEER_MOTOR, BACK_LEFT_MODULE_STEER_ENCODER, BACK_LEFT_MODULE_STEER_OFFSET));
-    
+        BACK_LEFT_MODULE_DRIVE_MOTOR, BACK_LEFT_MODULE_STEER_MOTOR, BACK_LEFT_MODULE_STEER_ENCODER,
+        BACK_LEFT_MODULE_STEER_OFFSET));
+
     m_backRightModule = new SwerveModule(3, new SwerveModuleConstants(
-          BACK_RIGHT_MODULE_DRIVE_MOTOR, BACK_RIGHT_MODULE_STEER_MOTOR, BACK_RIGHT_MODULE_STEER_ENCODER, BACK_RIGHT_MODULE_STEER_OFFSET));
-    
+        BACK_RIGHT_MODULE_DRIVE_MOTOR, BACK_RIGHT_MODULE_STEER_MOTOR, BACK_RIGHT_MODULE_STEER_ENCODER,
+        BACK_RIGHT_MODULE_STEER_OFFSET));
+
     // m_frontLeftModule = Mk4iSwerveModuleHelper.createNeo(
-    //     // This parameter is optional, but will allow you to see the current state of
-    //     // the module on the dashboard.
-    //     tab.getLayout("Front Left Module", BuiltInLayouts.kList)
-    //         .withSize(2, 4)
-    //         .withPosition(0, 0),
-    //     // This can either be STANDARD or FAST depending on your gear configuration
-    //     Mk4iSwerveModuleHelper.GearRatio.L2,
-    //     // This is the ID of the drive motor
-    //     FRONT_LEFT_MODULE_DRIVE_MOTOR,
-    //     // This is the ID of the steer motor
-    //     FRONT_LEFT_MODULE_STEER_MOTOR,
-    //     // This is the ID of the steer encoder
-    //     FRONT_LEFT_MODULE_STEER_ENCODER,
-    //     // This is how much the steer encoder is offset from true zero (In our case,
-    //     // zero is facing straight forward)
-    //     FRONT_LEFT_MODULE_STEER_OFFSET);
+    // // This parameter is optional, but will allow you to see the current state of
+    // // the module on the dashboard.
+    // tab.getLayout("Front Left Module", BuiltInLayouts.kList)
+    // .withSize(2, 4)
+    // .withPosition(0, 0),
+    // // This can either be STANDARD or FAST depending on your gear configuration
+    // Mk4iSwerveModuleHelper.GearRatio.L2,
+    // // This is the ID of the drive motor
+    // FRONT_LEFT_MODULE_DRIVE_MOTOR,
+    // // This is the ID of the steer motor
+    // FRONT_LEFT_MODULE_STEER_MOTOR,
+    // // This is the ID of the steer encoder
+    // FRONT_LEFT_MODULE_STEER_ENCODER,
+    // // This is how much the steer encoder is offset from true zero (In our case,
+    // // zero is facing straight forward)
+    // FRONT_LEFT_MODULE_STEER_OFFSET);
 
     // // We will do the same for the other modules
     // m_frontRightModule = Mk4iSwerveModuleHelper.createNeo(
-    //     tab.getLayout("Front Right Module", BuiltInLayouts.kList)
-    //         .withSize(2, 4)
-    //         .withPosition(2, 0),
-    //     Mk4iSwerveModuleHelper.GearRatio.L2,
-    //     FRONT_RIGHT_MODULE_DRIVE_MOTOR,
-    //     FRONT_RIGHT_MODULE_STEER_MOTOR,
-    //     FRONT_RIGHT_MODULE_STEER_ENCODER,
-    //     FRONT_RIGHT_MODULE_STEER_OFFSET);
+    // tab.getLayout("Front Right Module", BuiltInLayouts.kList)
+    // .withSize(2, 4)
+    // .withPosition(2, 0),
+    // Mk4iSwerveModuleHelper.GearRatio.L2,
+    // FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+    // FRONT_RIGHT_MODULE_STEER_MOTOR,
+    // FRONT_RIGHT_MODULE_STEER_ENCODER,
+    // FRONT_RIGHT_MODULE_STEER_OFFSET);
 
     // m_backLeftModule = Mk4iSwerveModuleHelper.createNeo(
-    //     tab.getLayout("Back Left Module", BuiltInLayouts.kList)
-    //         .withSize(2, 4)
-    //         .withPosition(4, 0),
-    //     Mk4iSwerveModuleHelper.GearRatio.L2,
-    //     BACK_LEFT_MODULE_DRIVE_MOTOR,
-    //     BACK_LEFT_MODULE_STEER_MOTOR,
-    //     BACK_LEFT_MODULE_STEER_ENCODER,
-    //     BACK_LEFT_MODULE_STEER_OFFSET);
+    // tab.getLayout("Back Left Module", BuiltInLayouts.kList)
+    // .withSize(2, 4)
+    // .withPosition(4, 0),
+    // Mk4iSwerveModuleHelper.GearRatio.L2,
+    // BACK_LEFT_MODULE_DRIVE_MOTOR,
+    // BACK_LEFT_MODULE_STEER_MOTOR,
+    // BACK_LEFT_MODULE_STEER_ENCODER,
+    // BACK_LEFT_MODULE_STEER_OFFSET);
 
     // m_backRightModule = Mk4iSwerveModuleHelper.createNeo(
-    //     tab.getLayout("Back Right Module", BuiltInLayouts.kList)
-    //         .withSize(2, 4)
-    //         .withPosition(6, 0),
-    //     Mk4iSwerveModuleHelper.GearRatio.L2,
-    //     BACK_RIGHT_MODULE_DRIVE_MOTOR,
-    //     BACK_RIGHT_MODULE_STEER_MOTOR,
-    //     BACK_RIGHT_MODULE_STEER_ENCODER,
-    //     BACK_RIGHT_MODULE_STEER_OFFSET);
+    // tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+    // .withSize(2, 4)
+    // .withPosition(6, 0),
+    // Mk4iSwerveModuleHelper.GearRatio.L2,
+    // BACK_RIGHT_MODULE_DRIVE_MOTOR,
+    // BACK_RIGHT_MODULE_STEER_MOTOR,
+    // BACK_RIGHT_MODULE_STEER_ENCODER,
+    // BACK_RIGHT_MODULE_STEER_OFFSET);
 
     swerveModules = new SwerveModule[] {
         m_frontLeftModule, m_frontRightModule, m_backLeftModule, m_backRightModule
@@ -225,7 +231,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     } else {
       zeroNavx = 0;
     }
-    
 
     // m_navx.reset();
     m_navx.zeroYaw();
@@ -246,9 +251,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
     } else {
       zeroNavx = 0;
     }
-    
+
     this.currentOrientation = currentOrientation;
-    
+
     // m_navx.reset();
     m_navx.zeroYaw();
   }
@@ -265,17 +270,19 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // // We will only get valid fused headings if the magnetometer is calibrated
       // System.out.println("returning the angle FUSE ZERO from the robot:
       // "+m_navx.getAngle());
-      
+
       return Rotation2d.fromDegrees(-m_navx.getFusedHeading() + zeroNavx + currentOrientation);
     }
     //
     // // We have to invert the angle of the NavX so that rotating the robot
     // counter-clockwise makes the angle increase.
     // return Rotation2d.fromDegrees(360.0 - m_navx.getYaw());
-    // TODO we may need to better caliabrate the NAVX due to the fact we are executing this code
-    // KAG System.out.println("returning the angle from the robot: " + m_navx.getAngle());
-    // WE may need to fix this and 
-    
+    // TODO we may need to better caliabrate the NAVX due to the fact we are
+    // executing this code
+    // KAG System.out.println("returning the angle from the robot: " +
+    // m_navx.getAngle());
+    // WE may need to fix this and
+
     return Rotation2d.fromDegrees(-m_navx.getYaw() + currentOrientation);
   }
 
@@ -283,18 +290,19 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_chassisSpeeds = chassisSpeeds;
   }
 
-  // Read the absolute values from the cancoder 
-  //CANCoder backLeft = new CANCoder(Constants.BACK_LEFT_MODULE_STEER_ENCODER);
-  //double absPosDeg = backLeft.getAbsolutePosition();
-  //double encPosDeg = backLeft.getPosition();
+  // Read the absolute values from the cancoder
+  // CANCoder backLeft = new CANCoder(Constants.BACK_LEFT_MODULE_STEER_ENCODER);
+  // double absPosDeg = backLeft.getAbsolutePosition();
+  // double encPosDeg = backLeft.getPosition();
   @Override
   public void periodic() {
-  
+
     // drive(m_chassisSpeeds.vyMetersPerSecond, m_chassisSpeeds.vxMetersPerSecond,
     // m_chassisSpeeds.omegaRadiansPerSecond);
 
     if (Robot.count % 20 == 0) {
-      // System.out.println("In DrivetrainSubsystem chassis speeds = "+m_chassisSpeeds);
+      // System.out.println("In DrivetrainSubsystem chassis speeds =
+      // "+m_chassisSpeeds);
       for (SwerveModule mod : swerveModules) {
         SmartDashboard.putNumber(
             "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
@@ -308,44 +316,61 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
+    if (Robot.count % 20 == 0) {
+      for (int i = 0; i < states.length; i++) {
+        SwerveModuleState state = states[i];
+        logf("id:%d sp:%.2f ang:%.2f deg:%.2f enc:%.2f\n", i, state.speedMetersPerSecond, state.angle.getDegrees(),
+        swerveModules[i].getAngle().getDegrees(), swerveModules[i].getPosition() );
+      }
+    }
+
     // SwerveModuleState[] states = drive();
-    
-    // m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //     getAngleForModule(m_frontLeftModule, states[0]));
-    // m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //     getAngleForModule(m_frontRightModule, states[1]));
-    // m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //       getAngleForModule(m_backLeftModule, states[2]));
-    // m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //       getAngleForModule(m_backRightModule, states[3]));
+
+    // m_frontLeftModule.set(states[0].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // getAngleForModule(m_frontLeftModule, states[0]));
+    // m_frontRightModule.set(states[1].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // getAngleForModule(m_frontRightModule, states[1]));
+    // m_backLeftModule.set(states[2].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // getAngleForModule(m_backLeftModule, states[2]));
+    // m_backRightModule.set(states[3].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // getAngleForModule(m_backRightModule, states[3]));
 
     // SwerveModuleState sms = new SwerveModuleState(0,Rotation2d.fromDegrees(0));
 
-    m_frontLeftModule.setDesiredState(states[0]); //.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-        // getAngleForModule(m_frontLeftModule, states[0]));
-    m_frontRightModule.setDesiredState(states[1]); //.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-        // getAngleForModule(m_frontRightModule, states[1]));
+    m_frontLeftModule.setDesiredState(states[0]); // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND *
+                                                  // MAX_VOLTAGE,
+    // getAngleForModule(m_frontLeftModule, states[0]));
+    m_frontRightModule.setDesiredState(states[1]); // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND *
+                                                   // MAX_VOLTAGE,
+    // getAngleForModule(m_frontRightModule, states[1]));
     m_backLeftModule.setDesiredState(states[2]);
-    //.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-          // getAngleForModule(m_backLeftModule, states[2]));
+    // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // getAngleForModule(m_backLeftModule, states[2]));
     m_backRightModule.setDesiredState(states[3]);
     // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //       getAngleForModule(m_backRightModule, states[3]));
+    // getAngleForModule(m_backRightModule, states[3]));
 
-
-    // m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //     states[0].angle.getRadians());
-    // m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //     states[1].angle.getRadians());
-    // m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //     states[2].angle.getRadians());
-    // m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    //     states[3].angle.getRadians());
+    // m_frontLeftModule.set(states[0].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // states[0].angle.getRadians());
+    // m_frontRightModule.set(states[1].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // states[1].angle.getRadians());
+    // m_backLeftModule.set(states[2].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // states[2].angle.getRadians());
+    // m_backRightModule.set(states[3].speedMetersPerSecond /
+    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // states[3].angle.getRadians());
     if (Robot.count % 20 == 7) {
-      //SmartDashboard.putNumber("FL", states[0].angle.getDegrees());
-      //SmartDashboard.putNumber("FR", states[1].angle.getDegrees());
-      //SmartDashboard.putNumber("BL", states[2].angle.getDegrees());
-      //SmartDashboard.putNumber("BR", states[3].angle.getDegrees());
+      // SmartDashboard.putNumber("FL", states[0].angle.getDegrees());
+      // SmartDashboard.putNumber("FR", states[1].angle.getDegrees());
+      // SmartDashboard.putNumber("BL", states[2].angle.getDegrees());
+      // SmartDashboard.putNumber("BR", states[3].angle.getDegrees());
       SmartDashboard.putNumber("Yaw", m_navx.getYaw());
       SmartDashboard.putNumber("Rot", getGyroscopeRotation().getDegrees());
     }
@@ -357,9 +382,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
     return state.angle.getRadians();
   }
+
   public SwerveModuleState[] drive() {
     double fwd = m_chassisSpeeds.vxMetersPerSecond;
-    double str = m_chassisSpeeds.vyMetersPerSecond; 
+    double str = m_chassisSpeeds.vyMetersPerSecond;
     double rcw = m_chassisSpeeds.omegaRadiansPerSecond;
     // // if (str < JOYSTICK_THRESHOLD && fwd < JOYSTICK_THRESHOLD && rcw <
     // JOYSTICK_THRESHOLD) {
@@ -370,8 +396,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // }
 
     // first we transpose the direction vector with the angle of the gyro
-    double robotAngle = 0; //getGyroscopeRotation().getRadians();
-      //Math.toRadians(m_navx.getYaw()) + Math.PI / 4;
+    double robotAngle = 0; // getGyroscopeRotation().getRadians();
+    // Math.toRadians(m_navx.getYaw()) + Math.PI / 4;
 
     double temp = fwd * Math.cos(robotAngle) + str * Math.sin(robotAngle);
     str = -fwd * Math.sin(robotAngle) + str * Math.cos(robotAngle);
@@ -410,26 +436,30 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     SwerveModuleState[] result = new SwerveModuleState[] {
-      new SwerveModuleState(speed[0] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
-      , new Rotation2d(getAngle(b, d))),
-      new SwerveModuleState(speed[1] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
-      , new Rotation2d(getAngle(b, c))),
-      new SwerveModuleState(speed[2] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
-      , new Rotation2d(getAngle(a, d))),
-      new SwerveModuleState(speed[3] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
-      , new Rotation2d(getAngle(a, c)))
+        new SwerveModuleState(speed[0] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
+            , new Rotation2d(getAngle(b, d))),
+        new SwerveModuleState(speed[1] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
+            , new Rotation2d(getAngle(b, c))),
+        new SwerveModuleState(speed[2] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
+            , new Rotation2d(getAngle(a, d))),
+        new SwerveModuleState(speed[3] // / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE
+            , new Rotation2d(getAngle(a, c)))
     };
 
-    // m_frontLeftModule.set(speed[0] / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, getAngle(b, d));
-    // m_frontRightModule.set(speed[1] / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, getAngle(b, c));
-    // m_backLeftModule.set(speed[2] / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, getAngle(a, d));
-    // m_backRightModule.set(speed[3] / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, getAngle(a, c));
+    // m_frontLeftModule.set(speed[0] / MAX_VELOCITY_METERS_PER_SECOND *
+    // MAX_VOLTAGE, getAngle(b, d));
+    // m_frontRightModule.set(speed[1] / MAX_VELOCITY_METERS_PER_SECOND *
+    // MAX_VOLTAGE, getAngle(b, c));
+    // m_backLeftModule.set(speed[2] / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+    // getAngle(a, d));
+    // m_backRightModule.set(speed[3] / MAX_VELOCITY_METERS_PER_SECOND *
+    // MAX_VOLTAGE, getAngle(a, c));
     if (Robot.count % 15 == 6) {
-      //SmartDashboard.putNumber("FL", getAngle(b, d));
-      //SmartDashboard.putNumber("FR", getAngle(b, c));
-      //SmartDashboard.putNumber("BL", getAngle(a, d));
-      //SmartDashboard.putNumber("BR", getAngle(a, c));
-      //SmartDashboard.putNumber("Yaw", m_navx.getYaw());
+      // SmartDashboard.putNumber("FL", getAngle(b, d));
+      // SmartDashboard.putNumber("FR", getAngle(b, c));
+      // SmartDashboard.putNumber("BL", getAngle(a, d));
+      // SmartDashboard.putNumber("BR", getAngle(a, c));
+      // SmartDashboard.putNumber("Yaw", m_navx.getYaw());
     }
 
     // frontLeft.setAngle(getAngle(b, d));
@@ -448,7 +478,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public double getAngle(double x, double y) {
     return radians(90)
-     - Math.atan2(y, x) + (Math.PI / 2);
+        - Math.atan2(y, x) + (Math.PI / 2);
   }
 
   public double getSpeed(double x, double y) { // }, double rotateX) {
@@ -475,20 +505,21 @@ public class DrivetrainSubsystem extends SubsystemBase {
    *         backLeft, backRight
    */
   public SwerveModulePosition[] getModulePositions() {
-    Rotation2d flA = m_frontLeftModule.getAngle(); //new Rotation2d(m_frontLeftModule.getAngle().getRadians()); //getSteerAngle());
-    Rotation2d frA = m_frontRightModule.getAngle(); //new Rotation2d(m_frontRightModule.getSteerAngle());
+    Rotation2d flA = m_frontLeftModule.getAngle(); // new Rotation2d(m_frontLeftModule.getAngle().getRadians());
+                                                   // //getSteerAngle());
+    Rotation2d frA = m_frontRightModule.getAngle(); // new Rotation2d(m_frontRightModule.getSteerAngle());
     Rotation2d blA = m_backLeftModule.getAngle(); // new Rotation2d(m_backLeftModule.getSteerAngle());
-    Rotation2d brA = m_backRightModule.getAngle(); //new Rotation2d(m_backRightModule.getSteerAngle());
+    Rotation2d brA = m_backRightModule.getAngle(); // new Rotation2d(m_backRightModule.getSteerAngle());
     double flP = m_frontLeftModule.getPosition();
     double frP = m_frontRightModule.getPosition();
     double blP = m_backLeftModule.getPosition();
     double brP = m_backRightModule.getPosition();
 
     // if (Robot.count % 20 == 6) {
-    //   SmartDashboard.putNumber("FL POS", flP);
-    //   SmartDashboard.putNumber("FR POS", frP);
-    //   SmartDashboard.putNumber("BR POS", brP);
-    //   SmartDashboard.putNumber("BL POS", blP);
+    // SmartDashboard.putNumber("FL POS", flP);
+    // SmartDashboard.putNumber("FR POS", frP);
+    // SmartDashboard.putNumber("BR POS", brP);
+    // SmartDashboard.putNumber("BL POS", blP);
     // }
     // The postition is in meters
     return new SwerveModulePosition[] {
