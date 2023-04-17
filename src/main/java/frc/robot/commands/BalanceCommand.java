@@ -122,7 +122,7 @@ public class BalanceCommand extends CommandBase {
             }
         }
         if (state == State.SLOW_BACK) {
-            if (Math.abs(roll)< 8 || RobotController.getFPGATime() / 1000 - initTime > 1300) {
+            if (Math.abs(roll)< 8 || RobotController.getFPGATime() / 1000 - initTime > 1100) {
                 state = State.LOCK_WHEELS;
                 drivetrainSubsystem.drive(
                             new ChassisSpeeds(

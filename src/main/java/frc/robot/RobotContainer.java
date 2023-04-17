@@ -128,7 +128,7 @@ public class RobotContainer {
 
     
     autonomousChooser.setDefaultOption("Over and Balance",
-    AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
+    AutonomousCommandFactory.getAutonomousSimpleLowCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
     .andThen(AutonomousCommandFactory.getOverAndBalanceCommand(m_drivetrainSubsystem, poseEstimator))
   );
     // A chooser for autonomous commands

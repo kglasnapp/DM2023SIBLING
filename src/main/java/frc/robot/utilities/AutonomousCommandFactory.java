@@ -75,6 +75,19 @@ public class AutonomousCommandFactory {
         .andThen(new ZeroShoulderCommand(m_armSubsystem));
   }
 
+  public static Command getAutonomousSimpleLowCommand(DrivetrainSubsystem m_drivetrainSubsystem,
+  ArmSubsystem m_armSubsystem, GrabberSubsystem grabberSubsystem) {
+return new GrabberCommand(grabberSubsystem, false)
+    .andThen(new ZeroExtenderCommand(m_armSubsystem))
+    .andThen(new ShoulderCommand(m_armSubsystem, 67000))
+    //.andThen(new ExtenderCommand(m_armSubsystem, 400000000))
+    .andThen(new WaitCommand(0.25))
+    .andThen(new GrabberCommand(grabberSubsystem, true))
+    .andThen(new WaitCommand(0.25))
+    .andThen(new ZeroExtenderCommand(m_armSubsystem))
+    .andThen(new ZeroShoulderCommand(m_armSubsystem));
+}
+
   public static Command getSetPositionAndBalanceCommand(DrivetrainSubsystem m_drivetrainSubsystem,
       PoseEstimatorAggregator poseEstimator) {
     return new CommandBase() {
@@ -125,7 +138,7 @@ public class AutonomousCommandFactory {
       }
 
     }.andThen(
-      new RobotOrientedDriveCommand(m_drivetrainSubsystem, -0.02, 0, 0, 6000))
+      new RobotOrientedDriveCommand(m_drivetrainSubsystem, -0.02, 0, 0, 4750))
     .andThen(new RotateCommand(m_drivetrainSubsystem))   
     .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, -0.02, 0, 0, 250)) 
     .andThen(
