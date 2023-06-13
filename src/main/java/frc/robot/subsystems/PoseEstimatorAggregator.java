@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class PoseEstimatorAggregator implements Supplier<Pose2d> {
-    // TODO: to change the camera to use
     // mode -1 = aggregator uses the smar average between all the estimators
     // mode 0-n = returns the value of the estimator in the mode position. To use camera 1, 
     // set the mode to 0, camera 2 set it to 1 

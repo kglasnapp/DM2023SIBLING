@@ -210,7 +210,7 @@ public final class FieldConstants {
       return pose;
     }
   }
-// TODO: obstacles
+
   // public static List<Obstacle> obstacles = List.of(
   //     // Charging Station
   //     new Obstacle(new double[] {

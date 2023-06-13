@@ -6,7 +6,6 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,7 +23,6 @@ public class RearGrabberSubsystem extends SubsystemBase {
     private TalonSRX rearGrabberTiltMotor;
     private TalonSRX rearGrabberIntakeMotor;
     private double lastGrabberStopPosition;
-    private double lastPowerLevel = 0;
     private double lastIntakeSpeed = 0;
 
     public RearGrabberSubsystem() {
@@ -80,7 +78,6 @@ public class RearGrabberSubsystem extends SubsystemBase {
         } else {
             rearGrabberTiltMotor.set(ControlMode.PercentOutput, speed);
         }
-        lastPowerLevel = speed;
     }
 
     public double getTiltCurrent() {

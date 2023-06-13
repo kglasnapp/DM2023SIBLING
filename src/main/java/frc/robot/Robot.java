@@ -4,25 +4,18 @@
 
 package frc.robot;
 
-// import com.revrobotics.CANEncoder;
-// import com.revrobotics.CANPIDController;
-// import com.revrobotics.CANSparkMax;
-// import com.revrobotics.CANSparkMaxLowLevel;
-// import com.revrobotics.ControlType;
-import com.revrobotics.REVLibError;
-import com.revrobotics.SparkMaxPIDController;
-
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.PDHData;
 import static frc.robot.utilities.Util.logf;
 
+import com.revrobotics.SparkMaxPIDController;
+
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Leds;
+import frc.robot.subsystems.PDHData;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -41,10 +34,8 @@ public class Robot extends TimedRobot {
   public static long count = 0;
   private final PDHData pdhData = new PDHData();
   public static Alliance alliance;
-
-  private AddressableLED m_led;
-  private AddressableLEDBuffer m_ledBuffer;
-  private int color = 0;
+  public static Leds led = new Leds();
+  
   Command cmd;
 
   /**
@@ -61,9 +52,6 @@ public class Robot extends TimedRobot {
     Util.logf("Start Swerve %s\n", alliance.toString());
 
     m_robotContainer = new RobotContainer();
-    // testingMotors();
-    initNeoPixel();
-
     CameraServer.startAutomaticCapture();
   }
 
@@ -136,49 +124,7 @@ public class Robot extends TimedRobot {
   // // );
   // }
 
-  private void initNeoPixel() {
-    m_led = new AddressableLED(9);
-    // Reuse buffer
-    // Default to a length of 60, start empty output
-    // Length is expensive to set, so only set it once, then just update data
-    m_ledBuffer = new AddressableLEDBuffer(60);
-    m_led.setLength(m_ledBuffer.getLength());
-
-    // Set the data
-    m_led.setData(m_ledBuffer);
-    m_led.start();
-  }
-
-  private void setNeoPixelColors() {
-    if (count % 50 == 0) {
-      color++;
-      color = color % 6;
-      for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-        // Sets the specified LED to the RGB
-        if (color == 0)
-          m_ledBuffer.setRGB(i, 255, 0, 0);
-        if (color == 1)
-          m_ledBuffer.setRGB(i, 0, 255, 0);
-        if (color == 2)
-          m_ledBuffer.setRGB(i, 0, 0, 255);
-        if (color == 3)
-          m_ledBuffer.setRGB(i, 255, 255, 0);
-        if (color == 4)
-          m_ledBuffer.setRGB(i, 128, 128, 128);
-        if (color == 5)
-          m_ledBuffer.setRGB(i, 0, 0, 0);
-      }
-      m_led.setData(m_ledBuffer);
-    }
-  }
-
-  public static void checkNeoError(REVLibError error, String message) {
-    if (error != REVLibError.kOk) {
-      throw new RuntimeException(String.format("%s: %s", message, error.toString()));
-    }
-  }
-
-  int i = 0;
+  
 
   /**
    * This function is called every robot packet, no matter the mode. Use this for
@@ -205,7 +151,8 @@ public class Robot extends TimedRobot {
     if (count % 500 == 0) {
       pdhData.logPDHData();
     }
-    setNeoPixelColors();
+    led.periodic();
+    //setNeoPixelColors();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

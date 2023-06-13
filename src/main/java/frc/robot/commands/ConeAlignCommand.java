@@ -84,6 +84,9 @@ public class ConeAlignCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
+        if (lastTarget == null) {
+            return true;
+        }
         double coneX = lastTarget.getPose().getX();
         double coneY = lastTarget.getPose().getY();
         double coneAngle = lastTarget.getPose().getRotation().getDegrees() + 90;
@@ -120,9 +123,8 @@ public class ConeAlignCommand extends CommandBase {
                 coneAngle = 0;
             }
             atGoalA = Math.abs(Math.abs(coneAngle)) < 10;
-            // TODO: to test, we are assuming the robot is at the right angle.
             
-            double robotAngle = robotPose.getRotation().getAngle();
+            //double robotAngle = robotPose.getRotation().getAngle();
             double coneXToTheRobot = (((coneX-340)*0.16) / 100);
             double coneYToTheRobot = (((270-coneY)*0.7) / 100);
             double goalPoseAngle = Math.toRadians(robotPose2d.getRotation().getDegrees() - coneAngle);

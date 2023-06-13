@@ -30,7 +30,7 @@ public class ArmSubsystem extends SubsystemBase {
     private PID extenderPid;
     // private double lastSpeed = 0;
     // private double lastJoy = 0;
-    
+
     public TalonFX shoulderMotor;
     public TalonFX extenderMotor;
 
@@ -45,33 +45,33 @@ public class ArmSubsystem extends SubsystemBase {
             shoulderMotor = new TalonFX(SHOULDER_MOTOR_MASTER);
             TalonFX motor2 = new TalonFX(SHOULDER_MOTOR_SLAVE);
             shoulderMotor.setInverted(true);
-            
-        //    motor2.follow(shoulderMotor);
+
+            // motor2.follow(shoulderMotor);
             motor2.configFactoryDefault();
             motor2.setInverted(true);
             setBrakeMode(motor2, true);
             shoulderMotor.configNeutralDeadband(0.04);
-            //PIDToFX(motor2, shoulderPid, 0, Constants.kTimeoutMs);
+            // PIDToFX(motor2, shoulderPid, 0, Constants.kTimeoutMs);
             motor2.set(ControlMode.Follower, SHOULDER_MOTOR_MASTER);
         } else {
             shoulderMotor = new TalonFX(10);
             shoulderMotor.setInverted(true);
         }
         shoulderMotor.configFactoryDefault();
-        setCurrentLimits(shoulderMotor,10);
+        setCurrentLimits(shoulderMotor, 10);
         enableLimitSwitch(shoulderMotor);
         setBrakeMode(shoulderMotor, true);
-        
+
         PIDToFX(shoulderMotor, shoulderPid, 0, Constants.kTimeoutMs);
-        
+
         logf("Shoulder Motor Enabled\n");
 
         extenderMotor = new TalonFX(EXTENDER_MOTOR_ID);
         extenderMotor.configFactoryDefault();
-        setCurrentLimits(extenderMotor,10);
+        setCurrentLimits(extenderMotor, 10);
         enableLimitSwitch(extenderMotor);
         setBrakeMode(extenderMotor, true);
-        //extenderPid = new PID("ExtPos", 0.5, 0, 0, 0, 0, -0.6, 0.6, false);
+        // extenderPid = new PID("ExtPos", 0.5, 0, 0, 0, 0, -0.6, 0.6, false);
         extenderPid = new PID("ExtPos", 0.5, 0, 0, 0, 0, -.3, .3, false);
         PIDToFX(extenderMotor, extenderPid, 0, Constants.kTimeoutMs);
         logf("Extender Motor Enabled\n");
@@ -89,11 +89,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public double getShoulderPos() {
-        return shoulderMotor.getSelectedSensorPosition(); //getSensorCollection().getIntegratedSensorPosition();
+        return shoulderMotor.getSelectedSensorPosition(); // getSensorCollection().getIntegratedSensorPosition();
     }
 
     public double getExtenderPos() {
-        return extenderMotor.getSelectedSensorPosition(); //getSensorCollection().getIntegratedSensorPosition();
+        return extenderMotor.getSelectedSensorPosition(); // getSensorCollection().getIntegratedSensorPosition();
     }
 
     public double getShoulderRevs() {
@@ -122,17 +122,18 @@ public class ArmSubsystem extends SubsystemBase {
     public void setCurrentLimits(TalonFX motor, double current) {
         SupplyCurrentLimitConfiguration currLimitCfg = new SupplyCurrentLimitConfiguration(true, current, current, .2);
         motor.configSupplyCurrentLimit(currLimitCfg);
-       StatorCurrentLimitConfiguration statCurrentLimitCfg = new StatorCurrentLimitConfiguration(true, current, current, .2);
-       motor.configGetStatorCurrentLimit(statCurrentLimitCfg);
+        StatorCurrentLimitConfiguration statCurrentLimitCfg = new StatorCurrentLimitConfiguration(true, current,
+                current, .2);
+        motor.configGetStatorCurrentLimit(statCurrentLimitCfg);
     }
 
     public void setShoulderSpeed(double speed) {
         if (speed == 0) {
             shoulderMotor.set(ControlMode.Disabled, 0);
-            //System.out.println("Setting velocity to zero (((()))))))");
-            //shoulderMotor.selectProfileSlot(EXTENDER_MOTOR_ID, DEVICE_NUMBER);
-            // shoulderMotor.set(ControlMode.Velocity, 0);        
-            //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
+            // System.out.println("Setting velocity to zero (((()))))))");
+            // shoulderMotor.selectProfileSlot(EXTENDER_MOTOR_ID, DEVICE_NUMBER);
+            // shoulderMotor.set(ControlMode.Velocity, 0);
+            // lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else {
             shoulderMotor.set(ControlMode.PercentOutput, speed);
         }
@@ -141,7 +142,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void setExtenderSpeed(double speed) {
         if (speed == 0) {
             extenderMotor.set(ControlMode.Disabled, 0);
-            //lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
+            // lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
         } else {
             extenderMotor.set(ControlMode.PercentOutput, speed);
         }
@@ -150,7 +151,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void setShoulderVelocity(double velocity) {
         if (velocity == 0) {
             shoulderMotor.set(ControlMode.Disabled, 0);
-           // lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
+            // lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else {
             shoulderMotor.set(ControlMode.Velocity, velocity);
         }
@@ -159,7 +160,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void setExtenderVelocity(double velocity) {
         if (velocity == 0) {
             extenderMotor.set(ControlMode.Disabled, 0);
-           // lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
+            // lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
         } else {
             extenderMotor.set(ControlMode.Velocity, velocity);
         }
@@ -167,17 +168,18 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void zeroEncoder(TalonFX motor) {
         motor.setSelectedSensorPosition(0.0);
-        //getSensorCollection().setIntegratedSensorPosition(0.0, Constants.kTimeoutMs);
+        // getSensorCollection().setIntegratedSensorPosition(0.0, Constants.kTimeoutMs);
     }
 
     public void setEncoderPosition(TalonFX motor, double position) {
         motor.setSelectedSensorPosition(position);
-        //motor.set(ControlMode.Velocity, 0);
-        //getSensorCollection().setIntegratedSensorPosition(position, Constants.kTimeoutMs);
+        // motor.set(ControlMode.Velocity, 0);
+        // getSensorCollection().setIntegratedSensorPosition(position,
+        // Constants.kTimeoutMs);
         if (motor == shoulderMotor) {
-            //lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
+            // lastShoulderStopPosition = shoulderMotor.getSelectedSensorPosition();
         } else if (motor == extenderMotor) {
-            //lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
+            // lastExtenderStopPosition = extenderMotor.getSelectedSensorPosition();
         }
     }
 
@@ -207,35 +209,35 @@ public class ArmSubsystem extends SubsystemBase {
 
         // double left = RobotContainer.getLeftTrigger();
         // if (RobotContainer.getLeftBumper()) {
-        //     left *= -1;
+        // left *= -1;
         // }
         // if (Math.abs(left) > .05) {
-        //     setShoulderSpeed(left * .3);
-        //     // logf("Shoulder Speed %.2f\n", left * .3);
+        // setShoulderSpeed(left * .3);
+        // // logf("Shoulder Speed %.2f\n", left * .3);
         // } else {
-        //     setShoulderSpeed(0);
+        // setShoulderSpeed(0);
         // }
 
         // double right = RobotContainer.getRightTrigger();
         // if (RobotContainer.getRightBumper()) {
-        //     right *= -1;
+        // right *= -1;
         // }
         // if (Math.abs(right) > .05) {
-        //     setExtenderSpeed(right * .3);
-        //     // logf("Extender Speed %.2f\n", right * .3);
+        // setExtenderSpeed(right * .3);
+        // // logf("Extender Speed %.2f\n", right * .3);
         // } else {
-        //     setExtenderSpeed(0);
+        // setExtenderSpeed(0);
         // }
 
         // if (state == ZERO_ENCODER) {
-        //     if (getReverseLimitSwitch(shoulderMotor)) {
-        //         state = NORMAL;
-        //         zeroEncoder(shoulderMotor);
-        //         logf("Shoulder Homed\n");
-        //         // setShoulderVelocity(0);
-        //     }
-        //     // setShoulderVelocity(0.3);
-        //     return;
+        // if (getReverseLimitSwitch(shoulderMotor)) {
+        // state = NORMAL;
+        // zeroEncoder(shoulderMotor);
+        // logf("Shoulder Homed\n");
+        // // setShoulderVelocity(0);
+        // }
+        // // setShoulderVelocity(0.3);
+        // return;
         // }
         double positionShl = getShoulderPos();
         // Display Shoulder Data
@@ -243,9 +245,11 @@ public class ArmSubsystem extends SubsystemBase {
             double current = shoulderMotor.getStatorCurrent();
             SmartDashboard.putNumber("ShlCur", current);
             boolean forwardLimit = getForwardLimitSwitch(shoulderMotor);
-            SmartDashboard.putBoolean("ShlForL", forwardLimit);
             boolean reverseLimit = getReverseLimitSwitch(shoulderMotor);
-            SmartDashboard.putBoolean("ShlRevL", reverseLimit);           
+            Robot.led.setLimit(1, forwardLimit);
+            Robot.led.setLimit(2, reverseLimit);
+            SmartDashboard.putBoolean("ShlForL", forwardLimit);
+            SmartDashboard.putBoolean("ShlRevL", reverseLimit);
             SmartDashboard.putNumber("ShlPos", positionShl);
             // logf("Shoulder pos: %.1f \n", positionShl);
         }
@@ -256,27 +260,29 @@ public class ArmSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("ExtCur", current);
             boolean forwardLimit = getForwardLimitSwitch(extenderMotor);
             SmartDashboard.putBoolean("ExtForL", forwardLimit);
+            Robot.led.setLimit(3,forwardLimit);
             boolean reverseLimit = getReverseLimitSwitch(extenderMotor);
             SmartDashboard.putBoolean("ExtRevL", reverseLimit);
+            Robot.led.setLimit(4, reverseLimit);
             double positionExt = getExtenderPos();
             SmartDashboard.putNumber("ExtPos", positionExt);
         }
 
         // if (RobotContainer.mrKeith) {
-        //     int pov = RobotContainer.getPov();
-        //     if (lastPOV == pov) {
-        //         return;
-        //     }
-        //     lastPOV = pov;
-        //     if (pov == 0) {
-        //         setMotorToPosition(shoulderMotor, 0);
-        //     } else if (pov == 90) {
-        //         setMotorToPosition(shoulderMotor, 5000);
-        //     } else if (pov == 180) {
-        //         setMotorToPosition(shoulderMotor, 10000);
-        //     } else if (pov == 270) {
-        //         setMotorToPosition(shoulderMotor, 15000);
-        //     }
+        // int pov = RobotContainer.getPov();
+        // if (lastPOV == pov) {
+        // return;
+        // }
+        // lastPOV = pov;
+        // if (pov == 0) {
+        // setMotorToPosition(shoulderMotor, 0);
+        // } else if (pov == 90) {
+        // setMotorToPosition(shoulderMotor, 5000);
+        // } else if (pov == 180) {
+        // setMotorToPosition(shoulderMotor, 10000);
+        // } else if (pov == 270) {
+        // setMotorToPosition(shoulderMotor, 15000);
+        // }
         // }
     }
 }

@@ -34,7 +34,7 @@ public class PiecePickerPoseProvider implements Runnable {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 
-                double timestamp = ByteBuffer.wrap(buffer, 0, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+                //double timestamp = ByteBuffer.wrap(buffer, 0, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                 double x = ByteBuffer.wrap(buffer, 8, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                 double y = ByteBuffer.wrap(buffer, 16, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();
                 double angle = ByteBuffer.wrap(buffer, 24, 8).order(ByteOrder.LITTLE_ENDIAN).getDouble();

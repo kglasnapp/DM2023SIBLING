@@ -128,7 +128,7 @@ public class StraightPathCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        double currentTime = RobotController.getFPGATime();
+        //double currentTime = RobotController.getFPGATime();
         if (destinationProvider != null) {
             destination = destinationProvider.get();
         }

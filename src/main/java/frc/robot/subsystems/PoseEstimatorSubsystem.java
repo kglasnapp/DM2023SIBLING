@@ -236,9 +236,5 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     setCurrentPose(new Pose2d());
   }
 
-  // TODO: make it work later
-  // public void addTrajectory(PathPlannerTrajectory traj) {
-  // field2d.getObject("Trajectory").setTrajectory(traj);
-  // }
 
 }

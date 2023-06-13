@@ -23,12 +23,12 @@ public class CameraPoseEstimator extends PhotonPoseEstimator {
      * Any apriltag with an ambiguity higher than this number will be ignored.`
      */
     public final static double MAX_AMBIGUITY = 0.2;
-    private String cameraId;
+    //private String cameraId;
 
     public CameraPoseEstimator(String cameraId, AprilTagFieldLayout fieldTags, PoseStrategy strategy, PhotonCamera camera,
             Transform3d robotToCamera) {
         super(fieldTags, strategy, camera, robotToCamera);
-        this.cameraId = cameraId;
+        //this.cameraId = cameraId;
     }
 
     @Override
