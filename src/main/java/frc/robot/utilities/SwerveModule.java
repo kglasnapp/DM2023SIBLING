@@ -275,4 +275,12 @@ public class SwerveModule {
     public double getCurrent() {
       return driveMotor.getOutputCurrent();
     }
+
+    public double getVoltage() {
+      return driveMotor.getBusVoltage();
+    }
+
+    public double getVelocity() {
+      return driveMotor.getEncoder().getVelocity();
+    }
 }

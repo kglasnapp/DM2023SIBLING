@@ -78,9 +78,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
-  final DigitalInput robotIDCheck = new DigitalInput(0); // robotIDCheck.get returns true for the sibling, false for comp bot
-  private final RearGrabberSubsystem rearGrabberSubsystem = 
-    robotIDCheck.get()?new RearGrabberSubsystem():null;
+  final DigitalInput robotIDCheck = new DigitalInput(0); // robotIDCheck.get returns true for the sibling, false for
+                                                         // comp bot
+  private final RearGrabberSubsystem rearGrabberSubsystem = robotIDCheck.get() ? new RearGrabberSubsystem() : null;
 
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
 
@@ -89,25 +89,25 @@ public class RobotContainer {
   private final static CommandXboxController m_controller2 = new CommandXboxController(3);
   // private final static ControllerAvg controllerAverage = new
   // ControllerAvg(m_controller);
-  private GenericHID keyPadController = new GenericHID(1);
+  private GenericHID keyPadController = null; 
+  private boolean KeyPadActive = false;
+  public boolean USBCamera = false;
 
   private Transform3d competitionCamerasTransform[] = {
-    new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()),
-    new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d())
+      new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()),
+      new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d())
   };
 
   private Transform3d siblingCamerasTransform[] = {
-    new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()),
-    new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d())
+      new Transform3d(new Translation3d(0, 0.14, 0), new Rotation3d()),
+      new Transform3d(new Translation3d(0, -0.14, 0), new Rotation3d())
   };
-
-  
 
   private final PoseEstimatorAggregator poseEstimator = new PoseEstimatorAggregator(new PoseEstimatorSubsystem[] {
       new PoseEstimatorSubsystem("1", new PhotonCamera("gloworm1"),
-          robotIDCheck.get()?siblingCamerasTransform[0]:competitionCamerasTransform[0], m_drivetrainSubsystem),
+          robotIDCheck.get() ? siblingCamerasTransform[0] : competitionCamerasTransform[0], m_drivetrainSubsystem),
       new PoseEstimatorSubsystem("2", new PhotonCamera("gloworm2"),
-          robotIDCheck.get()?siblingCamerasTransform[1]:competitionCamerasTransform[1], m_drivetrainSubsystem),
+          robotIDCheck.get() ? siblingCamerasTransform[1] : competitionCamerasTransform[1], m_drivetrainSubsystem),
   });
 
   private final PiecePickerPoseProvider pickerPoseProvider = new PiecePickerPoseProvider();
@@ -125,22 +125,22 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
-    
+    if (KeyPadActive) {
+      keyPadController = new GenericHID(1);
+    }
     autonomousChooser.setDefaultOption("Over and Balance",
-    AutonomousCommandFactory.getAutonomousSimpleLowCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
-    .andThen(AutonomousCommandFactory.getOverAndBalanceCommand(m_drivetrainSubsystem, poseEstimator))
-  );
+        AutonomousCommandFactory.getAutonomousSimpleLowCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
+            .andThen(AutonomousCommandFactory.getOverAndBalanceCommand(m_drivetrainSubsystem, poseEstimator)));
     // A chooser for autonomous commands
     autonomousChooser.setDefaultOption("Middle Balance",
         AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem, m_armSubsystem, grabberSubsystem)
-        .andThen(AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator))
-      );
+            .andThen(AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator)));
     autonomousChooser.addOption("Simple Case and Left out",
         AutonomousCommandFactory.getAutonomousAcceleratedAndLeftOutCommand(m_drivetrainSubsystem, m_armSubsystem,
             grabberSubsystem));
     autonomousChooser.addOption("Simple Case and Right out",
-        AutonomousCommandFactory.getAutonomousSimpleAndRightDeacceleratedOutCommand(m_drivetrainSubsystem, m_armSubsystem,
+        AutonomousCommandFactory.getAutonomousSimpleAndRightDeacceleratedOutCommand(m_drivetrainSubsystem,
+            m_armSubsystem,
             grabberSubsystem));
 
     // Add commands to the autonomous command chooser
@@ -174,7 +174,7 @@ public class RobotContainer {
         m_controller2.povDown()));
 
     if (rearGrabberSubsystem != null) {
-      rearGrabberSubsystem.setDefaultCommand(new RearGrabberDefaultCommand(rearGrabberSubsystem,  m_controller2));
+      rearGrabberSubsystem.setDefaultCommand(new RearGrabberDefaultCommand(rearGrabberSubsystem, m_controller2));
     }
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
@@ -303,15 +303,14 @@ public class RobotContainer {
     // m_controller.x().whileTrue(pathFollowCommand);
 
     m_controller.x().whileTrue(
-      //remove autonomous command
-      new ShoulderCommand(m_armSubsystem, 75000)
-      .andThen(new GrabberCommand(grabberSubsystem, true)).andThen(new WaitCommand(0.25))
-      .andThen(new StopGrabberCommand(grabberSubsystem))
-      .andThen((new ZeroExtenderCommand(m_armSubsystem).andThen(new ZeroShoulderCommand(m_armSubsystem))))
-    );
+        // remove autonomous command
+        new ShoulderCommand(m_armSubsystem, 75000)
+            .andThen(new GrabberCommand(grabberSubsystem, true)).andThen(new WaitCommand(0.25))
+            .andThen(new StopGrabberCommand(grabberSubsystem))
+            .andThen((new ZeroExtenderCommand(m_armSubsystem).andThen(new ZeroShoulderCommand(m_armSubsystem)))));
 
     m_controller.y().whileTrue(new RotateCommand(m_drivetrainSubsystem));
-      //new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, 180));
+    // new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, 180));
     // balanceCommand.andThen(new PrintCommand("Finished Balancing")));
 
     // todo: cone align
@@ -322,14 +321,15 @@ public class RobotContainer {
         .andThen(new ShoulderCommand(m_armSubsystem, 37352))
         .andThen(new ExtenderCommand(m_armSubsystem, 91000))));
 
-    m_controller2.y().whileTrue(new ShoulderCommand(m_armSubsystem, robotIDCheck.get()?210000:199600));
+    m_controller2.y().whileTrue(new ShoulderCommand(m_armSubsystem, robotIDCheck.get() ? 210000 : 199600));
 
-      //shoulder pos 199600
-      // AutonomousCommandFactory.pickupCubeCommand(m_drivetrainSubsystem, 
+    // shoulder pos 199600
+    // AutonomousCommandFactory.pickupCubeCommand(m_drivetrainSubsystem,
 
-    //   m_armSubsystem, grabberSubsystem, poseEstimator)
-      
-    //AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem, poseEstimator));
+    // m_armSubsystem, grabberSubsystem, poseEstimator)
+
+    // AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem,
+    // poseEstimator));
     // new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
     // new Pose2d( poseEstimator.get().getX(), poseEstimator.get().getY(), new
     // Rotation2d(Math.toRadians(160))))
@@ -345,23 +345,25 @@ public class RobotContainer {
     // .andThen(new ExtenderCommand(m_armSubsystem, 183023 * 16 / 36)));
 
     // m_controller2.b().whileTrue(getAutonomousCommandCase3());
-    m_controller2.b().whileTrue(new ShoulderCommand(m_armSubsystem, robotIDCheck.get()?255000: 245000));
-    
+    m_controller2.b().whileTrue(new ShoulderCommand(m_armSubsystem, robotIDCheck.get() ? 255000 : 245000));
 
     // m_controller2.x().whileTrue(new StraightPathCommand(m_drivetrainSubsystem,
     // poseEstimator,
     // new Pose2d(2.29, 7, new Rotation2d(Math.toRadians(180)))));
     // new ShouldeCommand(m_armSubsystem, 241000));
     m_controller2.x()
-        .whileTrue(new GrabberCommand(grabberSubsystem, false).andThen(new ShoulderCommand(m_armSubsystem, robotIDCheck.get()?207000: 195500)));
+        .whileTrue(new GrabberCommand(grabberSubsystem, false)
+            .andThen(new ShoulderCommand(m_armSubsystem, robotIDCheck.get() ? 207000 : 195500)));
 
     m_controller.povRight().whileTrue(pickUpFromRight());
     m_controller.povLeft().whileTrue(pickUpFromLeft());
-    for (int i = 0; i < 9; ++i) {
-      getKeyPadControllerButton(i).whileTrue(getCommandFor(i));
-    }
-    for (int i = 0; i < 3; ++i) {
-      getKeyPadControllerButton(9 + i).onTrue(new KeyPadStateCommand(i));
+    if (KeyPadActive) {
+      for (int i = 0; i < 9; ++i) {
+        getKeyPadControllerButton(i).whileTrue(getCommandFor(i));
+      }
+      for (int i = 0; i < 3; ++i) {
+        getKeyPadControllerButton(9 + i).onTrue(new KeyPadStateCommand(i));
+      }
     }
   }
 

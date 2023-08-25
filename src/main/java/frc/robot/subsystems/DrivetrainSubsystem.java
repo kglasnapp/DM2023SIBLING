@@ -38,7 +38,6 @@ import frc.robot.utilities.SwerveModuleConstants;
 
 import static frc.robot.Util.logf;
 
-
 //import java.util.Arrays;
 
 public class DrivetrainSubsystem extends SubsystemBase {
@@ -65,23 +64,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * line.
    */
   public static final double MAX_VELOCITY_METERS_PER_SECOND = 100.0 / 60.0 *
-     (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0) *
+      (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0) *
       0.10033 * Math.PI;
 
-      // public static final double MAX_VELOCITY_METERS_PER_SECOND = 100.0 / 60.0 *
-      // SdsModuleConfigurations.MK4I_L2.getDriveReduction() *
-      // SdsModuleConfigurations.MK4I_L2.getWheelDiameter() * Math.PI;
+  // public static final double MAX_VELOCITY_METERS_PER_SECOND = 100.0 / 60.0 *
+  // SdsModuleConfigurations.MK4I_L2.getDriveReduction() *
+  // SdsModuleConfigurations.MK4I_L2.getWheelDiameter() * Math.PI;
 
-
-
-//       public static final ModuleConfiguration MK4I_L2 = new ModuleConfiguration(
-//         0.10033,
-//         (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
-//         true,
-//         (14.0 / 50.0) * (10.0 / 60.0),
-//         false
-// );
-  
+  // public static final ModuleConfiguration MK4I_L2 = new ModuleConfiguration(
+  // 0.10033,
+  // (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0),
+  // true,
+  // (14.0 / 50.0) * (10.0 / 60.0),
+  // false
+  // );
 
   // public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
   // SdsModuleConfigurations.MK4I_L2.getDriveReduction() *
@@ -290,7 +286,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // We have to invert the angle of the NavX so that rotating the robot
     // counter-clockwise makes the angle increase.
     // return Rotation2d.fromDegrees(360.0 - m_navx.getYaw());
-  
 
     return Rotation2d.fromDegrees(-m_navx.getYaw() + currentOrientation);
   }
@@ -309,72 +304,54 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // drive(m_chassisSpeeds.vyMetersPerSecond, m_chassisSpeeds.vxMetersPerSecond,
     // m_chassisSpeeds.omegaRadiansPerSecond);
 
-    // if (Robot.count % 20 == 0) {
-    //   // System.out.println("In DrivetrainSubsystem chassis speeds =
-    //   // "+m_chassisSpeeds);
-    //   for (SwerveModule mod : swerveModules) {
-    //     SmartDashboard.putNumber(
-    //         "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-    //     SmartDashboard.putNumber(
-    //         "Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
-    //     SmartDashboard.putNumber(
-    //         "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
-    //   }
-    // }
+    if (Robot.count % 20 == -1) {
+      for (SwerveModule mod : swerveModules) {
+        SmartDashboard.putNumber(
+            "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+        SmartDashboard.putNumber(
+            "Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
+        SmartDashboard.putNumber(
+            "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
+      }
+    }
 
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
     if (Robot.count % 20 == 0) {
+      String currents = "";
+      String volts = "";
+      String encoders = "";
+      String speeds = "";
+      String angles = "";
+      String degrees = "";
+      String positions = "";
+      String velocities = "";
       for (int i = 0; i < states.length; i++) {
         SwerveModuleState state = states[i];
-        logf("id:%d sp:%.2f ang:%.2f deg:%.2f cur:%.2f enc:%.2f\n", i, state.speedMetersPerSecond, state.angle.getDegrees(),
-        swerveModules[i].getAngle().getDegrees(), swerveModules[i].getCurrent(), swerveModules[i].getPosition() );
+        currents += String.format("%.2f,", swerveModules[i].getCurrent());
+        volts += String.format("%.2f,", swerveModules[i].getVoltage());
+        encoders += String.format("%.2f,", swerveModules[i].getPosition());
+        speeds += String.format("%.2f,", state.speedMetersPerSecond);
+        angles += String.format("%.2f,", state.angle.getDegrees());
+        degrees += String.format("%.2f,", swerveModules[i].getAngle().getDegrees());
+        positions += String.format("%.2f,", swerveModules[i].getPosition());
+        velocities += String.format("%.2f,", swerveModules[i].getVelocity());
+
+        // logf("id:%d sp:%.2f ang:%.2f deg:%.2f cur:%.2f volts:%.2f enc:%.2f\n", i,
+        // state.speedMetersPerSecond, state.angle.getDegrees(),
+        // swerveModules[i].getAngle().getDegrees(), swerveModules[i].getCurrent(),
+        // swerveModules[i].getCurrent(), swerveModules[i].getPosition() );
       }
+      logf("cur<%s> volt<%s> enc<%s> sp<%s> ang<%s> deg<%s> pos<%s> vel<%s>\n", chop(currents), chop(volts), chop(encoders),
+          chop(speeds), chop(angles),
+          chop(degrees), chop(positions), chop(velocities));
     }
 
-    // SwerveModuleState[] states = drive();
-
-    // m_frontLeftModule.set(states[0].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // getAngleForModule(m_frontLeftModule, states[0]));
-    // m_frontRightModule.set(states[1].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // getAngleForModule(m_frontRightModule, states[1]));
-    // m_backLeftModule.set(states[2].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // getAngleForModule(m_backLeftModule, states[2]));
-    // m_backRightModule.set(states[3].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // getAngleForModule(m_backRightModule, states[3]));
-
-    // SwerveModuleState sms = new SwerveModuleState(0,Rotation2d.fromDegrees(0));
-
-    m_frontLeftModule.setDesiredState(states[0]); // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND *
-                                                  // MAX_VOLTAGE,
-    // getAngleForModule(m_frontLeftModule, states[0]));
-    m_frontRightModule.setDesiredState(states[1]); // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND *
-                                                   // MAX_VOLTAGE,
-    // getAngleForModule(m_frontRightModule, states[1]));
+    m_frontLeftModule.setDesiredState(states[0]);
+    m_frontRightModule.setDesiredState(states[1]);
     m_backLeftModule.setDesiredState(states[2]);
-    // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // getAngleForModule(m_backLeftModule, states[2]));
     m_backRightModule.setDesiredState(states[3]);
-    // .speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // getAngleForModule(m_backRightModule, states[3]));
-
-    // m_frontLeftModule.set(states[0].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // states[0].angle.getRadians());
-    // m_frontRightModule.set(states[1].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // states[1].angle.getRadians());
-    // m_backLeftModule.set(states[2].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // states[2].angle.getRadians());
-    // m_backRightModule.set(states[3].speedMetersPerSecond /
-    // MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
-    // states[3].angle.getRadians());
     if (Robot.count % 20 == 7) {
       // SmartDashboard.putNumber("FL", states[0].angle.getDegrees());
       // SmartDashboard.putNumber("FR", states[1].angle.getDegrees());
@@ -383,6 +360,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Yaw", m_navx.getYaw());
       SmartDashboard.putNumber("Rot", getGyroscopeRotation().getDegrees());
     }
+  }
+
+  private String chop(String s) {
+    // returns the string after removing the last character
+    return s.substring(0, s.length() - 1);
   }
 
   public double getAngleForModule(SwerveModule module, SwerveModuleState state) {

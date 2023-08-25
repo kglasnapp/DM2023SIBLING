@@ -18,7 +18,7 @@ public class GrabberDefaultCommand extends CommandBase {
 
     double CURRENT_THRESHOLD = 6.5;
     RunningAverage avg = new RunningAverage(20);
-    
+
     static double timer = 0;
 
     BooleanSupplier openProvider;
@@ -41,7 +41,7 @@ public class GrabberDefaultCommand extends CommandBase {
             BooleanSupplier openProvider2,
             BooleanSupplier closeProvider2,
             BooleanSupplier stopProvider2) {
-        this.grabberSubsystem = grabberSubsystem;
+        GrabberDefaultCommand.grabberSubsystem = grabberSubsystem;
         this.openProvider = openProvider;
         this.closeProvider = closeProvider;
         this.stopProvider = stopProvider;
@@ -58,13 +58,11 @@ public class GrabberDefaultCommand extends CommandBase {
         avg.init();
         state = State.READY;
     }
-    
-    
 
     @Override
     public void execute() {
         double avgCurrent = Math.abs(avg.add(grabberSubsystem.getStatorCurrent()));
-        
+
         if (grabberSubsystem.getForwardLimitSwitch()) {
             grabberSubsystem.zeroEncoder();
         }
@@ -82,17 +80,17 @@ public class GrabberDefaultCommand extends CommandBase {
             }
         }
         if (state == State.OVERCURRENT) {
-           if (timer + 3000 < RobotController.getFPGATime() / 1000) {
+            if (timer + 3000 < RobotController.getFPGATime() / 1000) {
                 grabberSubsystem.setGrabberPower(0);
                 state = State.READY;
-           }
+            }
         }
 
         if (state == State.DROPPING) {
             if (timer + 4000 < RobotController.getFPGATime() / 1000) {
                 grabberSubsystem.setGrabberPower(0);
                 state = State.READY;
-           }
+            }
         }
 
         if (openProvider.getAsBoolean() || openProvider2.getAsBoolean()) {

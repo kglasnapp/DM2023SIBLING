@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
   private final PDHData pdhData = new PDHData();
   public static Alliance alliance;
   public static Leds led = new Leds();
-  
+
   Command cmd;
 
   /**
@@ -52,7 +52,9 @@ public class Robot extends TimedRobot {
     Util.logf("Start Swerve %s\n", alliance.toString());
 
     m_robotContainer = new RobotContainer();
-    CameraServer.startAutomaticCapture();
+    if (m_robotContainer.USBCamera) {
+      CameraServer.startAutomaticCapture();
+    }
   }
 
   SparkMaxPIDController controller;
@@ -124,8 +126,6 @@ public class Robot extends TimedRobot {
   // // );
   // }
 
-  
-
   /**
    * This function is called every robot packet, no matter the mode. Use this for
    * items like
@@ -152,7 +152,7 @@ public class Robot extends TimedRobot {
       pdhData.logPDHData();
     }
     led.periodic();
-    //setNeoPixelColors();
+    // setNeoPixelColors();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

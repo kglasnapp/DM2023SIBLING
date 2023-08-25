@@ -35,7 +35,7 @@ public class Leds extends SubsystemBase {
         m_led.start();
     }
 
-    private void setoldNeoPixelColors() {
+    public void setoldNeoPixelColors() {
         if (Robot.count % 50 == 0) {
             color++;
             color = color % 6;
