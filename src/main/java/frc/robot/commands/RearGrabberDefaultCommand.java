@@ -36,8 +36,8 @@ public class RearGrabberDefaultCommand extends CommandBase {
         double joyX = controller2.getLeftX();
         double joyY = controller2.getLeftY();
         if (Robot.count % 50 == 0) {
-            logf("Rear Grabber State:%s joyX:%.2f joyY:%.2f Tilt Pos:%.2f Last:%.2f Cur:%.2f\n", GrabberDefaultCommand.state, joyX, joyY,
-                    rearGrabberSubsystem.getTiltPos(), rearGrabberSubsystem.getLastTiltPos(), rearGrabberSubsystem.getTiltCurrent());
+            // logf("Rear Grabber State:%s joyX:%.2f joyY:%.2f Tilt Pos:%.2f Last:%.2f Cur:%.2f\n", GrabberDefaultCommand.state, joyX, joyY,
+            //         rearGrabberSubsystem.getTiltPos(), rearGrabberSubsystem.getLastTiltPos(), rearGrabberSubsystem.getTiltCurrent());
         }
         if (joyX < -0.8) {
             rearGrabberSubsystem.setIntakePower(-1);

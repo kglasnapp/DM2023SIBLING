@@ -318,36 +318,36 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
-    if (Robot.count % 20 == 0) {
-      String currents = "";
-      String volts = "";
-      String encoders = "";
-      String speeds = "";
-      String angles = "";
-      String degrees = "";
-      String positions = "";
-      String velocities = "";
-      for (int i = 0; i < states.length; i++) {
-        SwerveModuleState state = states[i];
-        currents += String.format("%.2f,", swerveModules[i].getCurrent());
-        volts += String.format("%.2f,", swerveModules[i].getVoltage());
-        encoders += String.format("%.2f,", swerveModules[i].getPosition());
-        speeds += String.format("%.2f,", state.speedMetersPerSecond);
-        angles += String.format("%.2f,", state.angle.getDegrees());
-        degrees += String.format("%.2f,", swerveModules[i].getAngle().getDegrees());
-        positions += String.format("%.2f,", swerveModules[i].getPosition());
-        velocities += String.format("%.2f,", swerveModules[i].getVelocity());
+    // if (Robot.count % 20 == 0) {
+    //   String currents = "";
+    //   String volts = "";
+    //   String encoders = "";
+    //   String speeds = "";
+    //   String angles = "";
+    //   String degrees = "";
+    //   String positions = "";
+    //   String velocities = "";
+    //   for (int i = 0; i < states.length; i++) {
+    //     SwerveModuleState state = states[i];
+    //     currents += String.format("%.2f,", swerveModules[i].getCurrent());
+    //     volts += String.format("%.2f,", swerveModules[i].getVoltage());
+    //     encoders += String.format("%.2f,", swerveModules[i].getPosition());
+    //     speeds += String.format("%.2f,", state.speedMetersPerSecond);
+    //     angles += String.format("%.2f,", state.angle.getDegrees());
+    //     degrees += String.format("%.2f,", swerveModules[i].getAngle().getDegrees());
+    //     positions += String.format("%.2f,", swerveModules[i].getPosition());
+    //     velocities += String.format("%.2f,", swerveModules[i].getVelocity());
 
-        // logf("id:%d sp:%.2f ang:%.2f deg:%.2f cur:%.2f volts:%.2f enc:%.2f\n", i,
-        // state.speedMetersPerSecond, state.angle.getDegrees(),
-        // swerveModules[i].getAngle().getDegrees(), swerveModules[i].getCurrent(),
-        // swerveModules[i].getCurrent(), swerveModules[i].getPosition() );
-      }
+    //     // logf("id:%d sp:%.2f ang:%.2f deg:%.2f cur:%.2f volts:%.2f enc:%.2f\n", i,
+    //     // state.speedMetersPerSecond, state.angle.getDegrees(),
+    //     // swerveModules[i].getAngle().getDegrees(), swerveModules[i].getCurrent(),
+    //     // swerveModules[i].getCurrent(), swerveModules[i].getPosition() );
+    //   }
+      /*
       logf("cur<%s> volt<%s> enc<%s> sp<%s> ang<%s> deg<%s> pos<%s> vel<%s>\n", chop(currents), chop(volts), chop(encoders),
           chop(speeds), chop(angles),
           chop(degrees), chop(positions), chop(velocities));
-    }
-
+    } */
     m_frontLeftModule.setDesiredState(states[0]);
     m_frontRightModule.setDesiredState(states[1]);
     m_backLeftModule.setDesiredState(states[2]);
@@ -360,12 +360,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Yaw", m_navx.getYaw());
       SmartDashboard.putNumber("Rot", getGyroscopeRotation().getDegrees());
     }
-  }
+    }
+  
 
-  private String chop(String s) {
-    // returns the string after removing the last character
-    return s.substring(0, s.length() - 1);
-  }
+  // private String chop(String s) {
+  //   // returns the string after removing the last character
+  //   return s.substring(0, s.length() - 1);
+  // }
 
   public double getAngleForModule(SwerveModule module, SwerveModuleState state) {
     if (state.speedMetersPerSecond < 0.01) {
