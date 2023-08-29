@@ -38,15 +38,9 @@ import frc.robot.utilities.SwerveModuleConstants;
 
 import static frc.robot.Util.logf;
 
-//import java.util.Arrays;
-
 public class DrivetrainSubsystem extends SubsystemBase {
-  /**
-   * The maximum voltage that will be delivered to the drive motors.
-   * <p>
-   * This can be reduced to cap the robot's maximum speed. Typically, this is
-   * useful during initial testing of the robot.
-   */
+
+   // The maximum voltage that will be delivered to the drive motors.
   public static final double MAX_VOLTAGE = 12.0;
   // fixme Measure the drivetrain's maximum velocity or calculate the theoretical.
   // The formula for calculating the theoretical maximum velocity is:
@@ -230,7 +224,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // m_pigeon.setFusedHeading(0.0);
 
     // FIXed Uncomment if you are using a NavX
-    System.out.println("zero Gyro");
+    logf("zero Gyro");
     currentOrientation = 0;
     if (m_navx.isMagnetometerCalibrated()) {
       // // We will only get valid fused headings if the magnetometer is calibrated

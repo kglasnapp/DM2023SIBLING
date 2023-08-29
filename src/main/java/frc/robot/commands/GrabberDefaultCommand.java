@@ -3,12 +3,12 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Robot;
-import frc.robot.subsystems.RearGrabberSubsystem;
+import frc.robot.subsystems.GrabberSubsystem;
 
 import static frc.robot.utilities.Util.logf;
 
-public class RearGrabberDefaultCommand extends CommandBase {
-    static RearGrabberSubsystem rearGrabberSubsystem;
+public class GrabberDefaultCommand extends CommandBase {
+    static GrabberSubsystem grabberSubsystem;
     CommandXboxController controller2;
 
     enum STATE {
@@ -17,16 +17,16 @@ public class RearGrabberDefaultCommand extends CommandBase {
 
     STATE state = STATE.IDLE;
 
-    public RearGrabberDefaultCommand(RearGrabberSubsystem rearGrabberSubsystem, CommandXboxController controller2) {
-        RearGrabberDefaultCommand.rearGrabberSubsystem = rearGrabberSubsystem;
+    public GrabberDefaultCommand(GrabberSubsystem rearGrabberSubsystem, CommandXboxController controller2) {
+        GrabberDefaultCommand.grabberSubsystem = rearGrabberSubsystem;
         this.controller2 = controller2;
         addRequirements(rearGrabberSubsystem);
     }
 
     @Override
     public void initialize() {
-        rearGrabberSubsystem.setTiltPosition(160);
-        rearGrabberSubsystem.setIntakePower(0);
+        grabberSubsystem.setTiltAngle(0);
+        grabberSubsystem.setIntakePower(0);
         state = STATE.RAISED;
         logf("Init Rear Grab Default %d\n", Robot.count);
     }
@@ -40,18 +40,18 @@ public class RearGrabberDefaultCommand extends CommandBase {
             //         rearGrabberSubsystem.getTiltPos(), rearGrabberSubsystem.getLastTiltPos(), rearGrabberSubsystem.getTiltCurrent());
         }
         if (joyX < -0.8) {
-            rearGrabberSubsystem.setIntakePower(-1);
+            grabberSubsystem.setIntakePower(-1);
         } else if (joyX > 0.8) {
-            rearGrabberSubsystem.setIntakePower(1);
+            grabberSubsystem.setIntakePower(1);
         } else {
-            rearGrabberSubsystem.setIntakePower(0);
+            grabberSubsystem.setIntakePower(0);
         }
-
+        double angle = grabberSubsystem.getLastTiltAngle();
         if (joyY > .8) {
-            rearGrabberSubsystem.setTiltPosition(460);
+            grabberSubsystem.setTiltAngle(angle + 5);
         }
         if (joyY < -0.8) {
-             rearGrabberSubsystem.setTiltPosition(148);
+            grabberSubsystem.setTiltAngle(angle - 5);
         }
     }
 
