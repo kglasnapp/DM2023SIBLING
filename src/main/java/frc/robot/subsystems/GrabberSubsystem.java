@@ -12,6 +12,7 @@ import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 
 /**
  * REV Smart Motion Guide
@@ -54,27 +55,27 @@ public class GrabberSubsystem extends SubsystemBase {
     private CANSparkMax grabberIntakeMotor;
     private SparkMaxPIDController pidController;
     private RelativeEncoder tiltEncoder;
-    public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM, maxVel, minVel, maxAcc, allowedErr;
-    public int count = 0;
-    public int myMode = 0;
+    private PID_MAX pid = new PID_MAX();
 
     public GrabberSubsystem() {
 
         // Setup paramters for the tilt motor
         grabberTiltMotor = new CANSparkMax(GRABBER_TILT_MOTOR_ID, MotorType.kBrushless);
         grabberTiltMotor.restoreFactoryDefaults();
-        tiltForwardLimit = grabberTiltMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-        tiltReverseLimit = grabberTiltMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-        tiltForwardLimit.enableLimitSwitch(false);
-        tiltReverseLimit.enableLimitSwitch(false);
+        tiltForwardLimit = grabberTiltMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+        tiltReverseLimit = grabberTiltMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+        tiltForwardLimit.enableLimitSwitch(true);
+        tiltReverseLimit.enableLimitSwitch(true);
         tiltEncoder = grabberTiltMotor.getEncoder();
         pidController = grabberTiltMotor.getPIDController();
-        setDefaultPIPCoefficients();
-        PIDToMax();
+        pid.PIDCoefficientsTilt(pidController);
+        pid.PIDToMax();
 
         // Setup parametere for the grabber motor
         grabberIntakeMotor = new CANSparkMax(GRABBER_INTAKE_MOTOR_ID, MotorType.kBrushless);
         grabberIntakeMotor.restoreFactoryDefaults();
+        pid.putPidCoefficientToDashBoard();
+        logf("Grabber System Setup kP for Tilt:%.6f\n", pid.kP);
     }
 
     public boolean setTiltAngle(double angle) {
@@ -82,12 +83,18 @@ public class GrabberSubsystem extends SubsystemBase {
             logf("****** Error attempted to set an angle to large or small angle:%.1f\n", angle);
             return false;
         }
-        double setPoint = angle / 1000;
+
+        double setPoint = angle * (200000 / 360);
+        setPoint = angle * 20;
         lastTiltAngle = angle;
         lastTiltPosition = setPoint;
+        logf("Set angle:%.2f set point:%f\n", angle, setPoint);
         pidController.setReference(setPoint, CANSparkMax.ControlType.kSmartMotion);
+        double processVariable = tiltEncoder.getPosition();
         SmartDashboard.putNumber("Tilt SP", setPoint);
+        SmartDashboard.putNumber("Tilt Ang", angle);
         SmartDashboard.putNumber("Tilt Out", grabberTiltMotor.getAppliedOutput());
+        SmartDashboard.putNumber("Process", processVariable);
         return true;
     }
 
@@ -128,101 +135,24 @@ public class GrabberSubsystem extends SubsystemBase {
         }
     }
 
-    private void setDefaultPIPCoefficients() {
-        kP = 5e-5;
-        kI = 1e-6;
-        kD = 0;
-        kIz = 0;
-        kFF = 0.000156;
-        kMaxOutput = 1;
-        kMinOutput = -1;
-        // Smart Motion Coefficients
-        maxRPM = 5700; // maxPRM  velocity mode only
-        maxVel = 2000; // maxVel  for velocity mode only
-        maxAcc = 1500;
-    }
-
-    private void PIDToMax() {
-        // set PID coefficients
-        pidController.setP(kP);
-        pidController.setI(kI);
-        pidController.setD(kD);
-        pidController.setIZone(kIz);
-        pidController.setFF(kFF);
-        pidController.setOutputRange(kMinOutput, kMaxOutput);
-
-    }
-
-    private void getPidCoefficientsFromDashBoard() {
-        // read PID coefficients from SmartDashboard
-        double p = SmartDashboard.getNumber("P Gain", 0);
-        double i = SmartDashboard.getNumber("I Gain", 0);
-        double d = SmartDashboard.getNumber("D Gain", 0);
-        double iz = SmartDashboard.getNumber("I Zone", 0);
-        double ff = SmartDashboard.getNumber("Feed Forward", 0);
-        double max = SmartDashboard.getNumber("Max Output", 0);
-        double min = SmartDashboard.getNumber("Min Output", 0);
-        double maxV = SmartDashboard.getNumber("Max Velocity", 0);
-        double minV = SmartDashboard.getNumber("Min Velocity", 0);
-        double maxA = SmartDashboard.getNumber("Max Acceleration", 0);
-        double allE = SmartDashboard.getNumber("Allowed Closed Loop Error", 0);
-        // if PID coefficients on SmartDashboard have changed, write new values to controller
-        if ((p != kP)) {
-            pidController.setP(p);
-            kP = p;
-        }
-        if ((i != kI)) {
-            pidController.setI(i);
-            kI = i;
-        }
-        if ((d != kD)) {
-            pidController.setD(d);
-            kD = d;
-        }
-        if ((iz != kIz)) {
-            pidController.setIZone(iz);
-            kIz = iz;
-        }
-        if ((ff != kFF)) {
-            pidController.setFF(ff);
-            kFF = ff;
-        }
-        if ((max != kMaxOutput) || (min != kMinOutput)) {
-            pidController.setOutputRange(min, max);
-            kMinOutput = min;
-            kMaxOutput = max;
-        }
-        if ((maxV != maxVel)) {
-            pidController.setSmartMotionMaxVelocity(maxV, 0);
-            maxVel = maxV;
-        }
-        if ((minV != minVel)) {
-            pidController.setSmartMotionMinOutputVelocity(minV, 0);
-            minVel = minV;
-        }
-        if ((maxA != maxAcc)) {
-            pidController.setSmartMotionMaxAccel(maxA, 0);
-            maxAcc = maxA;
-        }
-        if ((allE != allowedErr)) {
-            pidController.setSmartMotionAllowedClosedLoopError(allE, 0);
-            allowedErr = allE;
-        }
-    }
-
     // This method will be called once per scheduler run
     @Override
     public void periodic() {
-        if (Robot.count % 15 == 5) {
-            double current = getTiltCurrent();
-            SmartDashboard.putNumber("GrStC", current);
-            SmartDashboard.putBoolean("GrForL", getForwardLimitSwitchTilt());
-            SmartDashboard.putBoolean("GrRevL", getReverseLimitSwitchTilt());
-            SmartDashboard.putNumber("GrPos", getTiltPos());
-            SmartDashboard.putNumber("GrLastPos", lastTiltPosition);
-        }
-        if (Robot.count % 15 == 10) {
-            getPidCoefficientsFromDashBoard();
+        pidController.setReference(lastTiltPosition, CANSparkMax.ControlType.kSmartMotion);
+        if (RobotContainer.smartForElevator) {
+          if (Robot.count % 15 == 5) {
+                double current = getTiltCurrent();
+                SmartDashboard.putNumber("GrStC", current);
+                SmartDashboard.putBoolean("GrForL", getForwardLimitSwitchTilt());
+                SmartDashboard.putBoolean("GrRevL", getReverseLimitSwitchTilt());
+                SmartDashboard.putNumber("GrPos", getTiltPos());
+                SmartDashboard.putNumber("GrLastPos", lastTiltPosition);
+                SmartDashboard.putNumber("Tilt Out", grabberTiltMotor.getAppliedOutput());
+            }
+            if (Robot.count % 15 == 10) {
+                pid.getPidCoefficientsFromDashBoard();
+            }
         }
     }
+
 }

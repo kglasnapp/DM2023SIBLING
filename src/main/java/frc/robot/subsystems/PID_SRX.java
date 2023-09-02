@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import static frc.robot.utilities.Util.logf;
 
-public class PID extends SubsystemBase {
+public class PID_SRX extends SubsystemBase {
 
   // Initial (default) PID coefficients
   public double kP = 0.5;
@@ -23,13 +23,13 @@ public class PID extends SubsystemBase {
   public String name;
 
   // Set PID using the default PID
-  public PID(String name, boolean smart) {
+  public PID_SRX(String name, boolean smart) {
     this.name = name;
     this.smart = smart;
   }
 
   // Set PID using the unique values for P, I, D the remaining values are default
-  public PID(String name, double kP, double kI, double kD, boolean smart) {
+  public PID_SRX(String name, double kP, double kI, double kD, boolean smart) {
     this.name = name;
     this.kP = kP;
     this.kI = kI;
@@ -39,7 +39,7 @@ public class PID extends SubsystemBase {
   }
 
   // Set PID using the unique values for all parameters
-  public PID(String name, double kP, double kI, double kD, double kIz, double kFF, double min, double max,
+  public PID_SRX(String name, double kP, double kI, double kD, double kIz, double kFF, double min, double max,
       boolean smart) {
     this.name = name;
     this.kP = kP;
@@ -53,7 +53,7 @@ public class PID extends SubsystemBase {
     this.smart = smart;
   }
 
-  public PID(String name, double kP, double kI, double kD, double kIz, double kFF, double maxIntegralAccumulation,
+  public PID_SRX(String name, double kP, double kI, double kD, double kIz, double kFF, double maxIntegralAccumulation,
       double resetIntegralAccumulationThreshold, int allowableCloseLoopError, boolean smart) {
     this.name = name;
     this.kP = kP;

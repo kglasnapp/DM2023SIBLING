@@ -203,13 +203,13 @@ public class FXMotor {
         motor.getSensorCollection().setIntegratedSensorPosition((int) position, Constants.kTimeoutMs);
     }
 
-    void setPositionPID(PID pid, FeedbackDevice feedBack) {
+    void setPositionPID(PID_SRX pid, FeedbackDevice feedBack) {
         //feedBackDevice = feedBack;
         setPositionPID(motor, 0, pid);
         PIDToFX(motor, pid, 0, Constants.kTimeoutMs);
     }
 
-    void setVelocityPID(PID pid) {
+    void setVelocityPID(PID_SRX pid) {
         PIDToFX(motor, pid, 1, Constants.kTimeoutMs);
     }
 
@@ -217,7 +217,7 @@ public class FXMotor {
         return motor.getMotorOutputVoltage();
     }
 
-    public void PIDToFX(TalonFX srx, PID pid, int slot, int timeout) {
+    public void PIDToFX(TalonFX srx, PID_SRX pid, int slot, int timeout) {
         srx.config_kP(slot, pid.kP, timeout);
         srx.config_kI(slot, pid.kI, timeout);
         srx.config_kD(slot, pid.kD, timeout);
@@ -263,7 +263,7 @@ public class FXMotor {
         motor.setSensorPhase(phase);
     }
 
-    private void setPositionPID(TalonFX talon, int pidIdx, PID pid) {
+    private void setPositionPID(TalonFX talon, int pidIdx, PID_SRX pid) {
         // Config the sensor used for Primary PID and sensor direction
 
         // talon.configSelectedFeedbackSensor(feedBackDevice, pidIdx,

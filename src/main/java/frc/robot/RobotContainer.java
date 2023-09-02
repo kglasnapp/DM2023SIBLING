@@ -25,9 +25,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.GrabberDefaultCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.utilities.SwerveModule;
@@ -46,8 +48,9 @@ public class RobotContainer {
   // robotIDCheck.get returns true for the sibling, false for
   final DigitalInput robotIDCheck = new DigitalInput(0);
   private final GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final static CommandXboxController m_controller = new CommandXboxController(2);
-  private final static CommandXboxController m_controller2 = new CommandXboxController(3);
+  //private final static CommandXboxController m_controller2 = new CommandXboxController(3);
   private GenericHID keyPadController = null;
   public boolean USBCamera = false;
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
@@ -55,6 +58,7 @@ public class RobotContainer {
   private SlewRateLimiter sLY = new SlewRateLimiter(9);
   private SlewRateLimiter sRX = new SlewRateLimiter(1);
   public static SendableChooser<Command> autonomousChooser = new SendableChooser<>();
+  public static boolean smartForElevator = true; 
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -102,7 +106,8 @@ public class RobotContainer {
 
     // Put the chooser on the dashboard
     SmartDashboard.putData("Autonomous Mode", (Sendable) autonomousChooser);
-    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem, m_controller2));
+    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem, m_controller));
+    elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, m_controller));
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
         m_drivetrainSubsystem,
         () -> (SwerveModule.powerRatio == 1 ? -modifyAxis((sLY.calculate(m_controller.getLeftY())))
@@ -118,7 +123,8 @@ public class RobotContainer {
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((m_controller.getRightX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        m_controller2.leftBumper()));
+                // KAG Chagned to controller 0
+        m_controller.leftBumper()));
 
     // m_armSubsystem.setDefaultCommand(new DefaultArmCommand(m_armSubsystem,
     // () -> (RobotContainer.getLeftBumper() ? -1 : 1) *
@@ -156,21 +162,21 @@ public class RobotContainer {
     return m_controller.getHID().getRawButton(5);
   }
 
-  public static double getRightTrigger2() {
-    return m_controller2.getRightTriggerAxis();
-  }
+  // public static double getRightTrigger2() {
+  //   return m_controller2.getRightTriggerAxis();
+  // }
 
-  public static double getLeftTrigger2() {
-    return m_controller2.getLeftTriggerAxis();
-  }
+  // public static double getLeftTrigger2() {
+  //   return m_controller2.getLeftTriggerAxis();
+  // }
 
-  public static boolean getRightBumper2() {
-    return m_controller2.getHID().getRawButton(6);
-  }
+  // public static boolean getRightBumper2() {
+  //   return m_controller2.getHID().getRawButton(6);
+  // }
 
-  public static boolean getLeftBumper2() {
-    return m_controller2.getHID().getRawButton(5);
-  }
+  // public static boolean getLeftBumper2() {
+  //   return m_controller2.getHID().getRawButton(5);
+  // }
 
   public static int getPov() {
     return m_controller.getHID().getPOV();
