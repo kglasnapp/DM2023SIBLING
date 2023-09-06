@@ -12,6 +12,8 @@ import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
+import frc.robot.RobotContainer.ShowPID;
 
 /**
  * REV Smart Motion Guide
@@ -43,7 +45,7 @@ import frc.robot.Robot;
  */
 
 public class ElevatorSubsystem extends SubsystemBase {
-    private static final int Elevator_MOTOR_ID = 12;
+    private static final int Elevator_MOTOR_ID = 11;
     private double lastElevatorPosition = 0;
     private double lastElevatorSetPoint = 0;
     private SparkMaxLimitSwitch forwardLimit;
@@ -54,11 +56,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     private PID_MAX pid = new PID_MAX();
     private double elevatorTicksPerInch = 1000;
 
+    public static double HOME_POS = 0.0;
+    public static double LOW_POS = 0.0;
+    public static double MEDIUM_POS = 0.0;
+    public static double HIGH_POS = 0.0;
+
     public ElevatorSubsystem() {
 
         // Setup paramters for the tilt motor
         elevatorMotor = new CANSparkMax(Elevator_MOTOR_ID, MotorType.kBrushless);
         elevatorMotor.restoreFactoryDefaults();
+        elevatorMotor.setSmartCurrentLimit(2);
         forwardLimit = elevatorMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
         reverseLimit = elevatorMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
         forwardLimit.enableLimitSwitch(true);
@@ -113,11 +121,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         return elevatorMotor.getOutputCurrent();
     }
 
-    private boolean getForwardLimitSwitch() {
+    public boolean getForwardLimitSwitch() {
         return forwardLimit.isPressed();
     }
 
-    private boolean getReverseLimitSwitch() {
+    public boolean getReverseLimitSwitch() {
         return reverseLimit.isPressed();
     }
 
@@ -134,7 +142,8 @@ public class ElevatorSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("ElevLastPos", lastElevatorPosition);
             SmartDashboard.putNumber("Elev Out", elevatorMotor.getAppliedOutput());
         }
-        if (Robot.count % 15 == 12) {
+        //if (RobotContainer.showPID == ShowPID.ELEVATOR &&  Robot.count % 15 == 12) {
+            if ( Robot.count % 15 == 12) {
             pid.getPidCoefficientsFromDashBoard();
         }
     }

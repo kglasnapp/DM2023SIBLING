@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class PID_MAX {
 
     private SparkMaxPIDController pidController;
+    private String pidName;
     public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxVel, minVel, maxAcc, allowedErr;
 
     public void PIDCoefficientsTilt(SparkMaxPIDController pidController) {
@@ -22,6 +23,8 @@ public class PID_MAX {
         maxVel = 2000; // for velocity mode
         maxAcc = 1500;
         this.pidController =  pidController;
+        pidName = "Tilt";
+
     }
 
     public void PIDCoefficientsElevator(SparkMaxPIDController pidController) {
@@ -37,6 +40,7 @@ public class PID_MAX {
         maxVel = 2000; // for velocity mode
         maxAcc = 1500;
         this.pidController =  pidController;
+        pidName = "Elevator";
     }
     
 
@@ -59,6 +63,7 @@ public class PID_MAX {
 
     public void putPidCoefficientToDashBoard() {
         // display PID coefficients on SmartDashboard
+        SmartDashboard.putString("PID", pidName);
         SmartDashboard.putNumber("P Gain", kP);
         SmartDashboard.putNumber("I Gain", kI);
         SmartDashboard.putNumber("D Gain", kD);

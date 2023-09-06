@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.Leds;
+//import frc.robot.subsystems.LedSubsystem;
 import frc.robot.subsystems.PDHData;
 
 /**
@@ -26,10 +26,10 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
-  public static long count = 0;
+  public static int count = 0;
   private final PDHData pdhData = new PDHData();
   public static Alliance alliance;
-  public static Leds led = new Leds();
+  //public static Leds led = new Leds();
 
   Command cmd;
 
@@ -68,7 +68,7 @@ public class Robot extends TimedRobot {
     if (count % 500 == 0) {
       pdhData.logPDHData();
     }
-    led.periodic();
+    //led.periodic();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
