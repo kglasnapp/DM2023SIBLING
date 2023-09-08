@@ -224,7 +224,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // m_pigeon.setFusedHeading(0.0);
 
     // FIXed Uncomment if you are using a NavX
-    logf("zero Gyro");
+    logf("zero Gyro DT\n");
     currentOrientation = 0;
     if (m_navx.isMagnetometerCalibrated()) {
       // // We will only get valid fused headings if the magnetometer is calibrated
@@ -244,7 +244,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // m_pigeon.setFusedHeading(0.0);
 
     // FIXed Uncomment if you are using a NavX
-    System.out.println("zero Gyro");
+    logf("zero Gyro\n");
 
     if (m_navx.isMagnetometerCalibrated()) {
       // // We will only get valid fused headings if the magnetometer is calibrated

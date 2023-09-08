@@ -20,12 +20,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.GrabberDefaultCommand;
+import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -45,12 +47,12 @@ public class RobotContainer {
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   // robotIDCheck.get returns true for the sibling, false for
   final DigitalInput robotIDCheck = new DigitalInput(0);
-  private final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem();
+  public final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem();
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-  public final LedSubsystem leds = new LedSubsystem(elevatorSubsystem, grabberSubsystem);
+  public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  public final static LedSubsystem leds = new LedSubsystem();
   private final static CommandXboxController driveController = new CommandXboxController(2);
-  private final static CommandXboxController operatorContoller = new CommandXboxController(3);
+  private final static CommandXboxController operatorController = new CommandXboxController(3);
   public boolean USBCamera = false;
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
   private SlewRateLimiter sLX = new SlewRateLimiter(9);
@@ -67,7 +69,6 @@ public class RobotContainer {
     Cone, Cube
   }
 
-  
   public static enum ShowPID {
     NONE, ELEVATOR, TILT
   }
@@ -142,6 +143,7 @@ public class RobotContainer {
     robotMode = mode;
     logf("Set Robot Mode: %s\n", mode);
     SmartDashboard.putString("Mode", robotMode.toString());
+    leds.setRobotModeLeds();
   }
 
   /**
@@ -167,17 +169,23 @@ public class RobotContainer {
       }
     }));
 
-    operatorContoller.button(OperatorButtons.CONE.value).whileTrue(new RunCommand(new Runnable() {
+    operatorController.button(OperatorButtons.CONE.value).onTrue(Commands.runOnce(new Runnable() {
+      //   controller.button(OperatorButtons.CONE.value).onTrue((new Runnable() {
       public void run() {
         setMode(RobotMode.Cone);
       }
     }));
 
-    operatorContoller.button(OperatorButtons.CUBE.value).whileTrue(new RunCommand(new Runnable() {
+    operatorController.button(OperatorButtons.CUBE.value).onTrue(Commands.runOnce(new Runnable() {
+      //   controller.button(OperatorButtons.CUBE.value).onTrue(new RunCommand(new Runnable() {
       public void run() {
         setMode(RobotMode.Cube);
       }
     }));
+
+    operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));
+    operatorController.button(OperatorButtons.MIDDLE.value).onTrue(new PositionCommand(this, OperatorButtons.MIDDLE));
+    operatorController.button(OperatorButtons.HIGH.value).onTrue(new PositionCommand(this, OperatorButtons.HIGH));
 
     // y Button will rotate the Robot 180 degrees
     driveController.y().onTrue(new RotateCommand(m_drivetrainSubsystem));

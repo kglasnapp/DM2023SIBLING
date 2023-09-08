@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.ShowPID;
+import frc.robot.subsystems.LedSubsystem.Leds;
 
 /**
  * REV Smart Motion Guide
@@ -136,14 +137,18 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (Robot.count % 15 == 8) {
             double current = getElevatorCurrent();
             SmartDashboard.putNumber("ElevC", current);
-            SmartDashboard.putBoolean("ElevForL", getForwardLimitSwitch());
-            SmartDashboard.putBoolean("ElevRevL", getReverseLimitSwitch());
+            boolean forLimit = getForwardLimitSwitch();
+            boolean revLimit = getReverseLimitSwitch();
+            RobotContainer.leds.setLimitSwitchLed(Leds.ElevatorForward, forLimit);
+            RobotContainer.leds.setLimitSwitchLed(Leds.ElevatorReverse, revLimit);
+            SmartDashboard.putBoolean("ElevForL", forLimit);
+            SmartDashboard.putBoolean("ElevRevL", revLimit);
             SmartDashboard.putNumber("ElevPos", getElevatorPos());
             SmartDashboard.putNumber("ElevLastPos", lastElevatorPosition);
             SmartDashboard.putNumber("Elev Out", elevatorMotor.getAppliedOutput());
         }
-        //if (RobotContainer.showPID == ShowPID.ELEVATOR &&  Robot.count % 15 == 12) {
-            if ( Robot.count % 15 == 12) {
+        if (RobotContainer.showPID == ShowPID.ELEVATOR && Robot.count % 15 == 12) {
+            //  if ( Robot.count % 15 == 12) {
             pid.getPidCoefficientsFromDashBoard();
         }
     }

@@ -21,7 +21,8 @@ public class GrabberDefaultCommand extends CommandBase {
 
     STATE state = STATE.IDLE;
 
-    public GrabberDefaultCommand(GrabberTiltSubsystem grabberSubsystem, IntakeSubsystem intakeSubsystem, CommandXboxController operatorController) {
+    public GrabberDefaultCommand(GrabberTiltSubsystem grabberSubsystem, IntakeSubsystem intakeSubsystem,
+            CommandXboxController operatorController) {
         GrabberDefaultCommand.grabberSubsystem = grabberSubsystem;
         this.controller2 = operatorController;
         this.intakeSubsystem = intakeSubsystem;
@@ -31,7 +32,7 @@ public class GrabberDefaultCommand extends CommandBase {
     @Override
     public void initialize() {
         grabberSubsystem.setTiltAngle(0);
-       intakeSubsystem.intakeOff();
+        intakeSubsystem.intakeOff();
         logf("Init Rear Grab Default %d\n", Robot.count);
     }
 
@@ -43,16 +44,16 @@ public class GrabberDefaultCommand extends CommandBase {
             if (pov == 270) {
                 intakeSubsystem.intakeIn();
             } else if (pov == 90) {
-               intakeSubsystem.intakeOut();;
+                intakeSubsystem.intakeOut();
             } else if (pov == -1) {
-                intakeSubsystem.intakeOff();;
+                intakeSubsystem.intakeOff();
             }
             double angle = grabberSubsystem.getLastTiltAngle();
             if (pov == 0) {
-                grabberSubsystem.setTiltAngle(angle + 5);
+                grabberSubsystem.setTiltAngle(angle + 1);
             }
             if (pov == 180) {
-                grabberSubsystem.setTiltAngle(angle - 5);
+                grabberSubsystem.setTiltAngle(angle - 1);
             }
             lastPov = pov;
         }
