@@ -25,8 +25,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.ElevatorCommand;
-import frc.robot.commands.GrabberDefaultCommand;
+import frc.robot.commands.DefaultElevatorCommand;
+import frc.robot.commands.DefaultGrabberCommand;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -62,7 +62,6 @@ public class RobotContainer {
   public static boolean smartForElevator = true;
   public static RobotMode robotMode;
 
-  // TODO Adjust to show correct PID on the Smart Dash Board
   public static ShowPID showPID = ShowPID.TILT;
 
   public static enum RobotMode {
@@ -89,8 +88,10 @@ public class RobotContainer {
   public RobotContainer() {
     // Set the default Robot Mode to Cube
     setMode(RobotMode.Cube);
-    grabberSubsystem.setDefaultCommand(new GrabberDefaultCommand(grabberSubsystem, intakeSubsystem, driveController));
-    elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, driveController));
+    grabberSubsystem.setDefaultCommand(new DefaultGrabberCommand(grabberSubsystem, intakeSubsystem, driveController));
+    Command defaulElevatorCommand = new DefaultElevatorCommand(elevatorSubsystem, grabberSubsystem, driveController);
+    elevatorSubsystem.setDefaultCommand(defaulElevatorCommand);
+
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
         m_drivetrainSubsystem,
         () -> (SwerveModule.powerRatio == 1 ? -modifyAxis((sLY.calculate(driveController.getLeftY())))
@@ -183,9 +184,25 @@ public class RobotContainer {
       }
     }));
 
+    driveController.start().onTrue(Commands.runOnce(new Runnable() {
+      public void run() {
+        if (showPID == ShowPID.TILT) {
+          showPID = ShowPID.ELEVATOR;
+        } else {
+          showPID = ShowPID.TILT;
+        }
+        logf("Change PID control to %s\n", showPID);
+      }
+    }));
+
     operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));
     operatorController.button(OperatorButtons.MIDDLE.value).onTrue(new PositionCommand(this, OperatorButtons.MIDDLE));
     operatorController.button(OperatorButtons.HIGH.value).onTrue(new PositionCommand(this, OperatorButtons.HIGH));
+    operatorController.button(OperatorButtons.HOME.value).onTrue(new PositionCommand(this, OperatorButtons.HOME));
+
+    operatorController.button(OperatorButtons.GROUND.value).onTrue(new PositionCommand(this, OperatorButtons.GROUND));
+    operatorController.button(OperatorButtons.CHUTE.value).onTrue(new PositionCommand(this, OperatorButtons.CHUTE));
+    operatorController.button(OperatorButtons.SHELF.value).onTrue(new PositionCommand(this, OperatorButtons.SHELF));
 
     // y Button will rotate the Robot 180 degrees
     driveController.y().onTrue(new RotateCommand(m_drivetrainSubsystem));

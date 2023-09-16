@@ -13,6 +13,8 @@ public class TopDropCommand extends CommandBase {
     double CONE_ANGLE = 10;
     double CUBE_ANGLE = 10;
 
+    double HIGH_POS = 0.0;
+
     ElevatorSubsystem elevatorSubsystem;
     GrabberTiltSubsystem grabberSubsystem;
     double targetAngle = 0;
@@ -32,13 +34,13 @@ public class TopDropCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        elevatorSubsystem.setElevatorPos(ElevatorSubsystem.HIGH_POS);
+        elevatorSubsystem.setElevatorPos(HIGH_POS);
         grabberSubsystem.setTiltAngle(targetAngle);
     }
 
     @Override
     public boolean isFinished() {
-        return Math.abs(elevatorSubsystem.getElevatorPos() - ElevatorSubsystem.HIGH_POS) < ELEVATOR_THRESHOLD
-            && Math.abs(grabberSubsystem.getTiltPos() - targetAngle) < TILT_THRESHOLD;
+        return Math.abs(elevatorSubsystem.getElevatorPos() - HIGH_POS) < ELEVATOR_THRESHOLD
+            && Math.abs(grabberSubsystem.getTiltAngleDegrees() - targetAngle) < TILT_THRESHOLD;
     }
 }

@@ -107,6 +107,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    alliance = DriverStation.getAlliance();
+    Util.logf("Enable Robot Alliance: %s\n", alliance.toString());
+    RobotContainer.leds.setAllianceLeds();
   }
 
   /** This function is called periodically during operator control. */
