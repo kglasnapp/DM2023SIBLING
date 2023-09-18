@@ -16,6 +16,7 @@ public class LimitSwitch {
     Leds reverseLed;
     String forwardName;
     String reverseName;
+    boolean first = true;
 
     public LimitSwitch(CANSparkMax motor, String name, Leds forwardLed, Leds reverseLed) {
         this.forwardLed = forwardLed;
@@ -31,16 +32,17 @@ public class LimitSwitch {
     public void periodic() {
         boolean forLimit = forwardLimit.isPressed();
         boolean revLimit = reverseLimit.isPressed();
-        if (forLimit != lastForward) {
+        if (forLimit != lastForward || first) {
             RobotContainer.leds.setLimitSwitchLed(forwardLed, forLimit);
-            SmartDashboard.putBoolean(forwardName, forLimit);
+            SmartDashboard.putBoolean(forwardName, !forLimit);
             lastForward = forLimit;
         }
-        if (revLimit != lastReverse) {
+        if (revLimit != lastReverse || first) {
             RobotContainer.leds.setLimitSwitchLed(reverseLed, revLimit);
-            SmartDashboard.putBoolean(reverseName, revLimit);
+            SmartDashboard.putBoolean(reverseName, !revLimit);
             lastReverse = revLimit;
         }
+        first = false;
     }
 
     public boolean getForward() {

@@ -11,22 +11,16 @@ import static frc.robot.utilities.Util.logf;
 public class DefaultGrabberCommand extends CommandBase {
     static GrabberTiltSubsystem grabberSubsystem;
     IntakeSubsystem intakeSubsystem;
-    CommandXboxController controller2;
+    CommandXboxController operatorController;
     int lastPov = -1;
-   
-
-    enum STATE {
-        IDLE, HOMEING, RAISED, DROPED
-    }
-
-    STATE state = STATE.IDLE;
 
     public DefaultGrabberCommand(GrabberTiltSubsystem grabberSubsystem, IntakeSubsystem intakeSubsystem,
             CommandXboxController operatorController) {
         DefaultGrabberCommand.grabberSubsystem = grabberSubsystem;
-        this.controller2 = operatorController;
+        this.operatorController = operatorController;
         this.intakeSubsystem = intakeSubsystem;
         addRequirements(grabberSubsystem);
+
     }
 
     @Override
@@ -39,24 +33,28 @@ public class DefaultGrabberCommand extends CommandBase {
 
     @Override
     public void execute() {
+        if (!grabberSubsystem.isReady()) {
+            // TODO return;
+        }
+        boolean left = operatorController.getHID().getRawButton(5);
+        boolean right = operatorController.getHID().getRawButton(6);
+        if (left) {
+            intakeSubsystem.intakeIn();
+        }
+        if (right) {
+            intakeSubsystem.intakeOut();
+        }
+        if (!(right || left)) {
+            intakeSubsystem.intakeOff();
+        }
         int pov = RobotContainer.getDriverPov();
         if (pov != lastPov) {
-            //logf("Pov: %d\n", pov);
-            if (intakeSubsystem != null) { // For testing the intake may be null
-                if (pov == 270) {
-                    intakeSubsystem.intakeIn();
-                } else if (pov == 90) {
-                    intakeSubsystem.intakeOut();
-                } else if (pov == -1) {
-                    intakeSubsystem.intakeOff();
-                }
-            }
             double angle = grabberSubsystem.getLastTiltAngle();
-            if (pov == 0) {
-                grabberSubsystem.setTiltAngle(angle + 1);
-            }
             if (pov == 180) {
-                grabberSubsystem.setTiltAngle(angle - 1);
+                grabberSubsystem.setTiltAngle(angle + 20);
+            }
+            if (pov == 0) {
+                grabberSubsystem.setTiltAngle(angle - 20);
             }
             lastPov = pov;
         }

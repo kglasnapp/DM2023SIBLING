@@ -49,7 +49,7 @@ public class RobotContainer {
   final DigitalInput robotIDCheck = new DigitalInput(0);
   public final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem();
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-  public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(grabberSubsystem);
   public final static LedSubsystem leds = new LedSubsystem();
   private final static CommandXboxController driveController = new CommandXboxController(2);
   private final static CommandXboxController operatorController = new CommandXboxController(3);
@@ -59,8 +59,9 @@ public class RobotContainer {
   private SlewRateLimiter sLY = new SlewRateLimiter(9);
   private SlewRateLimiter sRX = new SlewRateLimiter(1);
   public static SendableChooser<Command> autonomousChooser = new SendableChooser<>();
-  public static boolean smartForElevator = true;
+  public static  boolean smartForElevator = true;
   public static RobotMode robotMode;
+  public static boolean smartDashBoardForElevator = true;
 
   public static ShowPID showPID = ShowPID.TILT;
 
