@@ -19,6 +19,7 @@ import frc.robot.RobotContainer.ShowPID;
 import frc.robot.subsystems.LedSubsystem.Leds;
 import frc.robot.utilities.LimitSwitch;
 import frc.robot.utilities.RunningAverage;
+import static frc.robot.Constants.isMini;
 
 /**
  * REV Smart Motion Guide
@@ -54,7 +55,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     // this is the conversion ratio from the absolute encoder to the relative encoder of 
     // the tilt motor 
     final static double ABSOLUTE_ENCODER_RATIO = 360;
-  
+
     private double lastTiltRotations;
     private double lastTiltAngle = 0;
     private CANSparkMax grabberTiltMotor;
@@ -66,7 +67,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     private LimitSwitch limitSwitch;
     private boolean homed = false;
     int myCount = 0; // Counter used for timing in state machine
-    int overCurrent = 20;
+    private final static int OVER_CURRENT = 20;
 
     enum STATE {
         IDLE, HOMING, READY, OVERCURRENT_HOMING, OVERCURRENT_READY
@@ -82,7 +83,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         // Setup paramters for the tilt motor
         grabberTiltMotor = new CANSparkMax(GRABBER_TILT_MOTOR_ID, MotorType.kBrushless);
         grabberTiltMotor.restoreFactoryDefaults();
-        grabberTiltMotor.setSmartCurrentLimit(10);
+        grabberTiltMotor.setSmartCurrentLimit((int) OVER_CURRENT);
 
         limitSwitch = new LimitSwitch(grabberTiltMotor, "Tlt", Leds.GrabberForward, Leds.GrabberReverse);
         absEnc = new CANCoder(9);
@@ -175,8 +176,11 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     }
 
     public boolean isElevatorSafeToMove() {
+        if (isMini) {
+            return true; // Testing with mini it is always safe to move elevator
+        }
         double angle = getAbsEncoder();
-        return angle > 75 && angle < 105;
+        return angle > 75 && angle < 155;
     }
 
     public boolean isReady() {
@@ -209,6 +213,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
                 SmartDashboard.putNumber("TltAng", round2(getTiltAngleDegrees()));
                 SmartDashboard.putNumber("TltLastRot", lastTiltRotations);
                 SmartDashboard.putNumber("TltPwr", round2(grabberTiltMotor.getAppliedOutput()));
+                SmartDashboard.putNumber("TltVel", round2(tiltEncoder.getVelocity()));
             }
             if (Robot.count % 30 == 10) {
                 if (RobotContainer.showPID == ShowPID.TILT) {
@@ -224,9 +229,8 @@ public class GrabberTiltSubsystem extends SubsystemBase {
             double tiltAbsolutePosition = getAbsEncoder();
             // TODO put back in when connected to actual intake
             // tiltEncoder.setPosition(tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO);
-            logf("Motor Tilt Angle:%.3f Abs Encoder Rotations:%.3f Angle:%.3f\n", getTiltAngleDegrees(),
-                    tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO,
-                    getAbsEncoder());
+            logf("Tilt Motor Angle:%.3f  Abs Encoder Rotations:%.3f Abs Encoder Angle:%.3f\n", getTiltAngleDegrees(),
+                    tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO, tiltAbsolutePosition);
         }
 
     }
@@ -261,7 +265,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
                     tiltEncoder.setPosition(0);
                     break;
                 }
-                if (current > overCurrent) {
+                if (current > OVER_CURRENT) {
                     logf("Over Current %.2f detected while homing wait for it to clear\n", current);
                     setPower(0);
                     myCount = 25; // Set to wait 500 ms to see if high current stops
@@ -269,7 +273,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
                 }
                 break;
             case READY:
-                if (current > overCurrent) {
+                if (current > OVER_CURRENT) {
                     setPower(0);
                     myCount = 25; // Set to wait 500 ms to see if high current stops
                     state = STATE.OVERCURRENT_READY;
@@ -294,8 +298,10 @@ public class GrabberTiltSubsystem extends SubsystemBase {
                     if (current > 10) {
                         logf("***** Error ***** Tilt Current:%.2f in Ready still too high\n", current);
                         myCount = 25; // Set to wait 500 ms to see if high current stops
+                    } else {
+                        state = STATE.READY;
                     }
-                }
+                } 
                 break;
         }
     }

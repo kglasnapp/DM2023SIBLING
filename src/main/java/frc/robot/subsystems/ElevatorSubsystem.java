@@ -59,8 +59,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     private double elevatorRotationsPerInch = 1; // TODO Fix when connect to real robot
     private double current = 0;
     private GrabberTiltSubsystem grabberSubsystem;
+    private double lastPower = 99;
 
-    final private double MAX_CURRENT = 20;
+    final private double MAX_CURRENT = 30;
     private int myCount = 0;
 
     enum STATE {
@@ -74,7 +75,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Setup paramters for the tilt motor
         elevatorMotor = new CANSparkMax(Elevator_MOTOR_ID, MotorType.kBrushless);
         elevatorMotor.restoreFactoryDefaults();
-        elevatorMotor.setSmartCurrentLimit(20);
+        elevatorMotor.setInverted(false); // TODO do we need to invert????
+        elevatorMotor.setSmartCurrentLimit((int)MAX_CURRENT);
         limitSwitch = new LimitSwitch(elevatorMotor, "Elev", Leds.ElevatorForward, Leds.ElevatorReverse);
         distanceEncoder = elevatorMotor.getEncoder();
         distanceEncoder.setPosition(0);
@@ -105,11 +107,16 @@ public class ElevatorSubsystem extends SubsystemBase {
             logf("***** Elevator not safe to move angle:%.2f\n", grabberSubsystem.getAbsEncoder());
             return false;
         }
-
     }
 
-    public void setPower(double value) {
-        elevatorMotor.set(value);
+    public void setPower(double value, boolean homing) {
+        if (grabberSubsystem.isElevatorSafeToMove() || homing) {
+            if (lastPower != value || value == 0) {
+                logf("Elevator set a new power %.2f\n", value);
+                elevatorMotor.set(value);
+                lastPower = value;
+            }
+        }
     }
 
     public double getLastElevatorPositionInches() {
@@ -125,25 +132,25 @@ public class ElevatorSubsystem extends SubsystemBase {
         logf("Brake mode: %s\n", motor.getIdleMode());
     }
 
-    public double getElevatorPos() {
+    public double getElevatorPosRevs() {
         return distanceEncoder.getPosition();
     }
 
-    public double getElevatorLastPos() {
+    public double getElevatorLastPosInches() {
         return lastElevatorInches;
     }
 
     public double getElevatorCurrent() {
-        return current;
+        return elevatorMotor.getOutputCurrent();
     }
 
     public boolean atSetPoint() {
-        double error = distanceEncoder.getPosition() - lastElevatorInches;
+        double error = distanceEncoder.getPosition() - lastElevatorSetPoint;
         if (Robot.count % 10 == 5) {
             SmartDashboard.putNumber("EleErr", error);
         }
         // Note error is in revolutions
-        return Math.abs(error) < .1;
+        return Math.abs(error) < .05;
     }
 
     public boolean getForwardLimitSwitch() {
@@ -162,27 +169,37 @@ public class ElevatorSubsystem extends SubsystemBase {
         homed = value;
     }
 
-    public void setEncoder(double value) {
+    public void setEncoderRevs(double value) {
         distanceEncoder.setPosition(value);
     }
+
+    double lastSetPointForLogging = 0;
 
     // This method will be called once per scheduler run
     @Override
     public void periodic() {
         limitSwitch.periodic();
+        if (atSetPoint() && lastSetPointForLogging != lastElevatorSetPoint) {
+            logf("Elevator at set point:%.2f requested set point:%.2f\n", distanceEncoder.getPosition(),
+                    lastElevatorSetPoint);
+            // setPower(0, false); // TODO do we need this?
+            lastSetPointForLogging = lastElevatorSetPoint;
+        }
         current = getElevatorCurrent();
-        // TODO Allow homing when connected to real robot after testing
         doHoming(current);
-        //pidController.setReference(lastElevatorPosition, CANSparkMax.ControlType.kSmartMotion);
+        if (state == STATE.READY) {
+            pidController.setReference(lastElevatorSetPoint, CANSparkMax.ControlType.kSmartMotion);
+        }
         if (Robot.count % 15 == 8) {
             SmartDashboard.putNumber("ElevCur", round2(current));
-            SmartDashboard.putNumber("ElevPos", round2(getElevatorPos()));
+            SmartDashboard.putNumber("ElevPos", round2(getElevatorPosRevs()));
             SmartDashboard.putNumber("ElevLastPos", lastElevatorInches);
             SmartDashboard.putNumber("ElevPwr", round2(elevatorMotor.getAppliedOutput()));
+            SmartDashboard.putNumber("ElevVel", round2(distanceEncoder.getVelocity()));
         }
         if (RobotContainer.showPID == ShowPID.ELEVATOR && Robot.count % 15 == 12) {
             if (Robot.count % 15 == 12) {
-                pid.getPidCoefficientsFromDashBoard();
+                // TODO pid.getPidCoefficientsFromDashBoard();
             }
         }
     }
@@ -209,9 +226,9 @@ public class ElevatorSubsystem extends SubsystemBase {
             case HOMING:
                 if (getReverseLimitSwitch()) {
                     // At home so stop motor and indicate homed
-                    setPower(0);
+                    setPower(0, true);
                     setHomed(true);
-                    setEncoder(0);
+                    setEncoderRevs(0);
                     state = STATE.READY;
                     logf("Elevator is homed\n");
                     break;
@@ -222,7 +239,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                     state = STATE.OVERCURRENT;
                     break;
                 }
-                setPower(.2);
+                setPower(-.2, true);
                 break;
             case READY:
                 if (current > MAX_CURRENT) {
@@ -231,32 +248,32 @@ public class ElevatorSubsystem extends SubsystemBase {
                     state = STATE.OVERCURRENT;
                     break;
                 }
-
                 break;
             case OVERCURRENT:
                 myCount--;
                 if (myCount < 0) {
-                    setPower(0);
-                    myCount = 20; // Wait 400 ms to restart
-                    state = STATE.OVERCURRENTSTOPPED;
+                    if (current > MAX_CURRENT) {
+                        setPower(0, true);
+                        myCount = 20; // Wait 400 ms to restart
+                        state = STATE.OVERCURRENTSTOPPED;
+                    } else {
+                        state = STATE.HOMING;
+                    }
                 }
+                break;
             case OVERCURRENTSTOPPED:
                 myCount--;
                 if (myCount < 0) {
                     if (current > MAX_CURRENT) {
                         // If curent remains high continue to wait
-                        logf("Elevator current remains high -- current:%.2f\n", current);
+                        logf("***** Elevator current remains high -- current:%.2f\n", current);
                         myCount = 20; // Wait another 400 ms for current to go low
                         break;
                     }
                     // Current seems to have stablize restore last task
-                    if (getHomed()) {
-                        // TODO Restore any running PID
-                    } else {
-                        // Try to home again
-                        state = STATE.IDLE;
-                    }
+                    state = STATE.HOMING;
                 }
+                break;
         }
     }
 

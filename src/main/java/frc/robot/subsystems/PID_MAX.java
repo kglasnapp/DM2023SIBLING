@@ -20,8 +20,8 @@ public class PID_MAX {
         kMinOutput = -1;
         // Smart Motion Coefficients
         // maxRPM = 5700; // for velocity mode
-        maxVel = 2000; // for velocity mode
-        maxAcc = 1500 * 2;
+        maxVel = 7000; // for velocity mode
+        maxAcc = 15000;
         this.pidController =  pidController;
         pidName = "Tilt";
 

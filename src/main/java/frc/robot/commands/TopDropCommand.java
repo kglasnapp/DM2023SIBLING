@@ -40,7 +40,7 @@ public class TopDropCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return Math.abs(elevatorSubsystem.getElevatorPos() - HIGH_POS) < ELEVATOR_THRESHOLD
+        return Math.abs(elevatorSubsystem.getElevatorPosRevs() - HIGH_POS) < ELEVATOR_THRESHOLD
             && Math.abs(grabberSubsystem.getTiltAngleDegrees() - targetAngle) < TILT_THRESHOLD;
     }
 }

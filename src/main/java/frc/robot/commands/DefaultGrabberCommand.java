@@ -34,7 +34,7 @@ public class DefaultGrabberCommand extends CommandBase {
     @Override
     public void execute() {
         if (!grabberSubsystem.isReady()) {
-            // TODO return;
+            return;
         }
         boolean left = operatorController.getHID().getRawButton(5);
         boolean right = operatorController.getHID().getRawButton(6);

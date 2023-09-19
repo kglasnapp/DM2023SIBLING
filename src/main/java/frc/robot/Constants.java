@@ -54,6 +54,7 @@ public final class Constants {
     public static boolean logging = false;
     public static String robotType = "Swerve";
     public static final int kTimeoutMs = 20;
+    public static final boolean isMini = false;
     public static class VisionConstants {
 
     

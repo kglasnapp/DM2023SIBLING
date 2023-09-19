@@ -34,31 +34,31 @@ public class PositionCommand extends CommandBase {
         timeOut = 200;
         switch (type) {
             case HOME:
-                tiltAngle = 0;
+                tiltAngle = 90;
                 elevatorDistance = 0;
                 break;
             case CHUTE:
-                tiltAngle = 50;
+                tiltAngle = 90;
                 elevatorDistance = 40;
                 break;
             case SHELF:
-                tiltAngle = 20;
+                tiltAngle = 90;
                 elevatorDistance = 15;
                 break;
             case GROUND:
-                tiltAngle = 1;
+                tiltAngle = 90;
                 elevatorDistance = 1;
                 break;
             case HIGH:
-                tiltAngle = 8;
+                tiltAngle = 90;
                 elevatorDistance = 7;
                 break;
             case MIDDLE:
-                tiltAngle = 5;
+                tiltAngle = 90;
                 elevatorDistance = 5;
                 break;
             case LOW:
-                tiltAngle = 2;
+                tiltAngle = 90;
                 elevatorDistance = 3;
                 break;
             case CONE:
@@ -67,7 +67,7 @@ public class PositionCommand extends CommandBase {
                 break;
         }
         robotContainer.grabberSubsystem.setTiltAngle(tiltAngle);
-        robotContainer.elevatorSubsystem.setElevatorPos(elevatorDistance);
+        // TODO robotContainer.elevatorSubsystem.setElevatorPos(elevatorDistance);
         logf("Init Position Command tilt angle:%.2f elevator distance:%.2f\n", tiltAngle, elevatorDistance);
     }
 
