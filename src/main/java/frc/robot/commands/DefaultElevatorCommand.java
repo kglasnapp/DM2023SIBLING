@@ -47,10 +47,10 @@ public class DefaultElevatorCommand extends CommandBase {
             } else {
                 // Control Elevator in position mode
                 if (pov == 270) {
-                    elevatorSubsystem.setElevatorPos(pos + 3);
+                    elevatorSubsystem.setElevatorPos(pos + 10);
                 }
                 if (pov == 90) {
-                    elevatorSubsystem.setElevatorPos(pos - 3);
+                    elevatorSubsystem.setElevatorPos(pos - 10);
                 }
             }
             lastPov = pov;

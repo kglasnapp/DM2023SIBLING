@@ -1,6 +1,6 @@
 
 package frc.robot;
-import edu.wpi.first.util.sendable.Sendable;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -9,90 +9,126 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.commands.ZeroGyroCommand;
 import frc.robot.commands.BalanceCommand;
+import frc.robot.commands.DisplayLogCommand;
 
 public class Autonomous {
-  DrivetrainSubsystem m_drivetrainSubsystem ;
+  DrivetrainSubsystem m_drivetrainSubsystem;
   private final BalanceCommand balanceCommand;
   public static SendableChooser<Command> autonomousChooser = new SendableChooser<>();
-    public Autonomous(DrivetrainSubsystem m_drivetrainSubsystem) {
-     this.m_drivetrainSubsystem = m_drivetrainSubsystem;
-      balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
-     
-// autonomousChooser.setDefaultOption("Over and Balance",
 
-    // AutonomousCommandFactory.getAutonomousSimpleLowCommand(m_drivetrainSubsystem,
-    // m_armSubsystem, grabberSubsystem)
-    // .andThen(AutonomousCommandFactory.getOverAndBalanceCommand(m_drivetrainSubsystem,
-    // poseEstimator)));
-    // // A chooser for autonomous commands
-    // autonomousChooser.setDefaultOption("Middle Balance",
-    // AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem,
-    // m_armSubsystem, grabberSubsystem)
-    // .andThen(AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem,
-    // poseEstimator)));
-    // autonomousChooser.addOption("Simple Case and Left out",
-    // AutonomousCommandFactory.getAutonomousAcceleratedAndLeftOutCommand(m_drivetrainSubsystem,
-    // m_armSubsystem,
-    // grabberSubsystem));
-    // autonomousChooser.addOption("Simple Case and Right out",
-    // AutonomousCommandFactory.getAutonomousSimpleAndRightDeacceleratedOutCommand(m_drivetrainSubsystem,
-    // m_armSubsystem,
-    // grabberSubsystem));
-
-    // // Add commands to the autonomous command chooser
-    // autonomousChooser.addOption("Case 1 left",
-    // getAutonomousCommandCase1(0).andThen(new
-    // StraightPathCommand(m_drivetrainSubsystem,
-    // getPoseEstimatorForTarget(poseEstimator, 2),
-    // getFinalPoseForCase1(0))));
-
-    // autonomousChooser.addOption("Case 1 middle", getAutonomousCommandCase1(1));
-    // autonomousChooser.addOption("CaSe 1 right", getAutonomousCommandCase1(2)
-    // .andThen(new StraightPathCommand(m_drivetrainSubsystem,
-    // getPoseEstimatorForTarget(poseEstimator, 0),
-    // getFinalPoseForCase1(2))));
-
-    // autonomousChooser.addOption("Case 2 left", getAutonomousCommandCase2(0));
-    // autonomousChooser.addOption("Case 1 middle", getAutonomousCommandCase1(1));
-    // autonomousChooser.addOption("Case 2 red", getAutonomousCommandCase2Red());
-    // autonomousChooser.addOption("Case 2 blue", getAutonomousCommandCase2Blue());
-    // autonomousChooser.addOption("Case 2 right", getAutonomousCommandCase2(2));
-    // autonomousChooser.addOption("Case 3", getAutonomousCommandCase3());
-
+  public Autonomous(DrivetrainSubsystem m_drivetrainSubsystem) {
+    this.m_drivetrainSubsystem = m_drivetrainSubsystem;
+    balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
+    autonomousChooser.addOption("Case 1 left", getAutonomousCommandCase1());
+    autonomousChooser.addOption("Case 2 left turn", getAutonomousCommandCase2());
+    autonomousChooser.addOption("Case 3 Center Balance", getAutonomousCommandCase3());
+    autonomousChooser.addOption("Case 4 Center Pickup Balance", getAutonomousCommandCase4());
     // Put the chooser on the dashboard
-    SmartDashboard.putData("Autonomous Mode", (Sendable) autonomousChooser);
-    }
+    SmartDashboard.putData("Autonomous Mode", autonomousChooser);
+  }
+
+  private Command getAutonomousCommandCase1() {
+    CommandBase command = new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, (180))
+        .andThen(new WaitCommand(0.5))
+        .andThen(new DisplayLogCommand("Run Case 1"));
+    return command;
+  }
+
+  private Command getAutonomousCommandCase2() {
+    CommandBase command = new DisplayLogCommand("Case 2")
+    .andThen(new WaitCommand(0.5));
+    return command;
+  }
+
+  private Command getAutonomousCommandCase3() {
+    CommandBase command = new DisplayLogCommand("Case 2")
+    .andThen(new WaitCommand(0.5));
+    return command;
+  }
+
+  private Command getAutonomousCommandCase4() {
+    CommandBase command = new DisplayLogCommand("Case 2")
+    .andThen(new WaitCommand(0.5));
+    return command;
+  }
 
 
- public Command getAutonomousCommandCase2Red() {
-   CommandBase command = new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, (180))
-   
-  // .andThen(new GrabberCommand(grabberSubsystem, false))
-  // .andThen(new KeyPadStateCommand(1))
-  // .andThen(getCommandFor(1))
-  // .andThen(new GrabberCommand(grabberSubsystem, true))
-  // .andThen(new WaitCommand(0.5))
-  // .andThen(new ZeroExtenderCommand(m_armSubsystem))
-  // .andThen(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
-  // new Pose2d(new Translation2d(2.1, 5.24), new
-  // Rotation2d(Math.toRadians(180)))))
-  // .andThen(new ZeroShoulderCommand(m_armSubsystem))
-  // .andThen(new ChangeTurboModeCommand())
-  // .andThen(new DriveCommand(m_drivetrainSubsystem, -1, 0, 0))
-  .andThen(new WaitCommand(0.5));
-  // .andThen(new ChangeNormalModeCommand())
-  // .andThen(new DriveCommand(m_drivetrainSubsystem, -1, 0, 0))
-  // .andThen(new WaitCommand(2.5))
-  // // .andThen(new DriveCommand(m_drivetrainSubsystem, -0.05,0,0))
-  // // .andThen(new WaitCommand(2))
-  // .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0));
-  // // .andThen(new BalanceCommand(m_drivetrainSubsystem))
-     command.setName("Case 2 red");
-   return command;
- }
 
 
- // public Command getAutonomousCommandCase2Blue() {
+
+
+
+
+  // autonomousChooser.setDefaultOption("Over and Balance",
+
+  // AutonomousCommandFactory.getAutonomousSimpleLowCommand(m_drivetrainSubsystem,
+  // m_armSubsystem, grabberSubsystem)
+  // .andThen(AutonomousCommandFactory.getOverAndBalanceCommand(m_drivetrainSubsystem,
+  // poseEstimator)));
+  // // A chooser for autonomous commands
+  // autonomousChooser.setDefaultOption("Middle Balance",
+  // AutonomousCommandFactory.getAutonomousSimpleCommand(m_drivetrainSubsystem,
+  // m_armSubsystem, grabberSubsystem)
+  // .andThen(AutonomousCommandFactory.getSetPositionAndBalanceCommand(m_drivetrainSubsystem,
+  // poseEstimator)));
+  // autonomousChooser.addOption("Simple Case and Left out",
+  // AutonomousCommandFactory.getAutonomousAcceleratedAndLeftOutCommand(m_drivetrainSubsystem,
+  // m_armSubsystem,
+  // grabberSubsystem));
+  // autonomousChooser.addOption("Simple Case and Right out",
+  // AutonomousCommandFactory.getAutonomousSimpleAndRightDeacceleratedOutCommand(m_drivetrainSubsystem,
+  // m_armSubsystem,
+  // grabberSubsystem));
+
+  // // Add commands to the autonomous command chooser
+  // autonomousChooser.addOption("Case 1 left",
+  // getAutonomousCommandCase1(0).andThen(new
+  // StraightPathCommand(m_drivetrainSubsystem,
+  // getPoseEstimatorForTarget(poseEstimator, 2),
+  // getFinalPoseForCase1(0))));
+
+  // autonomousChooser.addOption("Case 1 middle", getAutonomousCommandCase1(1));
+  // autonomousChooser.addOption("CaSe 1 right", getAutonomousCommandCase1(2)
+  // .andThen(new StraightPathCommand(m_drivetrainSubsystem,
+  // getPoseEstimatorForTarget(poseEstimator, 0),
+  // getFinalPoseForCase1(2))));
+
+  // autonomousChooser.addOption("Case 2 left", getAutonomousCommandCase2(0));
+  // autonomousChooser.addOption("Case 1 middle", getAutonomousCommandCase1(1));
+  // autonomousChooser.addOption("Case 2 red", getAutonomousCommandCase2Red());
+  // autonomousChooser.addOption("Case 2 blue", getAutonomousCommandCase2Blue());
+  // autonomousChooser.addOption("Case 2 right", getAutonomousCommandCase2(2));
+  // autonomousChooser.addOption("Case 3", getAutonomousCommandCase3());
+
+  
+  public Command getAutonomousCommandCase2Red() {
+    CommandBase command = new ZeroGyroCommand(m_drivetrainSubsystem, balanceCommand, (180))
+
+        // .andThen(new GrabberCommand(grabberSubsystem, false))
+        // .andThen(new KeyPadStateCommand(1))
+        // .andThen(getCommandFor(1))
+        // .andThen(new GrabberCommand(grabberSubsystem, true))
+        // .andThen(new WaitCommand(0.5))
+        // .andThen(new ZeroExtenderCommand(m_armSubsystem))
+        // .andThen(new StraightPathCommand(m_drivetrainSubsystem, poseEstimator,
+        // new Pose2d(new Translation2d(2.1, 5.24), new
+        // Rotation2d(Math.toRadians(180)))))
+        // .andThen(new ZeroShoulderCommand(m_armSubsystem))
+        // .andThen(new ChangeTurboModeCommand())
+        // .andThen(new DriveCommand(m_drivetrainSubsystem, -1, 0, 0))
+        .andThen(new WaitCommand(0.5));
+    // .andThen(new ChangeNormalModeCommand())
+    // .andThen(new DriveCommand(m_drivetrainSubsystem, -1, 0, 0))
+    // .andThen(new WaitCommand(2.5))
+    // // .andThen(new DriveCommand(m_drivetrainSubsystem, -0.05,0,0))
+    // // .andThen(new WaitCommand(2))
+    // .andThen(new DriveCommand(m_drivetrainSubsystem, 0, 0, 0));
+    // // .andThen(new BalanceCommand(m_drivetrainSubsystem))
+    command.setName("Case 2 red");
+    return command;
+  }
+
+  // public Command getAutonomousCommandCase2Blue() {
   // CommandBase command = new ZeroGyroCommand(m_drivetrainSubsystem,
   // balanceCommand, (180))
   // .andThen(new GrabberCommand(grabberSubsystem, false))
@@ -170,6 +206,5 @@ public class Autonomous {
   // command.setName("case 3");
   // return command;
   // }
-
 
 }

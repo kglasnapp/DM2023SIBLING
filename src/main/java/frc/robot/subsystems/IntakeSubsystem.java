@@ -18,17 +18,26 @@ import com.revrobotics.SparkMaxPIDController;
 
 public class IntakeSubsystem extends SubsystemBase {
     private static final int GRABBER_INTAKE_MOTOR_ID = 10;
+    private double targetIntakePower = 0;
     private double lastIntakePower = 0;
     private final CANSparkMax intakeMotor;
-    private final double defaultIntakePower = .6;
+
+    private final double defaultIntakePowerInCone = .6;
+    private final double defaultIntakePowerOutCone = .6;
+    private final double defaultIntakePowerInCube = .6;
+    private final double defaultIntakePowerOutCube = 1.0;
+
     private final double overCurrentPower = .05;
-    private final double maxCurrent = 10;
-    private final double maxCurrentLow = 2;
+
+    private final double maxCurrentCone = 10;
+    private final double maxCurrentLowCone = 2;
+    private final double maxCurrentCube = 5;
+    private final double maxCurrentLowCube = 2;
+
     //private PID_MAX pid = new PID_MAX();
     //private int timeOverMax = 0;
     //private int timeAtOverCurrent = 0;
     private SparkMaxPIDController pidController;
-    private boolean currentMode = false;
     private RunningAverage avg = new RunningAverage(10);
 
     public IntakeSubsystem() {
@@ -52,23 +61,19 @@ public class IntakeSubsystem extends SubsystemBase {
         logf("Brake mode: %s\n", intakeMotor.getIdleMode());
     }
 
-    public void setIntakeCurrent(double current) {
-        pidController.setReference(current, CANSparkMax.ControlType.kCurrent);
-    }
-
     public void intakeIn() {
         if (RobotContainer.robotMode == RobotMode.Cone) {
-            setIntakePower(-defaultIntakePower);
+            setIntakePower(-defaultIntakePowerInCone);
         } else {
-            setIntakePower(defaultIntakePower);
+            setIntakePower(defaultIntakePowerInCube);
         }
     }
 
     public void intakeOut() {
         if (RobotContainer.robotMode == RobotMode.Cone) {
-            setIntakePower(defaultIntakePower);
+            setIntakePower(defaultIntakePowerOutCone);
         } else {
-            setIntakePower(-defaultIntakePower);
+            setIntakePower(-defaultIntakePowerOutCube);
         }
     }
 
@@ -77,26 +82,14 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     private void setIntakePower(double power) {
-        if (lastIntakePower != power) {
-            lastIntakePower = power;
-            if (currentMode) {
-                logf("Grabber Intakecurrent:%.2f\n", power * 30);
-                setIntakeCurrent(power * 30);
-                //timeOverMax = 0;
-            } else {
-                intakeMotor.set(power);
-                logf("Grabber Intake power:%.2f\n", power);
-                //timeOverMax = 0;
-            }
-        }
+        targetIntakePower = power;
     }
 
-    private void setReducedIntakePower() {
-        if (lastIntakePower > 0) {
-            setIntakePower(overCurrentPower);
-        }
-        if (lastIntakePower < 0) {
-            setIntakePower(-overCurrentPower);
+    private double getReducedIntakePower() {
+        if (RobotContainer.robotMode == RobotMode.Cone) {
+            return overCurrentPower;
+        } else {
+            return -overCurrentPower;
         }
     }
 
@@ -105,66 +98,62 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     private STATE state = STATE.NORMAL;
-    private int myCount = 0;
+    // cycles over current limit
+    private int overcurrentCountUp = 0;
+    // cycles to remain in overcurrent state
+    private int overcurrentCountDown = 0;
+
+    private static final int overcurrentCountUpLimit = 30;
+    private static final int overcurrentCountDownLimit = 15;
 
     // This method will be called once per scheduler run
     @Override
     public void periodic() {
+        double maxCurrent = RobotContainer.robotMode == RobotContainer.RobotMode.Cone ? maxCurrentCone : maxCurrentCube;
+        double maxCurrentLow = RobotContainer.robotMode == RobotContainer.RobotMode.Cone ? maxCurrentLowCone
+                : maxCurrentLowCube;
+
         double current = intakeMotor.getOutputCurrent();
-        avg.add(current);
-        double avgCurrent = avg.getAverage();
-        //if (current > 0 || avgCurrent > 0)
-        //    logf("Intake Current:%.2f avg:%.2f\n", current, avgCurrent);
+        double avgCurrent = avg.add(current);
+        double power = targetIntakePower;
+
         if (state == STATE.NORMAL) {
             if (avgCurrent > maxCurrent) {
-                setReducedIntakePower();
+                overcurrentCountUp++;
+            }
+            if (overcurrentCountUp >= overcurrentCountUpLimit) {
                 state = STATE.OVERCURRENT;
-                myCount = 10;
+                overcurrentCountDown = overcurrentCountDownLimit;
+                overcurrentCountUp = 0;
                 logf("Intake Overcurrent detected avg current:%.2f\n", avgCurrent);
                 RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, true);
             }
         }
         if (state == STATE.OVERCURRENT) {
-            myCount--;
-            if (myCount < 0) {
-                if (avgCurrent < maxCurrentLow) {
-                    state = STATE.NORMAL;
-                    RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
-                } else {
-                    myCount = 10;
-                }
+            overcurrentCountDown--;
+            if (avgCurrent > maxCurrentLow) {
+                overcurrentCountDown = overcurrentCountDownLimit;
             }
+
+            if (overcurrentCountDown <= 0) {
+                state = STATE.NORMAL;
+                RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
+                overcurrentCountDown = 0;
+            }
+
+            power = getReducedIntakePower();
         }
 
-        // if (timeAtOverCurrent == 0) {
-        //     if (current > maxCurrent) {
-        //         timeOverMax++;
-        //         if (timeOverMax > 8) {
-        //             logf("Intake Over Current %,2f\n", current);
-        //             setReducedIntakePower();
-        //             RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, true);
-        //             timeAtOverCurrent = 15;
-        //             timeOverMax = 0;
-        //         }
-        //     }
-        // } else {
-        //     timeAtOverCurrent--;
-        //     if (current > maxCurrentLow) {
-        //         timeAtOverCurrent = 15;
-        //     }
-        //     if (timeAtOverCurrent <= 0) {
-        //         RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
-        //         intakeMotor.set(lastIntakePower);
-        //         timeAtOverCurrent = 0;
-        //     } else {
-        //         setReducedIntakePower();
-        //     }
-        // }
+        if (power != lastIntakePower) {
+            intakeMotor.set(power);
+            lastIntakePower = power;
+        }
 
         if (Robot.count % 10 == 1) {
             SmartDashboard.putNumber("Intk Cur", current);
             SmartDashboard.putNumber("Intk ACur", avgCurrent);
-            SmartDashboard.putNumber("Intk Pwr", lastIntakePower);
+            SmartDashboard.putNumber("Intk TPwr", lastIntakePower);
+            SmartDashboard.putNumber("Intk Pwr", power);
         }
     }
 

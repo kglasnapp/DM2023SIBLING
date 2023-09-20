@@ -75,7 +75,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Setup paramters for the tilt motor
         elevatorMotor = new CANSparkMax(Elevator_MOTOR_ID, MotorType.kBrushless);
         elevatorMotor.restoreFactoryDefaults();
-        elevatorMotor.setInverted(false); // TODO do we need to invert????
+        elevatorMotor.setInverted(false); 
+        setBrakeMode(elevatorMotor, true);
         elevatorMotor.setSmartCurrentLimit((int)MAX_CURRENT);
         limitSwitch = new LimitSwitch(elevatorMotor, "Elev", Leds.ElevatorForward, Leds.ElevatorReverse);
         distanceEncoder = elevatorMotor.getEncoder();
@@ -90,7 +91,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public boolean setElevatorPos(double inches) {
-        if (inches < 0 || inches > 40) {
+        if (inches < 0 || inches > 130) {
             logf("****** Error attempted to set position out of range positon:%.1f\n", inches);
             return false;
         }
@@ -174,7 +175,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     double lastSetPointForLogging = 0;
-
     // This method will be called once per scheduler run
     @Override
     public void periodic() {
@@ -186,7 +186,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             lastSetPointForLogging = lastElevatorSetPoint;
         }
         current = getElevatorCurrent();
-        doHoming(current);
+        doHomingAndMonitor(current);
         if (state == STATE.READY) {
             pidController.setReference(lastElevatorSetPoint, CANSparkMax.ControlType.kSmartMotion);
         }
@@ -204,7 +204,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 
-    private void doHoming(double current) {
+    private void doHomingAndMonitor(double current) {
         if (state != lastState) {
             logf("Elevator State Changed state:%s current:%.3f myCount:%d angle:%.2f\n", state, current, myCount,
                     grabberSubsystem.getAbsEncoder());

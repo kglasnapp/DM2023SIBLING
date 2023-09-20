@@ -51,10 +51,10 @@ public class DefaultGrabberCommand extends CommandBase {
         if (pov != lastPov) {
             double angle = grabberSubsystem.getLastTiltAngle();
             if (pov == 180) {
-                grabberSubsystem.setTiltAngle(angle + 20);
+                grabberSubsystem.setTiltAngle(angle + 5);
             }
             if (pov == 0) {
-                grabberSubsystem.setTiltAngle(angle - 20);
+                grabberSubsystem.setTiltAngle(angle - 5);
             }
             lastPov = pov;
         }

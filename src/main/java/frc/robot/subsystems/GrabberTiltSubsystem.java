@@ -83,6 +83,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         // Setup paramters for the tilt motor
         grabberTiltMotor = new CANSparkMax(GRABBER_TILT_MOTOR_ID, MotorType.kBrushless);
         grabberTiltMotor.restoreFactoryDefaults();
+        setBrakeMode(true);
         grabberTiltMotor.setSmartCurrentLimit((int) OVER_CURRENT);
 
         limitSwitch = new LimitSwitch(grabberTiltMotor, "Tlt", Leds.GrabberForward, Leds.GrabberReverse);
@@ -180,7 +181,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
             return true; // Testing with mini it is always safe to move elevator
         }
         double angle = getAbsEncoder();
-        return angle > 75 && angle < 155;
+        return angle > 40 && angle < 155;
     }
 
     public boolean isReady() {
@@ -206,6 +207,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     public void periodic() {
         limitSwitch.periodic();
         double current = getTiltCurrent();
+        // pidController.setReference(setPointRotations, CANSparkMax.ControlType.kSmartMotion);
         doHoming(current);
         if (RobotContainer.smartDashBoardForElevator) {
             if (Robot.count % 15 == 5) {

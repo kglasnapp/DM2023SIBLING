@@ -37,8 +37,8 @@ public class PID_MAX {
         kMinOutput = -1;
         // Smart Motion Coefficients
         // maxRPM = 5700; // for velocity mode
-        maxVel = 2000; // for velocity mode
-        maxAcc = 1500;
+        maxVel = 9000; // for velocity mode
+        maxAcc = 6500;
         this.pidController =  pidController;
         pidName = "Elevator";
     }

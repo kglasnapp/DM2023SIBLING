@@ -67,9 +67,9 @@ public class LedSubsystem extends SubsystemBase {
 
     public void setLimitSwitchLed(Leds led, boolean value) {
         if (value) {
-            setColors(led, 80, 0, 0);
-        } else {
             setColors(led, 0, 80, 0);
+        } else {
+            setColors(led, 80, 0, 0);
         }
     }
 
