@@ -14,7 +14,7 @@ import frc.robot.RobotContainer.RobotMode;
 import frc.robot.subsystems.LedSubsystem.Leds;
 import frc.robot.utilities.RunningAverage;
 
-import com.revrobotics.SparkMaxPIDController;
+//import com.revrobotics.SparkMaxPIDController;
 
 public class IntakeSubsystem extends SubsystemBase {
     private static final int GRABBER_INTAKE_MOTOR_ID = 10;
@@ -37,7 +37,7 @@ public class IntakeSubsystem extends SubsystemBase {
     //private PID_MAX pid = new PID_MAX();
     //private int timeOverMax = 0;
     //private int timeAtOverCurrent = 0;
-    private SparkMaxPIDController pidController;
+    //private SparkMaxPIDController pidController;
     private RunningAverage avg = new RunningAverage(10);
 
     public IntakeSubsystem() {

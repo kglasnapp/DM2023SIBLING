@@ -36,6 +36,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LedSubsystem;
 import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.utilities.SwerveModule;
+//import frc.robot.Autonomous;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -47,12 +48,14 @@ public class RobotContainer {
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   // robotIDCheck.get returns true for the sibling, false for
   final DigitalInput robotIDCheck = new DigitalInput(0);
+
   public final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem();
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(grabberSubsystem);
   public final static LedSubsystem leds = new LedSubsystem();
   private final static CommandXboxController driveController = new CommandXboxController(2);
   private final static CommandXboxController operatorController = new CommandXboxController(3);
+  private final Autonomous autotonomous = new Autonomous(m_drivetrainSubsystem);
   public boolean USBCamera = false;
   private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
   private SlewRateLimiter sLX = new SlewRateLimiter(9);

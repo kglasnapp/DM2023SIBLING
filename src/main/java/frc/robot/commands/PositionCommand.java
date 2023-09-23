@@ -16,6 +16,7 @@ public class PositionCommand extends CommandBase {
     RobotContainer robotContainer;
     double tiltAngle = 0;
     double elevatorDistance = 0;
+    
 
     public PositionCommand(RobotContainer robotContainer, OperatorButtons type) {
         this.type = type;
@@ -30,6 +31,7 @@ public class PositionCommand extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        started = false;
         logf("Command Started for %s\n", type);
         timeOut = 200;
         switch (type) {
@@ -51,7 +53,7 @@ public class PositionCommand extends CommandBase {
                 break;
             case HIGH:
                 tiltAngle = 70;
-                elevatorDistance = 120;
+                elevatorDistance = 105;
                 break;
             case MIDDLE:
                 tiltAngle = 70;
@@ -81,10 +83,17 @@ public class PositionCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
     }
+    boolean started = false;
 
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
+        // Fix case when grabber hits bumper upon startup
+        if (robotContainer.grabberSubsystem.isElevatorSafeToMove() && !started) {
+            robotContainer.elevatorSubsystem.setElevatorPos(elevatorDistance);
+            started = true;
+        }
+
         if (robotContainer.grabberSubsystem.atSetPoint() && robotContainer.elevatorSubsystem.atSetPoint()) {
             logf("Requested Positon Reached for type:%s\n", type);
             return true;

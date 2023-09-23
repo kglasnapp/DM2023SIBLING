@@ -28,7 +28,7 @@ public class PID_MAX {
     }
 
     public void PIDCoefficientsElevator(SparkMaxPIDController pidController) {
-        kP = 5e-5;
+        kP = 45e-6;
         kI = 1e-6;
         kD = 0;
         kIz = 0;
@@ -37,8 +37,8 @@ public class PID_MAX {
         kMinOutput = -1;
         // Smart Motion Coefficients
         // maxRPM = 5700; // for velocity mode
-        maxVel = 9000; // for velocity mode
-        maxAcc = 6500;
+        maxVel = 5700; // for velocity mode
+        maxAcc = 5700 * 2;
         this.pidController =  pidController;
         pidName = "Elevator";
     }
