@@ -13,7 +13,8 @@ public class DefaultElevatorCommand extends CommandBase {
     GrabberTiltSubsystem grabberSubsystem;
     CommandXboxController operatorController;
     int lastPov = -1;
-    private boolean powerMode = false;
+    private boolean powerMode = true;
+    private boolean elevatorPowered = false;
 
     public DefaultElevatorCommand(ElevatorSubsystem elevatorSubsystem, GrabberTiltSubsystem grabberSubsystem,
             CommandXboxController operatorController) {
@@ -31,27 +32,32 @@ public class DefaultElevatorCommand extends CommandBase {
     @Override
     public void execute() {
         int pov = RobotContainer.getDriverPov();
-        if (pov != lastPov) {
+        if (powerMode) {
             double pos = elevatorSubsystem.getLastElevatorPositionInches();
-            if (powerMode) {
-                // Control Elevator in power mode
-                if (pov == 270) {  // Up 
-                    elevatorSubsystem.setPower(-.2, false);
-                }
-                if (pov == 90) {  // Down
-                    elevatorSubsystem.setPower(.2, false);
-                }
-                if (!(pov == 270 || pov == 90)) {
-                    elevatorSubsystem.setPower(0, false);
-                }
-            } else {
-                // Control Elevator in position mode
-                if (pov == 270) {
-                    elevatorSubsystem.setElevatorPos(pos + 10);
-                }
-                if (pov == 90) {
-                    elevatorSubsystem.setElevatorPos(pos - 10);
-                }
+            // Control Elevator in power mode
+            if (pov == 270) {  // Up 
+                //elevatorSubsystem.setPower(-.2, false);
+                elevatorSubsystem.setElevatorPos(pos - .5);
+                elevatorPowered = true;
+            }
+            if (pov == 90) {  // Down
+                elevatorSubsystem.setElevatorPos(pos + .5);
+                //elevatorSubsystem.setPower(.2, false);
+                elevatorPowered = true;
+            }
+            if (!(pov == 270 || pov == 90) && elevatorPowered) { //Stop
+                //elevatorSubsystem.setPower(0, false);
+                elevatorPowered = false;
+            }
+        }
+        else if (pov != lastPov) {
+            double pos = elevatorSubsystem.getLastElevatorPositionInches();
+            // Control Elevator in position mode
+            if (pov == 270) {
+                elevatorSubsystem.setElevatorPos(pos + 10);
+            }
+            if (pov == 90) {
+                elevatorSubsystem.setElevatorPos(pos - 10);
             }
             lastPov = pov;
         }

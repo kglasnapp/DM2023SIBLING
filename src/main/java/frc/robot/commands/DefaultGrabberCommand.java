@@ -13,6 +13,7 @@ public class DefaultGrabberCommand extends CommandBase {
     IntakeSubsystem intakeSubsystem;
     CommandXboxController operatorController;
     int lastPov = -1;
+    boolean powerTilt = false;
 
     public DefaultGrabberCommand(GrabberTiltSubsystem grabberSubsystem, IntakeSubsystem intakeSubsystem,
             CommandXboxController operatorController) {
@@ -33,20 +34,20 @@ public class DefaultGrabberCommand extends CommandBase {
 
     @Override
     public void execute() {
-        if (!grabberSubsystem.isReady()) {
-            return;
-        }
         boolean left = operatorController.getHID().getRawButton(5);
         boolean right = operatorController.getHID().getRawButton(6);
-        if (left) {
+
+        if (left && grabberSubsystem.isReady()) {
             intakeSubsystem.intakeIn();
-        }
-        if (right) {
+        } else if (right && grabberSubsystem.isReady()) {
             intakeSubsystem.intakeOut();
-        }
-        if (!(right || left)) {
+        } else if (!(right || left)) {
             intakeSubsystem.intakeOff();
         }
+        // if (!grabberSubsystem.isReady()) {
+        //     return;
+        // }
+
         int pov = RobotContainer.getDriverPov();
         if (pov != lastPov) {
             double angle = grabberSubsystem.getLastTiltAngle();
@@ -57,6 +58,17 @@ public class DefaultGrabberCommand extends CommandBase {
                 grabberSubsystem.setTiltAngle(angle - 5);
             }
             lastPov = pov;
+        } 
+
+        if (RobotContainer.getRightTrigger() > .2){
+            grabberSubsystem.setPower(RobotContainer.getRightTrigger()/2);
+            powerTilt = true;
+        } else if (RobotContainer.getLeftTrigger() > .2){
+            grabberSubsystem.setPower(-RobotContainer.getLeftTrigger()/2);
+            powerTilt = true;
+        } else if (powerTilt){
+            grabberSubsystem.setPower(0);
+            powerTilt = false;
         }
     }
 }

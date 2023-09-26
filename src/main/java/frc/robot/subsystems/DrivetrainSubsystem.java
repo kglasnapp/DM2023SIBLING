@@ -33,6 +33,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.utilities.SwerveModule;
 import frc.robot.utilities.SwerveModuleConstants;
 
@@ -40,7 +41,7 @@ import static frc.robot.Util.logf;
 
 public class DrivetrainSubsystem extends SubsystemBase {
 
-   // The maximum voltage that will be delivered to the drive motors.
+  // The maximum voltage that will be delivered to the drive motors.
   public static final double MAX_VOLTAGE = 12.0;
   // fixme Measure the drivetrain's maximum velocity or calculate the theoretical.
   // The formula for calculating the theoretical maximum velocity is:
@@ -222,7 +223,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void zeroGyroscope() {
     // FIXed Remove if you are using a Pigeon
     // m_pigeon.setFusedHeading(0.0);
-
+    if (!RobotContainer.getBack()) {  // TODO  Clean up always was hit
+      return;
+    }
+    
     // FIXed Uncomment if you are using a NavX
     logf("zero Gyro DT\n");
     currentOrientation = 0;
@@ -337,10 +341,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     //     // swerveModules[i].getAngle().getDegrees(), swerveModules[i].getCurrent(),
     //     // swerveModules[i].getCurrent(), swerveModules[i].getPosition() );
     //   }
-      /*
-      logf("cur<%s> volt<%s> enc<%s> sp<%s> ang<%s> deg<%s> pos<%s> vel<%s>\n", chop(currents), chop(volts), chop(encoders),
-          chop(speeds), chop(angles),
-          chop(degrees), chop(positions), chop(velocities));
+    /*
+    logf("cur<%s> volt<%s> enc<%s> sp<%s> ang<%s> deg<%s> pos<%s> vel<%s>\n", chop(currents), chop(volts), chop(encoders),
+        chop(speeds), chop(angles),
+        chop(degrees), chop(positions), chop(velocities));
     } */
     m_frontLeftModule.setDesiredState(states[0]);
     m_frontRightModule.setDesiredState(states[1]);
@@ -354,8 +358,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Yaw", m_navx.getYaw());
       SmartDashboard.putNumber("Rot", getGyroscopeRotation().getDegrees());
     }
-    }
-  
+  }
 
   // private String chop(String s) {
   //   // returns the string after removing the last character

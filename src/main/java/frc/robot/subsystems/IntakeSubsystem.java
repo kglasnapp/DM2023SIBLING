@@ -103,7 +103,8 @@ public class IntakeSubsystem extends SubsystemBase {
     // cycles to remain in overcurrent state
     private int overcurrentCountDown = 0;
 
-    private static final int overcurrentCountUpLimit = 30;
+    private static final int overcurrentCountUpLimit = 20; 
+    //TODO overcurrentCountUpLimit was 30
     private static final int overcurrentCountDownLimit = 15;
 
     // This method will be called once per scheduler run
@@ -117,32 +118,32 @@ public class IntakeSubsystem extends SubsystemBase {
         double avgCurrent = avg.add(current);
         double power = targetIntakePower;
 
-        if (state == STATE.NORMAL) {
-            if (avgCurrent > maxCurrent) {
-                overcurrentCountUp++;
-            }
-            if (overcurrentCountUp >= overcurrentCountUpLimit) {
-                state = STATE.OVERCURRENT;
-                overcurrentCountDown = overcurrentCountDownLimit;
-                overcurrentCountUp = 0;
-                logf("Intake Overcurrent detected avg current:%.2f\n", avgCurrent);
-                RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, true);
-            }
-        }
-        if (state == STATE.OVERCURRENT) {
-            overcurrentCountDown--;
-            if (avgCurrent > maxCurrentLow) {
-                overcurrentCountDown = overcurrentCountDownLimit;
-            }
+        // if (state == STATE.NORMAL) {
+        //     if (avgCurrent > maxCurrent) {
+        //         overcurrentCountUp++;
+        //     }
+        //     if (overcurrentCountUp >= overcurrentCountUpLimit) {
+        //         state = STATE.OVERCURRENT;
+        //         overcurrentCountDown = overcurrentCountDownLimit;
+        //         overcurrentCountUp = 0;
+        //         logf("Intake Overcurrent detected avg current:%.2f\n", avgCurrent);
+        //         RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, true);
+        //     }
+        // }
+        // if (state == STATE.OVERCURRENT) {
+        //     overcurrentCountDown--;
+        //     if (avgCurrent > maxCurrentLow) {
+        //         overcurrentCountDown = overcurrentCountDownLimit;
+        //     }
 
-            if (overcurrentCountDown <= 0) {
-                state = STATE.NORMAL;
-                RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
-                overcurrentCountDown = 0;
-            }
+        //     if (overcurrentCountDown <= 0) {
+        //         state = STATE.NORMAL;
+        //         RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
+        //         overcurrentCountDown = 0;
+        //     }
 
-            power = getReducedIntakePower();
-        }
+        //     power = getReducedIntakePower();
+        // }
 
         if (power != lastIntakePower) {
             intakeMotor.set(power);

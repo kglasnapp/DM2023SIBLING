@@ -49,7 +49,7 @@ public class RobotContainer {
   // robotIDCheck.get returns true for the sibling, false for
   final DigitalInput robotIDCheck = new DigitalInput(0);
 
-  public final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem();
+  public final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem(this);
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(grabberSubsystem);
   public final static LedSubsystem leds = new LedSubsystem();
@@ -62,7 +62,7 @@ public class RobotContainer {
   private SlewRateLimiter sLY = new SlewRateLimiter(9);
   private SlewRateLimiter sRX = new SlewRateLimiter(1);
   public static SendableChooser<Command> autonomousChooser = new SendableChooser<>();
-  public static  boolean smartForElevator = true;
+  public static boolean smartForElevator = true;
   public static RobotMode robotMode;
   public static boolean smartDashBoardForElevator = true;
 
@@ -111,8 +111,7 @@ public class RobotContainer {
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((driveController.getRightX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        // Set precision based upon left bumper
-        driveController.leftBumper()));
+        driveController.y()));// Set precision based upon left bumper
     configureButtonBindings();
     configureDashboard();
   }
@@ -144,6 +143,10 @@ public class RobotContainer {
     return driveController.getHID().getPOV();
   }
 
+  public static boolean getBack() {
+    return driveController.getHID().getBackButton();
+  }
+
   public void setMode(RobotMode mode) {
     robotMode = mode;
     logf("Set Robot Mode: %s\n", mode);
@@ -167,6 +170,8 @@ public class RobotContainer {
         m_drivetrainSubsystem.zeroGyroscope();
       }
     }));
+
+    //driveController.back().onTrue(new PositionCommand(this, OperatorButtons.LOW));
 
     driveController.start().onTrue(new RunCommand(new Runnable() {
       public void run() {

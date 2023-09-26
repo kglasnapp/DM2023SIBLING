@@ -68,6 +68,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     private boolean homed = false;
     int myCount = 0; // Counter used for timing in state machine
     private final static int OVER_CURRENT = 20;
+    private RobotContainer robotContainer;
 
     enum STATE {
         IDLE, HOMING, READY, OVERCURRENT_HOMING, OVERCURRENT_READY
@@ -78,7 +79,9 @@ public class GrabberTiltSubsystem extends SubsystemBase {
 
     RunningAverage avgCurrent = new RunningAverage(5);
 
-    public GrabberTiltSubsystem() {
+    public GrabberTiltSubsystem(RobotContainer robotContainer) {
+
+        this.robotContainer = robotContainer;
 
         // Setup paramters for the tilt motor
         grabberTiltMotor = new CANSparkMax(GRABBER_TILT_MOTOR_ID, MotorType.kBrushless);
@@ -176,12 +179,19 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         return Math.abs(normalizeAngle(getAbsEncoder())) < 4;
     }
 
-    public boolean isElevatorSafeToMove() {
+    public boolean isElevatorSafeToMove(double eleToPos) {
         if (isMini) {
             return true; // Testing with mini it is always safe to move elevator
         }
         double angle = getAbsEncoder();
-        return angle > 40 && angle < 155;
+        if (RobotContainer.robotMode == RobotContainer.RobotMode.Cube) {
+            return angle > 40 && angle < 155;
+        } else {
+            double currentElePos = robotContainer.elevatorSubsystem.getElevatorPosRevs();
+            boolean direction = (eleToPos - currentElePos) > 0;
+            logf("Is Elevator Safe to move current:%.2f requested:%.2f direction:%b angle:%.2f \n", currentElePos, eleToPos, direction, angle);
+            return (angle > 40) || (angle < 190 && eleToPos > 30); 
+        }
     }
 
     public boolean isReady() {
@@ -303,7 +313,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
                     } else {
                         state = STATE.READY;
                     }
-                } 
+                }
                 break;
         }
     }

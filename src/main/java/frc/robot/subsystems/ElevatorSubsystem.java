@@ -95,7 +95,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             logf("****** Error attempted to set position out of range positon:%.1f\n", inches);
             return false;
         }
-        if (grabberSubsystem.isElevatorSafeToMove()) {
+        if (grabberSubsystem.isElevatorSafeToMove(inches)) {
             double setPoint = inches * elevatorRotationsPerInch;
             lastElevatorSetPoint = setPoint;
             lastElevatorInches = inches;
@@ -111,7 +111,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void setPower(double value, boolean homing) {
-        if (grabberSubsystem.isElevatorSafeToMove() || homing) {
+        if (grabberSubsystem.isElevatorSafeToMove(value) || homing) {
             if (lastPower != value || value == 0) {
                 logf("Elevator set a new power %.2f\n", value);
                 elevatorMotor.set(value);

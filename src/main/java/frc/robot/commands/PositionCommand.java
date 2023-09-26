@@ -7,6 +7,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.OperatorButtons;
+import frc.robot.RobotContainer.RobotMode;
+
 import static frc.robot.Util.logf;
 
 public class PositionCommand extends CommandBase {
@@ -32,6 +34,7 @@ public class PositionCommand extends CommandBase {
     @Override
     public void initialize() {
         started = false;
+        RobotMode mode = RobotContainer.robotMode;
         logf("Command Started for %s\n", type);
         timeOut = 200;
         switch (type) {
@@ -40,32 +43,57 @@ public class PositionCommand extends CommandBase {
                 elevatorDistance = 0;
                 break;
             case CHUTE: // TODO
-                tiltAngle = 90;
+            if (mode == RobotMode.Cube) {
+                tiltAngle = 70;
                 elevatorDistance = 40;
+            } else {
+                tiltAngle = 130;
+                elevatorDistance = 40;
+            }
                 break;
             case SHELF: //  TODO
                 tiltAngle = 90;
                 elevatorDistance = 15;
                 break;
             case GROUND:
-                tiltAngle = 130;
-                elevatorDistance = 10;
+                if (mode == RobotMode.Cube) {
+                    tiltAngle = 132; // TODO was 130
+                    elevatorDistance = 10;
+                } else {
+                    tiltAngle = 163;
+                    elevatorDistance = 36;
+                }
                 break;
             case HIGH:
-                tiltAngle = 70;
-                elevatorDistance = 105;
+                if (mode == RobotMode.Cube) {
+                    tiltAngle = 70; 
+                    elevatorDistance = 60; // TODO was 110
+                } else {
+                    tiltAngle = 122;
+                    elevatorDistance = 130;
+                }
                 break;
             case MIDDLE:
-                tiltAngle = 70;
-                elevatorDistance = 60;
+                if (mode == RobotMode.Cube) {
+                    tiltAngle = 70;
+                    elevatorDistance = 60;
+                } else {
+                    tiltAngle = 180;
+                    elevatorDistance = 130;
+                }
                 break;
             case LOW:
-                tiltAngle = 70;
-                elevatorDistance = 0;
+                if (mode == RobotMode.Cube) {
+                    tiltAngle = 90; // TODO was 70
+                    elevatorDistance = 0; // TODO was 0
+                } else {
+                    tiltAngle = 180;
+                    elevatorDistance = 50;
+                }
                 break;
-            case CONE:
+            case CONE: // means nothing
                 return;
-            case CUBE:
+            case CUBE: // means nothing
                 return;
         }
 
@@ -89,7 +117,7 @@ public class PositionCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         // Fix case when grabber hits bumper upon startup
-        if (robotContainer.grabberSubsystem.isElevatorSafeToMove() && !started) {
+        if (robotContainer.grabberSubsystem.isElevatorSafeToMove(elevatorDistance) && !started) {
             robotContainer.elevatorSubsystem.setElevatorPos(elevatorDistance);
             started = true;
         }
