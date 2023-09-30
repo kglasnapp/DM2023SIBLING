@@ -26,7 +26,7 @@ public class PoseEstimatorAggregator implements Supplier<Pose2d> {
         ShuffleboardTab tab = Shuffleboard.getTab("Vision Agreegator");
         tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
         tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
-        SmartDashboard.putNumber("VisMod", defaultMode);
+        SmartDashboard.putNumber("VisMod", defaultMode);        
     }
 
     private String getFomattedPose() {

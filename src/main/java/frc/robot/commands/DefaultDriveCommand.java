@@ -48,9 +48,9 @@ public class DefaultDriveCommand extends CommandBase {
         
         if (!autonomous) {
             if (precisionActivator.getAsBoolean()) {
-                SwerveModule.powerRatio = SwerveModule.NORMAL;
-            } else if (SwerveModule.powerRatio == SwerveModule.NORMAL) {
-                SwerveModule.powerRatio = SwerveModule.TURBO;
+                SwerveModule.setPowerRatio(SwerveModule.NORMAL);
+            } else if (SwerveModule.getPowerRatio() == SwerveModule.NORMAL) {
+                SwerveModule.setPowerRatio(SwerveModule.TURBO);
             }
 
         }

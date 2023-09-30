@@ -17,6 +17,7 @@ import frc.robot.RobotContainer.ShowPID;
 import frc.robot.subsystems.LedSubsystem.Leds;
 import frc.robot.utilities.LimitSwitch;
 
+
 /**
  * REV Smart Motion Guide
  * 
@@ -47,6 +48,8 @@ import frc.robot.utilities.LimitSwitch;
  */
 
 public class ElevatorSubsystem extends SubsystemBase {
+    
+   
     private static final int Elevator_MOTOR_ID = 11;
     private double lastElevatorInches = 0;
     private double lastElevatorSetPoint = 0;
@@ -56,7 +59,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private RelativeEncoder distanceEncoder;
     private PID_MAX pid = new PID_MAX();
     private boolean homed = false;
-    private double elevatorRotationsPerInch = 1; // TODO Fix when connect to real robot
+    private double elevatorRotationsPerInch = 1; 
     private double current = 0;
     private GrabberTiltSubsystem grabberSubsystem;
     private double lastPower = 99;
@@ -96,6 +99,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             return false;
         }
         if (grabberSubsystem.isElevatorSafeToMove(inches)) {
+            
             double setPoint = inches * elevatorRotationsPerInch;
             lastElevatorSetPoint = setPoint;
             lastElevatorInches = inches;
@@ -182,7 +186,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (atSetPoint() && lastSetPointForLogging != lastElevatorSetPoint) {
             logf("Elevator at set point:%.2f requested set point:%.2f\n", distanceEncoder.getPosition(),
                     lastElevatorSetPoint);
-            // setPower(0, false); // TODO do we need this?
             lastSetPointForLogging = lastElevatorSetPoint;
         }
         current = getElevatorCurrent();
@@ -245,8 +248,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 if (current > MAX_CURRENT) {
                     logf("Elevator overcurrent detected while ready current:%.2f\n", current);
                     myCount = 5; // Wait 100 ms to see if over current remains
-                    state = STATE.OVERCURRENT;
-                    break;
+                    state = STATE.OVERCURRENT;                    
                 }
                 break;
             case OVERCURRENT:

@@ -48,17 +48,17 @@ public class DefaultGrabberCommand extends CommandBase {
         //     return;
         // }
 
-        int pov = RobotContainer.getDriverPov();
-        if (pov != lastPov) {
-            double angle = grabberSubsystem.getLastTiltAngle();
-            if (pov == 180) {
-                grabberSubsystem.setTiltAngle(angle + 5);
-            }
-            if (pov == 0) {
-                grabberSubsystem.setTiltAngle(angle - 5);
-            }
-            lastPov = pov;
-        } 
+        // int pov = RobotContainer.getDriverPov();
+        // if (pov != lastPov) {
+        //     double angle = grabberSubsystem.getLastTiltAngle();
+        //     if (pov == 180) {
+        //         grabberSubsystem.setTiltAngle(angle + 5);
+        //     }
+        //     if (pov == 0) {
+        //         grabberSubsystem.setTiltAngle(angle - 5);
+        //     }
+        //     lastPov = pov;
+        // } 
 
         if (RobotContainer.getRightTrigger() > .2){
             grabberSubsystem.setPower(RobotContainer.getRightTrigger()/2);

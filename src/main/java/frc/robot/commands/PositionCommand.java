@@ -42,7 +42,7 @@ public class PositionCommand extends CommandBase {
                 tiltAngle = 50;
                 elevatorDistance = 0;
                 break;
-            case CHUTE: // TODO
+            case CHUTE: 
             if (mode == RobotMode.Cube) {
                 tiltAngle = 70;
                 elevatorDistance = 40;
@@ -51,13 +51,13 @@ public class PositionCommand extends CommandBase {
                 elevatorDistance = 40;
             }
                 break;
-            case SHELF: //  TODO
+            case SHELF:
                 tiltAngle = 90;
                 elevatorDistance = 15;
                 break;
             case GROUND:
                 if (mode == RobotMode.Cube) {
-                    tiltAngle = 132; // TODO was 130
+                    tiltAngle = 132; 
                     elevatorDistance = 10;
                 } else {
                     tiltAngle = 163;
@@ -67,7 +67,7 @@ public class PositionCommand extends CommandBase {
             case HIGH:
                 if (mode == RobotMode.Cube) {
                     tiltAngle = 70; 
-                    elevatorDistance = 60; // TODO was 110
+                    elevatorDistance = 60; // TODO was 110, resotre when elevator bearings fixed
                 } else {
                     tiltAngle = 122;
                     elevatorDistance = 130;
@@ -84,8 +84,8 @@ public class PositionCommand extends CommandBase {
                 break;
             case LOW:
                 if (mode == RobotMode.Cube) {
-                    tiltAngle = 90; // TODO was 70
-                    elevatorDistance = 0; // TODO was 0
+                    tiltAngle = 90; 
+                    elevatorDistance = 0; 
                 } else {
                     tiltAngle = 180;
                     elevatorDistance = 50;
@@ -111,13 +111,14 @@ public class PositionCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
     }
+
     boolean started = false;
 
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
         // Fix case when grabber hits bumper upon startup
-        if (robotContainer.grabberSubsystem.isElevatorSafeToMove(elevatorDistance) && !started) {
+        if (!started && robotContainer.grabberSubsystem.isElevatorSafeToMove(elevatorDistance)) {
             robotContainer.elevatorSubsystem.setElevatorPos(elevatorDistance);
             started = true;
         }

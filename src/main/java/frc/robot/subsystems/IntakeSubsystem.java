@@ -14,8 +14,6 @@ import frc.robot.RobotContainer.RobotMode;
 import frc.robot.subsystems.LedSubsystem.Leds;
 import frc.robot.utilities.RunningAverage;
 
-//import com.revrobotics.SparkMaxPIDController;
-
 public class IntakeSubsystem extends SubsystemBase {
     private static final int GRABBER_INTAKE_MOTOR_ID = 10;
     private double targetIntakePower = 0;
@@ -25,19 +23,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final double defaultIntakePowerInCone = .6;
     private final double defaultIntakePowerOutCone = .6;
     private final double defaultIntakePowerInCube = .6;
-    private final double defaultIntakePowerOutCube = 1.0;
-
-    private final double overCurrentPower = .05;
-
-    private final double maxCurrentCone = 10;
-    private final double maxCurrentLowCone = 2;
-    private final double maxCurrentCube = 5;
-    private final double maxCurrentLowCube = 2;
-
-    //private PID_MAX pid = new PID_MAX();
-    //private int timeOverMax = 0;
-    //private int timeAtOverCurrent = 0;
-    //private SparkMaxPIDController pidController;
+    private final double defaultIntakePowerOutCube = 1.0;;
     private RunningAverage avg = new RunningAverage(10);
 
     public IntakeSubsystem() {
@@ -81,133 +67,80 @@ public class IntakeSubsystem extends SubsystemBase {
         setIntakePower(0);
     }
 
+    public boolean overCurrent() {
+        return StateMachineForCurrent.overCurrent();
+    }
+
     private void setIntakePower(double power) {
         targetIntakePower = power;
     }
 
-    private double getReducedIntakePower() {
-        if (RobotContainer.robotMode == RobotMode.Cone) {
-            return overCurrentPower;
-        } else {
-            return -overCurrentPower;
-        }
-    }
-
-    enum STATE {
-        NORMAL, OVERCURRENT,
-    }
-
-    private STATE state = STATE.NORMAL;
-    // cycles over current limit
-    private int overcurrentCountUp = 0;
-    // cycles to remain in overcurrent state
-    private int overcurrentCountDown = 0;
-
-    private static final int overcurrentCountUpLimit = 20; 
-    //TODO overcurrentCountUpLimit was 30
-    private static final int overcurrentCountDownLimit = 15;
-
     // This method will be called once per scheduler run
     @Override
     public void periodic() {
-        double maxCurrent = RobotContainer.robotMode == RobotContainer.RobotMode.Cone ? maxCurrentCone : maxCurrentCube;
-        double maxCurrentLow = RobotContainer.robotMode == RobotContainer.RobotMode.Cone ? maxCurrentLowCone
-                : maxCurrentLowCube;
-
         double current = intakeMotor.getOutputCurrent();
         double avgCurrent = avg.add(current);
-        double power = targetIntakePower;
-
-        // if (state == STATE.NORMAL) {
-        //     if (avgCurrent > maxCurrent) {
-        //         overcurrentCountUp++;
-        //     }
-        //     if (overcurrentCountUp >= overcurrentCountUpLimit) {
-        //         state = STATE.OVERCURRENT;
-        //         overcurrentCountDown = overcurrentCountDownLimit;
-        //         overcurrentCountUp = 0;
-        //         logf("Intake Overcurrent detected avg current:%.2f\n", avgCurrent);
-        //         RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, true);
-        //     }
-        // }
-        // if (state == STATE.OVERCURRENT) {
-        //     overcurrentCountDown--;
-        //     if (avgCurrent > maxCurrentLow) {
-        //         overcurrentCountDown = overcurrentCountDownLimit;
-        //     }
-
-        //     if (overcurrentCountDown <= 0) {
-        //         state = STATE.NORMAL;
-        //         RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
-        //         overcurrentCountDown = 0;
-        //     }
-
-        //     power = getReducedIntakePower();
-        // }
-
+        double power = StateMachineForCurrent.periodic(targetIntakePower, avgCurrent);
         if (power != lastIntakePower) {
             intakeMotor.set(power);
             lastIntakePower = power;
         }
-
         if (Robot.count % 10 == 1) {
             SmartDashboard.putNumber("Intk Cur", current);
             SmartDashboard.putNumber("Intk ACur", avgCurrent);
-            SmartDashboard.putNumber("Intk TPwr", lastIntakePower);
+            //SmartDashboard.putNumber("Intk TPwr", lastIntakePower);
             SmartDashboard.putNumber("Intk Pwr", power);
         }
     }
 
-    // enum STATE {
-    //     NORMAL, WAITOVER, INOVERCURRENT,
-    // }
+    static class StateMachineForCurrent {
+        private static final double maxCurrentCone = 10;
+        private static final double maxCurrentLowCone = 2;
+        private static final double maxCurrentCube = 5;
+        private static final double maxCurrentLowCube = 2;
+        private static final int OVERCURRENT_COUNT_LIMIT = 20; //TODO overcurrentCountUpLimit was 30
+        private static final int BACK_TO_NORMAL_COUNT_LIMIT = 15;
+        private static final double overCurrentPower = .05;
 
-    // class currentControl {
-    //     int overMaxCnt;
-    //     double maxCurrent;
-    //     int atOverCurrentCnt;
-    //     double reducedCurrent;
-    //     int myCount;
-    //     STATE state;
+        private static int counter = 0;
 
-    //     public currentControl(double maxCurrent, int overMaxCnt, double reducedCurrent, int atOverCurrentCnt) {
-    //         this.maxCurrent = maxCurrent;
-    //         this.overMaxCnt = overMaxCnt;
-    //         this.reducedCurrent = reducedCurrent;
-    //         this.atOverCurrentCnt = atOverCurrentCnt;
-    //         myCount = 0;
-    //         state = STATE.NORMAL;
-    //     }
+        enum STATE {
+            NORMAL, OVERCURRENT,
+        }
+        static STATE state = STATE.NORMAL;
 
-    //     boolean periodic(double current) {
-    //         switch (state) {
-    //             case NORMAL:
-    //                 if (current > maxCurrent) {
-    //                     myCount = overMaxCnt;
-    //                     state = STATE.WAITOVER;
-    //                 }
-    //                 return true;
-    //             case WAITOVER:
-    //                 myCount--;
-    //                 if (myCount < 0) {
-    //                     if (current > maxCurrent) {
-    //                         state = STATE.INOVERCURRENT;
-    //                         myCount = atOverCurrentCnt;
-    //                     }
-    //                 }
-    //                 return false;
-    //             case INOVERCURRENT:
-    //                 myCount--;
-    //                 if (myCount < 0) {
-    //                     if (current < reducedCurrent) {
-    //                         state = STATE.NORMAL;
-    //                         return true;
-    //                     }
-    //                     myCount = atOverCurrentCnt;
-    //                 }
-    //                 return false;
-    //         }
-    //         return false;
-    //     }
-    // }
+        public static double periodic(double power, double avgCurrent) {
+            boolean coneMode = RobotContainer.robotMode == RobotContainer.RobotMode.Cone;
+            double maxCurrent = coneMode ? maxCurrentCone : maxCurrentCube;
+            double maxCurrentLow = coneMode ? maxCurrentLowCone : maxCurrentLowCube;
+            if (state == STATE.NORMAL) {
+                if (avgCurrent > maxCurrent) {
+                    counter++;
+                }
+                if (counter >= OVERCURRENT_COUNT_LIMIT) {
+                    state = STATE.OVERCURRENT;
+                    counter = 0;                    
+                    logf("Intake Overcurrent detected avg current:%.2f\n", avgCurrent);
+                    RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, true);
+                }
+            }
+            if (state == STATE.OVERCURRENT) {                
+                if (avgCurrent > maxCurrentLow) {
+                    counter = 0;
+                }
+                if (counter >= BACK_TO_NORMAL_COUNT_LIMIT) {
+                    state = STATE.NORMAL;
+                    RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
+                    counter = 0;
+                }
+                power = (RobotContainer.robotMode == RobotMode.Cone)?overCurrentPower:-overCurrentPower;
+                counter++;
+            }
+            return power;
+        }
+
+        public static boolean overCurrent() {
+            return state == STATE.OVERCURRENT && counter > BACK_TO_NORMAL_COUNT_LIMIT - 2;
+        }
+    }
 }

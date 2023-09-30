@@ -63,7 +63,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     private RelativeEncoder tiltEncoder;
     private PID_MAX pid = new PID_MAX();
     private CANCoder absEnc;
-    private double rotationsPerDegree = 1; // TODO fix when connected to Sibling
+    private double rotationsPerDegree = 1;
     private LimitSwitch limitSwitch;
     private boolean homed = false;
     int myCount = 0; // Counter used for timing in state machine
@@ -218,7 +218,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         limitSwitch.periodic();
         double current = getTiltCurrent();
         // pidController.setReference(setPointRotations, CANSparkMax.ControlType.kSmartMotion);
-        doHoming(current);
+        doStateMachine(current);
         if (RobotContainer.smartDashBoardForElevator) {
             if (Robot.count % 15 == 5) {
                 SmartDashboard.putNumber("TltCur", round2(current));
@@ -247,7 +247,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
 
     }
 
-    void doHoming(double current) {
+    void doStateMachine(double current) {
         if (state != lastState) {
             logf("Tilt State Changed state:%s current:%.3f myCount:%d angle:%.2f\n", state, current, myCount,
                     getAbsEncoder());

@@ -6,7 +6,7 @@ import frc.robot.utilities.SwerveModule;
 public class ChangeTurboModeCommand extends CommandBase{
     @Override
           public void initialize() {
-            SwerveModule.powerRatio = SwerveModule.TURBO;
+            SwerveModule.setPowerRatio(SwerveModule.TURBO);
           }
     
           @Override

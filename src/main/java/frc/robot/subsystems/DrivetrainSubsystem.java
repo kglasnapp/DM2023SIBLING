@@ -221,9 +221,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * 'forwards' direction.
    */
   public void zeroGyroscope() {
-    // FIXed Remove if you are using a Pigeon
-    // m_pigeon.setFusedHeading(0.0);
-    if (!RobotContainer.getBack()) {  // TODO  Clean up always was hit
+    if (!RobotContainer.getBack()) {  // TODO back has two functions find other and fix Clean up always was hit
       return;
     }
     

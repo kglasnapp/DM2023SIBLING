@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -29,11 +30,13 @@ import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultGrabberCommand;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
+import frc.robot.commands.SetModeConeCube;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberTiltSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LedSubsystem;
+import frc.robot.subsystems.LimeLightPoseSubsystem;
 import frc.robot.subsystems.PoseEstimatorAggregator;
 import frc.robot.utilities.SwerveModule;
 //import frc.robot.Autonomous;
@@ -45,19 +48,21 @@ import frc.robot.utilities.SwerveModule;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+
   // robotIDCheck.get returns true for the sibling, false for
   final DigitalInput robotIDCheck = new DigitalInput(0);
 
   public final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem(this);
+  //private final LimeLightPose limeLightPose = new LimeLightPose();
   private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(grabberSubsystem);
+  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   public final static LedSubsystem leds = new LedSubsystem();
   private final static CommandXboxController driveController = new CommandXboxController(2);
   private final static CommandXboxController operatorController = new CommandXboxController(3);
-  private final Autonomous autotonomous = new Autonomous(m_drivetrainSubsystem);
+  public final Autonomous autotonomous = new Autonomous(this, drivetrainSubsystem, intakeSubsystem);
   public boolean USBCamera = false;
-  private final BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
+  private final BalanceCommand balanceCommand = new BalanceCommand(drivetrainSubsystem);
   private SlewRateLimiter sLX = new SlewRateLimiter(9);
   private SlewRateLimiter sLY = new SlewRateLimiter(9);
   private SlewRateLimiter sRX = new SlewRateLimiter(1);
@@ -65,6 +70,9 @@ public class RobotContainer {
   public static boolean smartForElevator = true;
   public static RobotMode robotMode;
   public static boolean smartDashBoardForElevator = true;
+  public static LimeLightPoseSubsystem limeLightPoseSubsystem;
+
+  public static RobotContainer instance;
 
   public static ShowPID showPID = ShowPID.TILT;
 
@@ -90,28 +98,30 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    instance = this;
     // Set the default Robot Mode to Cube
     setMode(RobotMode.Cube);
     grabberSubsystem.setDefaultCommand(new DefaultGrabberCommand(grabberSubsystem, intakeSubsystem, driveController));
     Command defaulElevatorCommand = new DefaultElevatorCommand(elevatorSubsystem, grabberSubsystem, driveController);
     elevatorSubsystem.setDefaultCommand(defaulElevatorCommand);
 
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-        m_drivetrainSubsystem,
-        () -> (SwerveModule.powerRatio == 1 ? -modifyAxis((sLY.calculate(driveController.getLeftY())))
+    drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+        drivetrainSubsystem,
+        () -> (SwerveModule.getPowerRatio() == 1 ? -modifyAxis((sLY.calculate(driveController.getLeftY())))
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((driveController.getLeftY()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        () -> (SwerveModule.powerRatio == 1 ? -modifyAxis((sLX.calculate(driveController.getLeftX())))
+        () -> (SwerveModule.getPowerRatio() == 1 ? -modifyAxis((sLX.calculate(driveController.getLeftX())))
             * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((driveController.getLeftX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
-        () -> (SwerveModule.powerRatio == 1
+        () -> (SwerveModule.getPowerRatio() == 1
             ? -modifyAxis((sRX.calculate(driveController.getRightX())))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND
             : -modifyAxis((driveController.getRightX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
         driveController.y()));// Set precision based upon left bumper
+    limeLightPoseSubsystem = new LimeLightPoseSubsystem(drivetrainSubsystem);
     configureButtonBindings();
     configureDashboard();
   }
@@ -165,35 +175,21 @@ public class RobotContainer {
     // new Button(m_controller::getAButton).whileHeld(holonomicTargetCommand);
     // new Button(m_controller::getBButton).whileHeld(chaseTagCommand);
     // Back button zeros the gyroscope);
-    driveController.back().onTrue(new RunCommand(new Runnable() {
+    driveController.back().whileTrue(new RunCommand(new Runnable() {
       public void run() {
-        m_drivetrainSubsystem.zeroGyroscope();
+        drivetrainSubsystem.zeroGyroscope();
       }
     }));
 
     //driveController.back().onTrue(new PositionCommand(this, OperatorButtons.LOW));
 
-    driveController.start().onTrue(new RunCommand(new Runnable() {
+    driveController.start().whileTrue(new RunCommand(new Runnable() {
       public void run() {
         balanceCommand.zeroGyroscope();
       }
     }));
 
-    operatorController.button(OperatorButtons.CONE.value).onTrue(Commands.runOnce(new Runnable() {
-      //   controller.button(OperatorButtons.CONE.value).onTrue((new Runnable() {
-      public void run() {
-        setMode(RobotMode.Cone);
-      }
-    }));
-
-    operatorController.button(OperatorButtons.CUBE.value).onTrue(Commands.runOnce(new Runnable() {
-      //   controller.button(OperatorButtons.CUBE.value).onTrue(new RunCommand(new Runnable() {
-      public void run() {
-        setMode(RobotMode.Cube);
-      }
-    }));
-
-    driveController.start().onTrue(Commands.runOnce(new Runnable() {
+    driveController.start().whileTrue(Commands.runOnce(new Runnable() {
       public void run() {
         if (showPID == ShowPID.TILT) {
           showPID = ShowPID.ELEVATOR;
@@ -203,6 +199,8 @@ public class RobotContainer {
         logf("Change PID control to %s\n", showPID);
       }
     }));
+    // y Button will rotate the Robot 180 degrees
+    driveController.y().onTrue(new RotateCommand(drivetrainSubsystem));
 
     operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));
     operatorController.button(OperatorButtons.MIDDLE.value).onTrue(new PositionCommand(this, OperatorButtons.MIDDLE));
@@ -213,9 +211,32 @@ public class RobotContainer {
     operatorController.button(OperatorButtons.CHUTE.value).onTrue(new PositionCommand(this, OperatorButtons.CHUTE));
     operatorController.button(OperatorButtons.SHELF.value).onTrue(new PositionCommand(this, OperatorButtons.SHELF));
 
-    // y Button will rotate the Robot 180 degrees
-    driveController.y().onTrue(new RotateCommand(m_drivetrainSubsystem));
+    operatorController.button(OperatorButtons.CONE.value).onTrue(new SetModeConeCube(RobotMode.Cone));
+    operatorController.button(OperatorButtons.CUBE.value).onTrue(new SetModeConeCube(RobotMode.Cube));
+
+    // operatorController.button(OperatorButtons.CONE.value).onTrue(Commands.runOnce(setMode(RobotMode.Cube)); 
+
+    // operatorController.button(OperatorButtons.CUBE.value).onTrue(Commands.runOnce(new Runnable() {
+    //   public void run() {
+    //     setMode(RobotMode.Cone);
+    //   }
+    // }));
+
+    // operatorController.button(OperatorButtons.CUBE.value).onTrue(Commands.runOnce(new Runnable() {
+    //   public void run() {
+    //     setMode(RobotMode.Cube);
+    //   }
+    // }));
+
   }
+
+  // Command a = RobotContainer.runOnce(()->{ setMode(RobotMode.Cone);});
+
+  /** Grabs the hatch. */
+  // public CommandBase grabHatchCommand() {
+  // implicitly require `this`
+  // return this.runOnce(() -> m_hatchSolenoid.set(kForward));
+  //   }
 
   public Pose2d getPickupPose(boolean right, int phase) {
     var alliance = DriverStation.getAlliance();

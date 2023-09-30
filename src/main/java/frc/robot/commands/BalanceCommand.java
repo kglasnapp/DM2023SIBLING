@@ -58,7 +58,7 @@ public class BalanceCommand extends CommandBase {
         initTime = RobotController.getFPGATime() / 1000;
         state = State.FAST_BACK;      
         DefaultDriveCommand.autonomous = true;
-        SwerveModule.powerRatio = 1.4; 
+        SwerveModule.setPowerRatio(1.4); 
     }
 
     @Override
@@ -201,7 +201,7 @@ public class BalanceCommand extends CommandBase {
     public void end(boolean interrupted) {
         drivetrainSubsystem.stop();
         DefaultDriveCommand.autonomous = false;
-        SwerveModule.powerRatio = SwerveModule.TURBO; 
+        SwerveModule.setPowerRatio(SwerveModule.TURBO); 
     }
 
     @Override

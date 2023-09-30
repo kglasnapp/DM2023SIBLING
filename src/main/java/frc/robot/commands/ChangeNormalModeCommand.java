@@ -7,7 +7,7 @@ import frc.robot.utilities.SwerveModule;
 public class ChangeNormalModeCommand extends CommandBase{
     @Override
           public void initialize() {
-            SwerveModule.powerRatio = SwerveModule.NORMAL;
+            SwerveModule.setPowerRatio(SwerveModule.NORMAL);
           }
     
           @Override
