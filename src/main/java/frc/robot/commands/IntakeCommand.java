@@ -27,7 +27,7 @@ public class IntakeCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        startTime = RobotController.getFPGATime();
+        startTime = RobotController.getFPGATime() / 1000;
         if (state == State.OUT) {
             intakeSubsystem.intakeOut();
         }
@@ -51,10 +51,16 @@ public class IntakeCommand extends CommandBase {
             return true;
         }
         // Check to see if command has run too long
-        if (RobotController.getFPGATime()  > startTime + timeOut) {
-            intakeSubsystem.intakeOff();
+        if (RobotController.getFPGATime() / 1000 > startTime + timeOut) {
             return true;
         }
         return false;
     }
+
+    // Called once the command ends or is interrupted.
+    @Override
+    public void end(boolean interrupted) {
+        intakeSubsystem.intakeOff();
+    }
+
 }

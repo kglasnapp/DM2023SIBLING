@@ -67,7 +67,7 @@ public class PositionCommand extends CommandBase {
             case HIGH:
                 if (mode == RobotMode.Cube) {
                     tiltAngle = 70; 
-                    elevatorDistance = 60; // TODO was 110, resotre when elevator bearings fixed
+                    elevatorDistance = 110; // TODO was 110, resotre when elevator bearings fixed
                 } else {
                     tiltAngle = 122;
                     elevatorDistance = 130;
@@ -95,6 +95,10 @@ public class PositionCommand extends CommandBase {
                 return;
             case CUBE: // means nothing
                 return;
+            case ELECTRIALHOME:
+                tiltAngle = 0;
+                elevatorDistance = 0;
+                break;
         }
 
         robotContainer.grabberSubsystem.setTiltAngle(tiltAngle);

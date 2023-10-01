@@ -16,8 +16,9 @@ public class RobotOrientedDriveCommand extends CommandBase {
     double initTime = 0;
     boolean isFinished = false;
 
-    public RobotOrientedDriveCommand(DrivetrainSubsystem drivetrainSubsystem, double xSpeed, double ySpeed, double angleSpeed,
-                                    double duration) {
+    public RobotOrientedDriveCommand(DrivetrainSubsystem drivetrainSubsystem, double xSpeed, double ySpeed,
+            double angleSpeed,
+            double duration) {
         this.drivetrainSubsystem = drivetrainSubsystem;
         this.xSpeed = xSpeed;
         this.ySpeed = ySpeed;
@@ -28,28 +29,24 @@ public class RobotOrientedDriveCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        initTime = RobotController.getFPGATime()/1000;
-        logf("Robot Oriented Speed X: %.4f y:%.4f angle:%.4f\n", xSpeed, ySpeed, angleSpeed);
-         drivetrainSubsystem.drive(
-            new ChassisSpeeds(
-                        xSpeed,
-                        ySpeed,
-                        angleSpeed)); 
+        initTime = RobotController.getFPGATime() / 1000;
+        logf("Robot Drive Speed X: %.4f y:%.4f angle:%.4f\n", xSpeed, ySpeed, angleSpeed);
+        drivetrainSubsystem.drive(new ChassisSpeeds(xSpeed, ySpeed, angleSpeed));
     }
 
     @Override
     public void execute() {
-                             
     }
 
     @Override
     public boolean isFinished() {
-        return RobotController.getFPGATime()/1000 > initTime + duration;
+        return RobotController.getFPGATime() / 1000 > initTime + duration;
     }
 
     @Override
     public void end(boolean interrupted) {
-        
+        // TODO Is this OK
+        drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, 0));
     }
-    
+
 }

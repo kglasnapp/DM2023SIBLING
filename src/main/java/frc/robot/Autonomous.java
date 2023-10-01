@@ -1,52 +1,61 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import java.util.function.Supplier;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.subsystems.DrivetrainSubsystem;
-//import frc.robot.subsystems.ElevatorSubsystem;
-//import frc.robot.subsystems.GrabberTiltSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.commands.ZeroGyroCommand;
-import frc.robot.commands.IntakeCommand.State;
 import frc.robot.RobotContainer.OperatorButtons;
 import frc.robot.RobotContainer.RobotMode;
 import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DisplayLogCommand;
+import frc.robot.commands.DriveCommand;
 import frc.robot.commands.IntakeCommand;
+import frc.robot.commands.IntakeCommand.State;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RobotOrientedDriveCommand;
+import frc.robot.commands.RobotOrientedDriveDeacceleratedCommand;
+import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
+import frc.robot.commands.StraightPathCommand;
+import frc.robot.commands.ZeroGyroCommand;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.utilities.KeyPadPositionSupplier;
 
 public class Autonomous {
-  DrivetrainSubsystem drivetrain;
+  DrivetrainSubsystem drivetrainSubsystem;
   RobotContainer robotContainer;
   private final BalanceCommand balanceCommand;
- 
+
   public static Command test;
+
   public Autonomous(RobotContainer robotContainer, DrivetrainSubsystem drivetrain, IntakeSubsystem intake) {
     this.robotContainer = robotContainer;
-    this.drivetrain = drivetrain;
+    this.drivetrainSubsystem = drivetrain;
     balanceCommand = new BalanceCommand(drivetrain);
-    RobotContainer.autonomousChooser.setDefaultOption("Case 1 left", getAutonomousCommandCase1());
+    RobotContainer.autonomousChooser.setDefaultOption("Case 1 outside", getAutonomousCommandCase1());
     RobotContainer.autonomousChooser.addOption("Case 2 left turn", getAutonomousCommandCase2());
+    RobotContainer.autonomousChooser.addOption("Case 2 right turn", getAutonomousCommandCase2());
     RobotContainer.autonomousChooser.addOption("Case 3 Center Balance", getAutonomousCommandCase3());
     RobotContainer.autonomousChooser.addOption("Case 4 Center Pickup Balance", getAutonomousCommandCase4());
     RobotContainer.autonomousChooser.addOption("Test Movements", testMovements(drivetrain, intake, robotContainer));
     RobotContainer.autonomousChooser.addOption("Balance ", balanceCommand);
 
-test = testMovements(drivetrain, intake, robotContainer);
+    test = testMovements(drivetrain, intake, robotContainer);
     // Put the chooser on the dashboard
-    SmartDashboard.putData("Autonomous Mode", RobotContainer.autonomousChooser); 
+    SmartDashboard.putData("Autonomous Mode", RobotContainer.autonomousChooser);
     //SmartDashboard.putData("Autonomous Mode", autonomousChooser);
 
   }
 
   private Command getAutonomousCommandCase1() {
-    CommandBase command = new ZeroGyroCommand(drivetrain, balanceCommand, (180))
+    CommandBase command = new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
         .andThen(new WaitCommand(0.5))
         .andThen(new DisplayLogCommand("Run Case 1"));
     return command;
@@ -70,19 +79,44 @@ test = testMovements(drivetrain, intake, robotContainer);
     return command;
   }
 
-  private Command testMovements(DrivetrainSubsystem drivetrain, IntakeSubsystem intake, RobotContainer robotContainer) {
+  private Command testMovements(DrivetrainSubsystem drivetrainSubsystem, IntakeSubsystem intake,
+      RobotContainer robotContainer) {
     return new DisplayLogCommand("Test Case")
-        .andThen(new RobotOrientedDriveCommand(drivetrain, 1, 0, 0, 500))
+        //.andThen(new RobotOrientedDriveCommand(drivetrainSubsystem, .4, 0, 0, 500))
         .andThen(new SetModeConeCube(RobotMode.Cube))
-        .andThen(new DisplayLogCommand("Test after cube"))
-        .andThen(new RobotOrientedDriveCommand(drivetrain, 0, 0, 0, 50))
-        .andThen(new PositionCommand(robotContainer, OperatorButtons.LOW))
-        .andThen(new IntakeCommand(intake, State.OUT, .5))
-        .andThen(new WaitCommand(1))
-        .andThen(new RobotOrientedDriveCommand(drivetrain, -1, 0, 0, 500))
-        .andThen(new RobotOrientedDriveCommand(drivetrain, 0, 0, 0, 50));
+        //.andThen(new RobotOrientedDriveCommand(drivetrainSubsystem, 0, 0, 0, 50))
+        //.andThen(new PositionCommand(robotContainer, OperatorButtons.LOW))
+        .andThen(new IntakeCommand(intake, State.OUT, 1000))
+        .andThen(new WaitCommand(.5))
+        .andThen(new PositionCommand(robotContainer, OperatorButtons.HOME))
+        .andThen(new RobotOrientedDriveCommand(drivetrainSubsystem, -.3, 0, 0, 1000))
+        .andThen(new WaitCommand(.25))
+        .andThen(new RotateCommand(drivetrainSubsystem))
+        .andThen(new PositionCommand(robotContainer, OperatorButtons.GROUND))
+        .andThen(new IntakeCommand(intake, State.IN, 1000))
+        .andThen(new RobotOrientedDriveDeacceleratedCommand(drivetrainSubsystem, -.3, 0, 0, 300))
+        ;
+    // .andThen(new RobotOrientedDriveCommand(drivetrainSubsystem, 0, 0, 0, 50));
   }
 
+  private Supplier<Pose2d> poseEstimator; // TODO Elie how do we get a pose provider
+
+  public Command test2() {
+    CommandBase command = new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
+        .andThen(new StraightPathCommand(drivetrainSubsystem, poseEstimator,
+            new Pose2d(new Translation2d(2.1, KeyPadPositionSupplier.FIELD_WIDTH - 5.24),
+                new Rotation2d(Math.toRadians(180)))))
+        .andThen(new DriveCommand(drivetrainSubsystem, -2, 0, 100))
+        .andThen(new WaitCommand(0.5))
+        .andThen(new DriveCommand(drivetrainSubsystem, -2, 0, 0))
+        .andThen(new WaitCommand(2.5))
+        .andThen(new DriveCommand(drivetrainSubsystem, -0.05, 0, 0))
+        .andThen(new WaitCommand(2))
+        .andThen(new DriveCommand(drivetrainSubsystem, 0, 0, 0))
+        .andThen(new BalanceCommand(drivetrainSubsystem));
+    command.setName("Test 2");
+    return command;
+  }
   // autonomousChooser.setDefaultOption("Over and Balance",
 
   // AutonomousCommandFactory.getAutonomousSimpleLowCommand(m_drivetrainSubsystem,
@@ -125,7 +159,7 @@ test = testMovements(drivetrain, intake, robotContainer);
   // autonomousChooser.addOption("Case 3", getAutonomousCommandCase3());
 
   public Command getAutonomousCommandCase2Red() {
-    CommandBase command = new ZeroGyroCommand(drivetrain, balanceCommand, (180))
+    CommandBase command = new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
 
         // .andThen(new GrabberCommand(grabberSubsystem, false))
         // .andThen(new KeyPadStateCommand(1))

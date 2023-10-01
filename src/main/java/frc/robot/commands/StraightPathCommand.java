@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.Util;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import static frc.robot.Util.logf;
@@ -60,12 +61,17 @@ public class StraightPathCommand extends CommandBase {
     public void initialize() {
 
         initialTime = RobotController.getFPGATime();
-        initialPose = poseProvider.get();
+        if (poseProvider != null) {
+            initialPose = poseProvider.get();
+        } else {
+            // TODO will this work
+            initialPose = RobotContainer.instance.getLLPose();
+        }
         omegaController.reset(initialPose.getRotation().getRadians());
         xController.reset(initialPose.getX());
         yController.reset(initialPose.getY());
         logf("Init Path Follow pose:<%.2f,%.2f,%.2f>\n", initialPose.getX(), initialPose.getY(),
-                initialPose.getRotation().getDegrees());                
+                initialPose.getRotation().getDegrees());
     }
 
     double getIntermediateGoal(double endPosition, double initialPosition, double targetTime, double currentTime) {
@@ -147,7 +153,8 @@ public class StraightPathCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("****************************************** finished path command with destination: "+destination);
+        System.out.println(
+                "****************************************** finished path command with destination: " + destination);
         drivetrainSubsystem.stop();
     }
 }

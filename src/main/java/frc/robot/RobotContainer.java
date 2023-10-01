@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+//import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -70,7 +70,7 @@ public class RobotContainer {
   public static boolean smartForElevator = true;
   public static RobotMode robotMode;
   public static boolean smartDashBoardForElevator = true;
-  public static LimeLightPoseSubsystem limeLightPoseSubsystem;
+  public LimeLightPoseSubsystem limeLightPoseSubsystem;
 
   public static RobotContainer instance;
 
@@ -85,7 +85,7 @@ public class RobotContainer {
   }
 
   public static enum OperatorButtons {
-    HOME(3), CUBE(2), CONE(1), GROUND(4), CHUTE(5), SHELF(6), LOW(7), MIDDLE(8), HIGH(9);
+    HOME(3), CUBE(2), CONE(1), GROUND(4), CHUTE(5), SHELF(6), LOW(7), MIDDLE(8), HIGH(9), ELECTRIALHOME(15);
 
     public final int value;
 
@@ -163,6 +163,11 @@ public class RobotContainer {
     SmartDashboard.putString("Mode", robotMode.toString());
     leds.setRobotModeLeds();
   }
+
+  public Pose2d getLLPose() {
+    return limeLightPoseSubsystem.getPose();
+  }
+
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by

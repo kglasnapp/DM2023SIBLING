@@ -1,0 +1,46 @@
+14:16:14-861 Test Case
+14:16:14-866 Set Robot Mode: Cube
+14:16:14-880 Command Started for LOW
+14:16:14-885 Set tilt angle:90.00 set point:90.000000 kp:0.000050
+14:16:14-888 ***** Elevator not safe to move angle:2.57
+14:16:14-890 Init Position Command tilt angle:90.00 elevator distance:0.00
+14:16:15-420 Set Elevator position:0.00 set point:0.000000
+14:16:16-059 Set Tilt Motor power:0.000
+14:16:16-061 **** Error ***** Tilt Over Current:24.69 in Ready mode
+14:16:16-079 Tilt State Changed state:OVERCURRENT_READY current:21.531 myCount:25 angle:108.57
+14:16:16-599 Tilt State Changed state:READY current:0.000 myCount:-1 angle:108.57
+14:16:18-899 Timeout Position Command for LOW
+14:16:18-901 Intake OUT for 1000.00 counts
+14:16:20-440 Command Started for HOME
+14:16:20-443 Set tilt angle:50.00 set point:50.000000 kp:0.000050
+14:16:20-446 Set Elevator position:0.00 set point:0.000000
+14:16:20-448 Init Position Command tilt angle:50.00 elevator distance:0.00
+14:16:20-460 Set Elevator position:0.00 set point:0.000000
+14:16:21-440 Requested Positon Reached for type:HOME
+14:16:21-442 Robot Drive Speed X: -0.4000 y:0.0000 angle:0.0000
+14:16:21-961 Init Grabber Default Command
+14:16:21-962 Init Elevator Default Command
+
+
+14:54:34-540 Test Case
+14:54:34-544 Set Robot Mode: Cube
+14:54:34-559 Command Started for LOW
+14:54:34-565 Set tilt angle:90.00 set point:90.000000 kp:0.000050
+14:54:34-570 ***** Elevator not safe to move angle:2.75
+14:54:34-572 Init Position Command tilt angle:90.00 elevator distance:0.00
+14:54:35-099 Set Elevator position:0.00 set point:0.000000
+14:54:36-039 Requested Positon Reached for type:LOW
+14:54:36-041 Intake OUT for 1000.00 counts
+14:54:37-559 Command Started for HOME
+14:54:37-562 Set tilt angle:50.00 set point:50.000000 kp:0.000050
+14:54:37-565 Set Elevator position:0.00 set point:0.000000
+14:54:37-568 Init Position Command tilt angle:50.00 elevator distance:0.00
+14:54:37-579 Set Elevator position:0.00 set point:0.000000
+14:54:38-538 Requested Positon Reached for type:HOME
+14:54:38-540 Robot Drive Speed X: -0.4000 y:0.0000 angle:0.0000
+14:54:39-060 Init Grabber Default Command
+14:54:39-061 Init Elevator Default Command
+14:54:40-140 Voltage 12.48 Current:0.00 2:0.13 20:0.38 22:0.25
+14:54:41-198 Executing disabled init SequentialCommandGroup
+14:54:50-140 Voltage 12.52 Current:0.00 2:0.13 20:0.38 22:0.25
+14:55:00-140 Voltage 12.53 Current:0.00 2:0.13 20:0.31 22:0.25

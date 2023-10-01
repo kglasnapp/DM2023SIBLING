@@ -235,15 +235,15 @@ public class GrabberTiltSubsystem extends SubsystemBase {
             }
         }
 
-        if (Robot.count % 250 == 0) {
-            // we adjust the relative encoder of the tilt
-            // motor every 5 secs
-            double tiltAbsolutePosition = getAbsEncoder();
-            // TODO put back in when connected to actual intake
-            // tiltEncoder.setPosition(tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO);
-            logf("Tilt Motor Angle:%.3f  Abs Encoder Rotations:%.3f Abs Encoder Angle:%.3f\n", getTiltAngleDegrees(),
-                    tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO, tiltAbsolutePosition);
-        }
+        // if (Robot.count % 250 == 0) {
+        //     // we adjust the relative encoder of the tilt
+        //     // motor every 5 secs
+        //     double tiltAbsolutePosition = getAbsEncoder();
+        //     // TODO put back in when connected to actual intake
+        //     // tiltEncoder.setPosition(tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO);
+        //     logf("Tilt Motor Angle:%.3f  Abs Encoder Rotations:%.3f Abs Encoder Angle:%.3f\n", getTiltAngleDegrees(),
+        //             tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO, tiltAbsolutePosition);
+        // }
 
     }
 

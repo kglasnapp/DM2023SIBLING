@@ -1,11 +1,13 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,7 +17,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import static frc.robot.Util.logf;
+//import static frc.robot.Util.logf;
 
 import edu.wpi.first.math.Vector;
 
@@ -61,8 +63,9 @@ public class LimeLightPoseSubsystem extends SubsystemBase {
                 SmartDashboard.putNumber("LimeLY", y);
                 SmartDashboard.putNumber("LimeLArea", area);
             }
-            // TODO Fix for red
-            double llPose[] = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpiblue")
+            // TODO Test the Fix for allaince
+            String pipeLine = (Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
+            double llPose[] = NetworkTableInstance.getDefault().getTable("limelight").getEntry(pipeLine)
                     .getDoubleArray(new double[6]);
             Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(Math.toRadians(llPose[5])));
             poseEstimator.addVisionMeasurement(visionPose, timestamp.getDouble(0.0));
@@ -85,9 +88,9 @@ public class LimeLightPoseSubsystem extends SubsystemBase {
                 pose.getX(),
                 pose.getY(),
                 pose.getRotation().getDegrees());
-        if (Robot.count % 250 == 0) {
-            logf("Pose %s\n", s);
-        }
+        // if (Robot.count % 250 == 0) {
+        //     logf("Pose %s\n", s);
+        // }
         return s;
     }
 }

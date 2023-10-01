@@ -22,9 +22,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private final double defaultIntakePowerInCone = .6;
     private final double defaultIntakePowerOutCone = .6;
-    private final double defaultIntakePowerInCube = .6;
+    private final double defaultIntakePowerInCube = .8;
     private final double defaultIntakePowerOutCube = 1.0;;
-    private RunningAverage avg = new RunningAverage(10);
+    private RunningAverage avg = new RunningAverage(5);
+
+    private boolean isOut = false;
 
     public IntakeSubsystem() {
         // Setup parameters for the intake motor
@@ -48,6 +50,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeIn() {
+        isOut = false;
         if (RobotContainer.robotMode == RobotMode.Cone) {
             setIntakePower(-defaultIntakePowerInCone);
         } else {
@@ -56,6 +59,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeOut() {
+        isOut = true;
         if (RobotContainer.robotMode == RobotMode.Cone) {
             setIntakePower(defaultIntakePowerOutCone);
         } else {
@@ -64,6 +68,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeOff() {
+        isOut = false;
         setIntakePower(0);
     }
 
@@ -80,7 +85,15 @@ public class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         double current = intakeMotor.getOutputCurrent();
         double avgCurrent = avg.add(current);
-        double power = StateMachineForCurrent.periodic(targetIntakePower, avgCurrent);
+        if (current > .05) {
+            logf("Cur:%.2f Avg:%.2f Count:%d\n", current, avgCurrent, StateMachineForCurrent.counter);
+        }
+        double power;
+        if (!isOut) {
+            power = StateMachineForCurrent.periodic(targetIntakePower, avgCurrent);
+        } else {
+            power = targetIntakePower;
+        }
         if (power != lastIntakePower) {
             intakeMotor.set(power);
             lastIntakePower = power;
@@ -94,19 +107,20 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     static class StateMachineForCurrent {
-        private static final double maxCurrentCone = 10;
+        private static final double maxCurrentCone = 20;
         private static final double maxCurrentLowCone = 2;
-        private static final double maxCurrentCube = 5;
+        private static final double maxCurrentCube = 6;
         private static final double maxCurrentLowCube = 2;
-        private static final int OVERCURRENT_COUNT_LIMIT = 20; //TODO overcurrentCountUpLimit was 30
+        private static final int OVERCURRENT_COUNT_LIMIT = 10;
         private static final int BACK_TO_NORMAL_COUNT_LIMIT = 15;
-        private static final double overCurrentPower = .05;
+        private static final double overCurrentPower = .1;
 
-        private static int counter = 0;
+        static int counter = 0;
 
         enum STATE {
             NORMAL, OVERCURRENT,
         }
+
         static STATE state = STATE.NORMAL;
 
         public static double periodic(double power, double avgCurrent) {
@@ -116,15 +130,26 @@ public class IntakeSubsystem extends SubsystemBase {
             if (state == STATE.NORMAL) {
                 if (avgCurrent > maxCurrent) {
                     counter++;
+                } else {
+                    counter--;
+
+                    if (counter < 0) {
+                        counter = 0;
+                    }
                 }
                 if (counter >= OVERCURRENT_COUNT_LIMIT) {
                     state = STATE.OVERCURRENT;
-                    counter = 0;                    
+                    counter = 0;
                     logf("Intake Overcurrent detected avg current:%.2f\n", avgCurrent);
                     RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, true);
                 }
             }
-            if (state == STATE.OVERCURRENT) {                
+            if (state == STATE.OVERCURRENT) {
+                if (power == 0.0) {
+                    state = STATE.NORMAL;
+                    counter = 0;
+                    return 0.0;
+                }
                 if (avgCurrent > maxCurrentLow) {
                     counter = 0;
                 }
@@ -133,7 +158,7 @@ public class IntakeSubsystem extends SubsystemBase {
                     RobotContainer.leds.setOverCurrent(Leds.IntakeOverCurrent, false);
                     counter = 0;
                 }
-                power = (RobotContainer.robotMode == RobotMode.Cone)?overCurrentPower:-overCurrentPower;
+                power = Math.signum(power) * overCurrentPower;
                 counter++;
             }
             return power;

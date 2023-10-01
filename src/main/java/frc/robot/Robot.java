@@ -86,7 +86,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     cmd = RobotContainer.autonomousChooser.getSelected();
-    //cmd = Autonomous.test;
     if (cmd != null) {
       logf("Executing autonomous %s\n", cmd.getName());
       cmd.schedule();
