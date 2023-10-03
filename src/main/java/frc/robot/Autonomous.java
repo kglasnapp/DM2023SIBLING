@@ -40,8 +40,8 @@ public class Autonomous {
     this.drivetrainSubsystem = drivetrain;
     balanceCommand = new BalanceCommand(drivetrain);
     RobotContainer.autonomousChooser.setDefaultOption("Case 1 outside", getAutonomousCommandCase1());
-    RobotContainer.autonomousChooser.addOption("Case 2 left turn", getAutonomousCommandCase2());
-    RobotContainer.autonomousChooser.addOption("Case 2 right turn", getAutonomousCommandCase2());
+    RobotContainer.autonomousChooser.addOption("Case left turn", caseCommand("Left Turn", intake, 0.4,150));
+    RobotContainer.autonomousChooser.addOption("Case right turn", caseCommand("Right Turn", intake, -0.6,200));
     RobotContainer.autonomousChooser.addOption("Case 3 Center Balance", getAutonomousCommandCase3());
     RobotContainer.autonomousChooser.addOption("Case 4 Center Pickup Balance", getAutonomousCommandCase4());
     RobotContainer.autonomousChooser.addOption("Test Movements", testMovements(drivetrain, intake, robotContainer));
@@ -100,6 +100,22 @@ public class Autonomous {
   }
 
   private Supplier<Pose2d> poseEstimator; // TODO Elie how do we get a pose provider
+
+  public Command caseCommand(String name, IntakeSubsystem intakeSubsystem, double speedY, int durationY) {
+    CommandBase command = new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
+        .andThen(new SetModeConeCube(RobotMode.Cube))
+        .andThen(new PositionCommand(robotContainer, OperatorButtons.HIGH))
+        .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT,1000))
+        .andThen(new PositionCommand(robotContainer, OperatorButtons.HOME))
+        .andThen(new RobotOrientedDriveDeacceleratedCommand(drivetrainSubsystem, 0, speedY, 0, durationY))
+        .andThen(new WaitCommand(0.1))
+        .andThen(new RobotOrientedDriveDeacceleratedCommand(drivetrainSubsystem, -.7, 0, 0, 1500))
+        .andThen(new RotateCommand(drivetrainSubsystem))
+        .andThen(new PositionCommand(robotContainer, OperatorButtons.GROUND))
+        .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.IN,1000));
+    command.setName(name);
+    return command;
+  }
 
   public Command test2() {
     CommandBase command = new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))

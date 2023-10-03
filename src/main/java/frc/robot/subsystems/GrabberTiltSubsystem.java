@@ -166,7 +166,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("TiltErr", error);
         }
         // Note error is in revolutions
-        return Math.abs(error) < .1;
+        return Math.abs(error) < .5;
     }
 
     // If grabber nearly retracted it is safe to move the elevator

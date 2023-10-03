@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -17,18 +18,20 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-//import static frc.robot.Util.logf;
+import static frc.robot.Util.logf;
+
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.Vector;
 
-public class LimeLightPoseSubsystem extends SubsystemBase {
+public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Pose2d> {
     private final SwerveDrivePoseEstimator poseEstimator;
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
     NetworkTableEntry tx = table.getEntry("tx");
     NetworkTableEntry ty = table.getEntry("ty");
     NetworkTableEntry ta = table.getEntry("ta");
     NetworkTableEntry tv = table.getEntry("tv");
-    NetworkTableEntry timestamp = table.getEntry("timestamp");
+    //NetworkTableEntry timestamp = table.getEntry("timestamp");
     ShuffleboardTab tab;
     private final Field2d field2d = new Field2d();
     Pose2d pose = new Pose2d();
@@ -54,6 +57,7 @@ public class LimeLightPoseSubsystem extends SubsystemBase {
     public void periodic() {
         //read values periodically
         if (tv.getDouble(0.0) == 1.0) {
+            // x and y are in degrees
             double x = tx.getDouble(0.0);
             double y = ty.getDouble(0.0);
             double area = ta.getDouble(0.0);
@@ -68,7 +72,9 @@ public class LimeLightPoseSubsystem extends SubsystemBase {
             double llPose[] = NetworkTableInstance.getDefault().getTable("limelight").getEntry(pipeLine)
                     .getDoubleArray(new double[6]);
             Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(Math.toRadians(llPose[5])));
-            poseEstimator.addVisionMeasurement(visionPose, timestamp.getDouble(0.0));
+            // TODO: Get a proper timestamp
+            double timeS = RobotController.getFPGATime() / 1000000.0;
+            poseEstimator.addVisionMeasurement(visionPose, timeS);
         }
         poseEstimator.update(
                 drivetrainSubsystem.getGyroscopeRotation(),
@@ -88,9 +94,14 @@ public class LimeLightPoseSubsystem extends SubsystemBase {
                 pose.getX(),
                 pose.getY(),
                 pose.getRotation().getDegrees());
-        // if (Robot.count % 250 == 0) {
-        //     logf("Pose %s\n", s);
-        // }
+       if (Robot.count % 250 == 0) {
+            logf("Pose %s\n", s);
+         }
         return s;
+    }
+
+    @Override
+    public Pose2d get() {
+        return pose;
     }
 }

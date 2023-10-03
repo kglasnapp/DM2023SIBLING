@@ -9,7 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
@@ -20,15 +20,15 @@ import static frc.robot.Util.logf;
 public class StraightPathCommand extends CommandBase {
     DrivetrainSubsystem drivetrainSubsystem;
 
-    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
-    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(3, 2);
+    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(7, 1.5);
+    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(7, 1.5);
     private static final TrapezoidProfile.Constraints OMEGA_CONSTRATINTS = new TrapezoidProfile.Constraints(
             Math.toRadians(180), Math.toRadians(180));
-    private final ProfiledPIDController xController = new ProfiledPIDController(0.75, 0, 0, X_CONSTRAINTS);
-    private final ProfiledPIDController yController = new ProfiledPIDController(0.75, 0, 0, Y_CONSTRAINTS);
-    private final ProfiledPIDController omegaController = new ProfiledPIDController(0.5, 0, 0, OMEGA_CONSTRATINTS);
+    private final ProfiledPIDController xController = new ProfiledPIDController(0.15, 0, 0, X_CONSTRAINTS);
+    private final ProfiledPIDController yController = new ProfiledPIDController(0.15, 0, 0, Y_CONSTRAINTS);
+    private final ProfiledPIDController omegaController = new ProfiledPIDController(0.015, 0, 0, OMEGA_CONSTRATINTS);
     private final Supplier<Pose2d> poseProvider;
-    Pose2d initialPose;
+    Pose2d initialPose; 
     Supplier<Pose2d> destinationProvider;
     Pose2d destination;
 
@@ -85,26 +85,26 @@ public class StraightPathCommand extends CommandBase {
     @Override
     public void execute() {
         // logf("executing path follow command\n");
-        double currentTime = RobotController.getFPGATime() - initialTime;
-
+        // double currentTime = RobotController.getFPGATime() - initialTime;
+        // currentTime/= 1000;
         if (destinationProvider != null) {
             destination = destinationProvider.get();
         }
 
-        double goalX = getIntermediateGoal(destination.getX(), initialPose.getX(), 2, currentTime);
-        double goalY = getIntermediateGoal(destination.getY(), initialPose.getY(), 2, currentTime);
-        double goalAngle = getIntermediateGoal(destination.getRotation().getDegrees(),
-                initialPose.getRotation().getDegrees(), 2, currentTime);
-        xController.setGoal(goalX);
-        yController.setGoal(goalY);
-        omegaController.setGoal(Math.toRadians(goalAngle));
+        // double goalX = getIntermediateGoal(destination.getX(), initialPose.getX(), 1000, currentTime);
+        // double goalY = getIntermediateGoal(destination.getY(), initialPose.getY(), 1000, currentTime);
+        // double goalAngle = getIntermediateGoal(destination.getRotation().getDegrees(),
+        //         initialPose.getRotation().getDegrees(), 2, currentTime);
+        xController.setGoal(destination.getX());
+        yController.setGoal(destination.getY());
+        omegaController.setGoal(destination.getRotation().getRadians());
         var robotPose = poseProvider.get();
 
-        if (Robot.count % 10 == 8) {
-            SmartDashboard.putNumber("goal X", goalX);
-            SmartDashboard.putNumber("goal Y", goalY);
-            SmartDashboard.putNumber("goal A", goalAngle);
-        }
+        // if (Robot.count % 10 == 8) {
+        //     SmartDashboard.putNumber("goal X", goalX);
+        //     SmartDashboard.putNumber("goal Y", goalY);
+        //     SmartDashboard.putNumber("goal A", goalAngle);
+        // }
 
         if (Robot.count % 20 == 3) {
             // logf("Path time:%.3f goal:<%.2f,%.2f,%.2f> robot pose:<%.2f,%.2f,%.2f>\n",

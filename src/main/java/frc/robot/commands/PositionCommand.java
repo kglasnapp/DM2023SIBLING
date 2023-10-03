@@ -43,12 +43,20 @@ public class PositionCommand extends CommandBase {
                 elevatorDistance = 0;
                 break;
             case CHUTE: 
-            if (mode == RobotMode.Cube) {
-                tiltAngle = 70;
-                elevatorDistance = 40;
+            // if (mode == RobotMode.Cube) {
+            //     tiltAngle = 70;
+            //     elevatorDistance = 40;
+            // } else {
+            //     tiltAngle = 130;
+            //     elevatorDistance = 40;
+            // }
+            //     break;
+             if (mode == RobotMode.Cube) {
+                tiltAngle = 0;
+                elevatorDistance = 0;
             } else {
-                tiltAngle = 130;
-                elevatorDistance = 40;
+                tiltAngle = 70;
+                elevatorDistance = 13.5;
             }
                 break;
             case SHELF:
@@ -67,7 +75,7 @@ public class PositionCommand extends CommandBase {
             case HIGH:
                 if (mode == RobotMode.Cube) {
                     tiltAngle = 70; 
-                    elevatorDistance = 110; // TODO was 110, resotre when elevator bearings fixed
+                    elevatorDistance = 115; // TODO was 110, resotre when elevator bearings fixed
                 } else {
                     tiltAngle = 122;
                     elevatorDistance = 130;
@@ -78,8 +86,8 @@ public class PositionCommand extends CommandBase {
                     tiltAngle = 70;
                     elevatorDistance = 60;
                 } else {
-                    tiltAngle = 180;
-                    elevatorDistance = 130;
+                    tiltAngle = 122;
+                    elevatorDistance = 94;
                 }
                 break;
             case LOW:

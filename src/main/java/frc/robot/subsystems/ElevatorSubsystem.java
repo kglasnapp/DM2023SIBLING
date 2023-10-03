@@ -155,7 +155,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("EleErr", error);
         }
         // Note error is in revolutions
-        return Math.abs(error) < .05;
+        return Math.abs(error) < .5;
     }
 
     public boolean getForwardLimitSwitch() {

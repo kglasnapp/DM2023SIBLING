@@ -28,9 +28,11 @@ import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultGrabberCommand;
+import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
+import frc.robot.commands.StraightPathCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberTiltSubsystem;
@@ -206,7 +208,13 @@ public class RobotContainer {
     }));
     // y Button will rotate the Robot 180 degrees
     driveController.y().onTrue(new RotateCommand(drivetrainSubsystem));
-
+    driveController.b().whileTrue(new StraightPathCommand(drivetrainSubsystem, 
+    limeLightPoseSubsystem, new Pose2d(4.26,4.92, new Rotation2d(Math.toRadians(180))))
+    .andThen(new RotateCommand(drivetrainSubsystem))
+    .andThen(new StraightPathCommand(drivetrainSubsystem, 
+    limeLightPoseSubsystem, new Pose2d(4.56,4.92, new Rotation2d(Math.toRadians(0))))
+    .alongWith(new PositionCommand(this, OperatorButtons.GROUND)))
+    .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.IN, 700)));
     operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));
     operatorController.button(OperatorButtons.MIDDLE.value).onTrue(new PositionCommand(this, OperatorButtons.MIDDLE));
     operatorController.button(OperatorButtons.HIGH.value).onTrue(new PositionCommand(this, OperatorButtons.HIGH));
