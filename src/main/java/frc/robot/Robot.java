@@ -63,7 +63,7 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
     count++;
-    if (count % 500 == 0) {
+    if (count % 1000 == 67) {
       pdhData.logPDHData();
     }
     //led.periodic();

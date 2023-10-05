@@ -33,6 +33,8 @@ import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
 import frc.robot.commands.StraightPathCommand;
+import frc.robot.commands.TrajectoryCommand;
+import frc.robot.commands.ZeroGyroCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberTiltSubsystem;
@@ -170,7 +172,6 @@ public class RobotContainer {
     return limeLightPoseSubsystem.getPose();
   }
 
-
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -208,13 +209,26 @@ public class RobotContainer {
     }));
     // y Button will rotate the Robot 180 degrees
     driveController.y().onTrue(new RotateCommand(drivetrainSubsystem));
-    driveController.b().whileTrue(new StraightPathCommand(drivetrainSubsystem, 
-    limeLightPoseSubsystem, new Pose2d(4.26,4.92, new Rotation2d(Math.toRadians(180))))
-    .andThen(new RotateCommand(drivetrainSubsystem))
-    .andThen(new StraightPathCommand(drivetrainSubsystem, 
-    limeLightPoseSubsystem, new Pose2d(4.56,4.92, new Rotation2d(Math.toRadians(0))))
-    .alongWith(new PositionCommand(this, OperatorButtons.GROUND)))
-    .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.IN, 700)));
+    driveController.a().whileTrue(new TrajectoryCommand(drivetrainSubsystem, limeLightPoseSubsystem));
+    driveController.b().whileTrue(
+        new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
+            .andThen(new SetModeConeCube(RobotMode.Cube))
+            //.andThen(new PositionCommand(this, OperatorButtons.LOW))
+            .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300))
+            // .andThen(new PositionCommand(this, OperatorButtons.HOME))
+            .andThen(
+                new StraightPathCommand(drivetrainSubsystem,
+                    limeLightPoseSubsystem, new Pose2d(4.49, 5.08, new Rotation2d(Math.toRadians(180)))))
+            .andThen(new RotateCommand(drivetrainSubsystem))
+            .andThen(new StraightPathCommand(drivetrainSubsystem,
+                limeLightPoseSubsystem, new Pose2d(4.79, 5.08, new Rotation2d(Math.toRadians(0))))
+                .andThen(new PositionCommand(this, OperatorButtons.GROUND)))
+            .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.IN, 1000))
+            .andThen(new PositionCommand(this, OperatorButtons.HOME))
+            .andThen(new RotateCommand(drivetrainSubsystem))
+            .andThen(new StraightPathCommand(drivetrainSubsystem,
+                limeLightPoseSubsystem, new Pose2d(1.89, 4.88, new Rotation2d(Math.toRadians(180)))))
+            .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300)));
     operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));
     operatorController.button(OperatorButtons.MIDDLE.value).onTrue(new PositionCommand(this, OperatorButtons.MIDDLE));
     operatorController.button(OperatorButtons.HIGH.value).onTrue(new PositionCommand(this, OperatorButtons.HIGH));
@@ -226,20 +240,6 @@ public class RobotContainer {
 
     operatorController.button(OperatorButtons.CONE.value).onTrue(new SetModeConeCube(RobotMode.Cone));
     operatorController.button(OperatorButtons.CUBE.value).onTrue(new SetModeConeCube(RobotMode.Cube));
-
-    // operatorController.button(OperatorButtons.CONE.value).onTrue(Commands.runOnce(setMode(RobotMode.Cube)); 
-
-    // operatorController.button(OperatorButtons.CUBE.value).onTrue(Commands.runOnce(new Runnable() {
-    //   public void run() {
-    //     setMode(RobotMode.Cone);
-    //   }
-    // }));
-
-    // operatorController.button(OperatorButtons.CUBE.value).onTrue(Commands.runOnce(new Runnable() {
-    //   public void run() {
-    //     setMode(RobotMode.Cube);
-    //   }
-    // }));
 
   }
 

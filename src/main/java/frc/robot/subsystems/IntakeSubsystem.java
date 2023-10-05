@@ -46,7 +46,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void setBrakeMode(boolean mode) {
         intakeMotor.setIdleMode(mode ? IdleMode.kBrake : IdleMode.kCoast);
-        logf("Brake mode: %s\n", intakeMotor.getIdleMode());
+        logf("Intake Brake mode: %s\n", intakeMotor.getIdleMode());
     }
 
     public void intakeIn() {
@@ -85,8 +85,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         double current = intakeMotor.getOutputCurrent();
         double avgCurrent = avg.add(current);
-        if (current > .05) {
-            logf("Cur:%.2f Avg:%.2f Count:%d\n", current, avgCurrent, StateMachineForCurrent.counter);
+        if (current > 4.5) {
+            logf("Intake Cur:%.2f Avg:%.2f Count:%d\n", current, avgCurrent, StateMachineForCurrent.counter);
         }
         double power;
         if (!isOut) {
@@ -111,7 +111,7 @@ public class IntakeSubsystem extends SubsystemBase {
         private static final double maxCurrentLowCone = 2;
         private static final double maxCurrentCube = 6;
         private static final double maxCurrentLowCube = 2;
-        private static final int OVERCURRENT_COUNT_LIMIT = 10;
+        private static final int OVERCURRENT_COUNT_LIMIT = 15;
         private static final int BACK_TO_NORMAL_COUNT_LIMIT = 15;
         private static final double overCurrentPower = .1;
 
@@ -165,7 +165,7 @@ public class IntakeSubsystem extends SubsystemBase {
         }
 
         public static boolean overCurrent() {
-            return state == STATE.OVERCURRENT && counter > BACK_TO_NORMAL_COUNT_LIMIT - 2;
+            return state == STATE.OVERCURRENT;
         }
     }
 }

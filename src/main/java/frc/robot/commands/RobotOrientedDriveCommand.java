@@ -45,7 +45,6 @@ public class RobotOrientedDriveCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        // TODO Is this OK
         drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, 0));
     }
 

@@ -19,7 +19,7 @@ import frc.robot.RobotContainer;
 import frc.robot.utilities.CANSparkMaxUtil.Usage;
 
 public class SwerveModule {
-  // TODO: Constant to indicate at what height of the elevator we force 
+  // Constant to indicate at what height of the elevator we force 
   // speed of the robot to go to PRECESSION MODE.
   public static final double ELEVATOR_HEIGHT_LIMIT_FOR_SPEED = 50;
 

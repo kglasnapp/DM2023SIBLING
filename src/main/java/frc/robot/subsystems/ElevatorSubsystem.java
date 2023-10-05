@@ -12,11 +12,8 @@ import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
-import frc.robot.RobotContainer.ShowPID;
 import frc.robot.subsystems.LedSubsystem.Leds;
 import frc.robot.utilities.LimitSwitch;
-
 
 /**
  * REV Smart Motion Guide
@@ -48,8 +45,7 @@ import frc.robot.utilities.LimitSwitch;
  */
 
 public class ElevatorSubsystem extends SubsystemBase {
-    
-   
+
     private static final int Elevator_MOTOR_ID = 11;
     private double lastElevatorInches = 0;
     private double lastElevatorSetPoint = 0;
@@ -59,7 +55,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private RelativeEncoder distanceEncoder;
     private PID_MAX pid = new PID_MAX();
     private boolean homed = false;
-    private double elevatorRotationsPerInch = 1; 
+    private double elevatorRotationsPerInch = 1;
     private double current = 0;
     private GrabberTiltSubsystem grabberSubsystem;
     private double lastPower = 99;
@@ -78,9 +74,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Setup paramters for the tilt motor
         elevatorMotor = new CANSparkMax(Elevator_MOTOR_ID, MotorType.kBrushless);
         elevatorMotor.restoreFactoryDefaults();
-        elevatorMotor.setInverted(false); 
+        elevatorMotor.setInverted(false);
         setBrakeMode(elevatorMotor, true);
-        elevatorMotor.setSmartCurrentLimit((int)MAX_CURRENT);
+        elevatorMotor.setSmartCurrentLimit((int) MAX_CURRENT);
         limitSwitch = new LimitSwitch(elevatorMotor, "Elev", Leds.ElevatorForward, Leds.ElevatorReverse);
         distanceEncoder = elevatorMotor.getEncoder();
         distanceEncoder.setPosition(0);
@@ -99,7 +95,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             return false;
         }
         if (grabberSubsystem.isElevatorSafeToMove(inches)) {
-            
+
             double setPoint = inches * elevatorRotationsPerInch;
             lastElevatorSetPoint = setPoint;
             lastElevatorInches = inches;
@@ -179,6 +175,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     double lastSetPointForLogging = 0;
+
     // This method will be called once per scheduler run
     @Override
     public void periodic() {
@@ -196,15 +193,15 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (Robot.count % 15 == 8) {
             SmartDashboard.putNumber("ElevCur", round2(current));
             SmartDashboard.putNumber("ElevPos", round2(getElevatorPosRevs()));
-            SmartDashboard.putNumber("ElevLastPos", lastElevatorInches);
-            SmartDashboard.putNumber("ElevPwr", round2(elevatorMotor.getAppliedOutput()));
-            SmartDashboard.putNumber("ElevVel", round2(distanceEncoder.getVelocity()));
+            // SmartDashboard.putNumber("ElevLastPos", lastElevatorInches);
+            //SmartDashboard.putNumber("ElevPwr", round2(elevatorMotor.getAppliedOutput()));
+            //SmartDashboard.putNumber("ElevVel", round2(distanceEncoder.getVelocity()));
         }
-        if (RobotContainer.showPID == ShowPID.ELEVATOR && Robot.count % 15 == 12) {
-            if (Robot.count % 15 == 12) {
-                // TODO pid.getPidCoefficientsFromDashBoard();
-            }
-        }
+        // if (RobotContainer.showPID == ShowPID.ELEVATOR && Robot.count % 15 == 12) {
+        //     if (Robot.count % 15 == 12) {
+        //         // pid.getPidCoefficientsFromDashBoard();
+        //     }
+        // }
     }
 
     private void doHomingAndMonitor(double current) {
@@ -248,7 +245,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 if (current > MAX_CURRENT) {
                     logf("Elevator overcurrent detected while ready current:%.2f\n", current);
                     myCount = 5; // Wait 100 ms to see if over current remains
-                    state = STATE.OVERCURRENT;                    
+                    state = STATE.OVERCURRENT;
                 }
                 break;
             case OVERCURRENT:

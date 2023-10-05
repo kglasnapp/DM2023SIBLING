@@ -37,7 +37,7 @@ public class IntakeCommand extends CommandBase {
         if (state == State.OFF) {
             intakeSubsystem.intakeOff();
         }
-        logf("Intake %s for %.2f counts\n", state, timeOut);
+        logf("Intake %s for %.2f milli seconds\n", state, timeOut);
     }
 
     @Override

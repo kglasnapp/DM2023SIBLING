@@ -53,9 +53,13 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
                 visionMeasurementStdDevs);
     }
 
+    double camearaToYawAdjustment = 0;
+    Rotation2d yaw = new Rotation2d();
+
     @Override
     public void periodic() {
         //read values periodically
+        yaw = drivetrainSubsystem.getGyroscopeRotation();
         if (tv.getDouble(0.0) == 1.0) {
             // x and y are in degrees
             double x = tx.getDouble(0.0);
@@ -67,17 +71,18 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
                 SmartDashboard.putNumber("LimeLY", y);
                 SmartDashboard.putNumber("LimeLArea", area);
             }
-            // TODO Test the Fix for allaince
+
             String pipeLine = (Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
             double llPose[] = NetworkTableInstance.getDefault().getTable("limelight").getEntry(pipeLine)
                     .getDoubleArray(new double[6]);
-            Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(Math.toRadians(llPose[5])));
-            // TODO: Get a proper timestamp
+            double cameraAngle = Math.toRadians(llPose[5]);
+            camearaToYawAdjustment = cameraAngle - yaw.getRadians();
+            Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(cameraAngle));
             double timeS = RobotController.getFPGATime() / 1000000.0;
             poseEstimator.addVisionMeasurement(visionPose, timeS);
         }
-        poseEstimator.update(
-                drivetrainSubsystem.getGyroscopeRotation(),
+        yaw = new Rotation2d(yaw.getRadians() - camearaToYawAdjustment);
+        poseEstimator.update(yaw,
                 drivetrainSubsystem.getModulePositions());
         pose = poseEstimator.getEstimatedPosition();
         if (Robot.count % 10 == 0) {
@@ -94,9 +99,9 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
                 pose.getX(),
                 pose.getY(),
                 pose.getRotation().getDegrees());
-       if (Robot.count % 250 == 0) {
-            logf("Pose %s\n", s);
-         }
+        if (Robot.count % 250 == 0) {
+            logf("LL Pose %s yaw:%.2f\n", s, yaw.getDegrees());
+        }
         return s;
     }
 

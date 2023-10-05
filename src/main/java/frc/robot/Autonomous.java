@@ -61,7 +61,7 @@ public class Autonomous {
     return command;
   }
 
-  private Command getAutonomousCommandCase2() {
+  public Command getAutonomousCommandCase2() {
     CommandBase command = new DisplayLogCommand("Case 2")
         .andThen(new WaitCommand(0.5));
     return command;
@@ -99,7 +99,7 @@ public class Autonomous {
     // .andThen(new RobotOrientedDriveCommand(drivetrainSubsystem, 0, 0, 0, 50));
   }
 
-  private Supplier<Pose2d> poseEstimator; // TODO Elie how do we get a pose provider
+  private Supplier<Pose2d> poseEstimator;
 
   public Command caseCommand(String name, IntakeSubsystem intakeSubsystem, double speedY, int durationY) {
     CommandBase command = new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))

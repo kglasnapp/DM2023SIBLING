@@ -67,7 +67,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     private LimitSwitch limitSwitch;
     private boolean homed = false;
     int myCount = 0; // Counter used for timing in state machine
-    private final static int OVER_CURRENT = 20;
+    private final static int OVER_CURRENT = 30;
     private RobotContainer robotContainer;
 
     enum STATE {
@@ -123,7 +123,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
     }
 
     public void setPower(double value) {
-        logf("Set Tilt Motor power:%.3f\n", value);
+        // logf("Set Tilt Motor power:%.3f\n", value);
         grabberTiltMotor.set(value);
     }
 
@@ -189,8 +189,9 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         } else {
             double currentElePos = robotContainer.elevatorSubsystem.getElevatorPosRevs();
             boolean direction = (eleToPos - currentElePos) > 0;
-            logf("Is Elevator Safe to move current:%.2f requested:%.2f direction:%b angle:%.2f \n", currentElePos, eleToPos, direction, angle);
-            return (angle > 40) || (angle < 190 && eleToPos > 30); 
+            logf("Is Elevator Safe to move current:%.2f requested:%.2f direction:%b angle:%.2f \n", currentElePos,
+                    eleToPos, direction, angle);
+            return (angle > 40) || (angle < 190 && eleToPos > 30);
         }
     }
 
@@ -220,14 +221,14 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         // pidController.setReference(setPointRotations, CANSparkMax.ControlType.kSmartMotion);
         doStateMachine(current);
         if (RobotContainer.smartDashBoardForElevator) {
-            if (Robot.count % 15 == 5) {
+            if (Robot.count % 30 == 5) {
                 SmartDashboard.putNumber("TltCur", round2(current));
                 SmartDashboard.putNumber("TltAng", round2(getTiltAngleDegrees()));
                 SmartDashboard.putNumber("TltLastRot", lastTiltRotations);
-                SmartDashboard.putNumber("TltPwr", round2(grabberTiltMotor.getAppliedOutput()));
-                SmartDashboard.putNumber("TltVel", round2(tiltEncoder.getVelocity()));
+                //SmartDashboard.putNumber("TltPwr", round2(grabberTiltMotor.getAppliedOutput()));
+                //SmartDashboard.putNumber("TltVel", round2(tiltEncoder.getVelocity()));
             }
-            if (Robot.count % 30 == 10) {
+            if (Robot.count % 100 == 10) {
                 if (RobotContainer.showPID == ShowPID.TILT) {
                     pid.getPidCoefficientsFromDashBoard();
                 }
@@ -239,7 +240,7 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         //     // we adjust the relative encoder of the tilt
         //     // motor every 5 secs
         //     double tiltAbsolutePosition = getAbsEncoder();
-        //     // TODO put back in when connected to actual intake
+        //     // put back in when connected to actual intake
         //     // tiltEncoder.setPosition(tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO);
         //     logf("Tilt Motor Angle:%.3f  Abs Encoder Rotations:%.3f Abs Encoder Angle:%.3f\n", getTiltAngleDegrees(),
         //             tiltAbsolutePosition / ABSOLUTE_ENCODER_RATIO, tiltAbsolutePosition);
