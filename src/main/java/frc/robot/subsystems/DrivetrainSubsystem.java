@@ -33,7 +33,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
 import frc.robot.utilities.SwerveModule;
 import frc.robot.utilities.SwerveModuleConstants;
 
@@ -221,9 +220,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * 'forwards' direction.
    */
   public void zeroGyroscope() {
-    if (!RobotContainer.getBack()) { // TODO back has two functions find other and fix Clean up always was hit
-      return;
-    }
+    // if (!RobotContainer.getBack()) { // TODO back has two functions find other and fix Clean up always was hit
+    //   return;
+    // }
 
     // FIXed Uncomment if you are using a NavX
     logf("zero Gyro DT\n");
@@ -275,15 +274,19 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // // We will only get valid fused headings if the magnetometer is calibrated
       // System.out.println("returning the angle FUSE ZERO from the robot:
       // "+m_navx.getAngle());
-
-      return Rotation2d.fromDegrees(-m_navx.getFusedHeading() + zeroNavx + currentOrientation);
+      
+      Rotation2d r = Rotation2d.fromDegrees(-m_navx.getFusedHeading() + zeroNavx + currentOrientation);
+      SmartDashboard.putNumber("Rot Cal", r.getDegrees());
+      return r;
     }
     //
     // We have to invert the angle of the NavX so that rotating the robot
     // counter-clockwise makes the angle increase.
     // return Rotation2d.fromDegrees(360.0 - m_navx.getYaw());
 
-    return Rotation2d.fromDegrees(-m_navx.getYaw() + currentOrientation);
+   Rotation2d r =  Rotation2d.fromDegrees(-m_navx.getYaw() + currentOrientation);
+   SmartDashboard.putNumber("Rot NC", r.getDegrees());
+   return r;
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
@@ -507,7 +510,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("FR POS", frP);
     // SmartDashboard.putNumber("BR POS", brP);
     // SmartDashboard.putNumber("BL POS", blP);
-    // }
+    // 
     // The postition is in meters
     return new SwerveModulePosition[] {
         new SwerveModulePosition(flP, flA),

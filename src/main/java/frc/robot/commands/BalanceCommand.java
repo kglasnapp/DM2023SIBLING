@@ -70,14 +70,14 @@ public class BalanceCommand extends CommandBase {
         if (state == State.FAST_BACK) {
             drivetrainSubsystem.drive(
                     new ChassisSpeeds(
-                            -0.02,
+                            0.02,
                             0,
                             0));
             if (RobotController.getFPGATime() / 1000 - initTime > 2000) {
                 state = State.SLOW_BACK;
                 drivetrainSubsystem.drive(
                             new ChassisSpeeds(
-                                    -0.015,
+                                    0.02,
                                     0,
                                     0));
                 initTime = RobotController.getFPGATime() / 1000;
@@ -144,7 +144,7 @@ public class BalanceCommand extends CommandBase {
                     state = State.RETRY;
                     drivetrainSubsystem.drive(
                         new ChassisSpeeds(
-                                5,
+                                -5,
                                 0,
                                 0));
                     initTime = RobotController.getFPGATime() / 1000;

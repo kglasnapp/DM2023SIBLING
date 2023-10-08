@@ -1,31 +1,33 @@
 package frc.robot.commands;
 
-import java.util.ArrayList;
+import static frc.robot.Util.logf;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
 import frc.robot.Util;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import static frc.robot.Util.logf;
 
 public class TrajectoryCommand extends CommandBase {
     DrivetrainSubsystem drivetrainSubsystem;
 
-    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(7, 1.5);
-    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(7, 1.5);
+    private static final TrapezoidProfile.Constraints X_CONSTRAINTS = new TrapezoidProfile.Constraints(7, 2.5);
+    private static final TrapezoidProfile.Constraints Y_CONSTRAINTS = new TrapezoidProfile.Constraints(7, 2.5);
     private static final TrapezoidProfile.Constraints OMEGA_CONSTRATINTS = new TrapezoidProfile.Constraints(
             Math.toRadians(180), Math.toRadians(180));
     private final ProfiledPIDController xController = new ProfiledPIDController(0.1, 0, 0, X_CONSTRAINTS);
@@ -36,31 +38,43 @@ public class TrajectoryCommand extends CommandBase {
     Supplier<Pose2d> destinationProvider;
     Trajectory trajectory;
     long initialTime;
+    Pose2d destination = new Pose2d(4.49, 5.08, Rotation2d.fromDegrees(0));
 
-    public TrajectoryCommand(DrivetrainSubsystem drivetrainSubsystem, Supplier<Pose2d> poseProvider) {
+    public TrajectoryCommand(String filename, DrivetrainSubsystem drivetrainSubsystem, Supplier<Pose2d> poseProvider) {
         this.drivetrainSubsystem = drivetrainSubsystem;
         this.poseProvider = poseProvider;
+        trajectory = generateTrajectory(filename);
         init();
+        List<Trajectory.State> states = trajectory.getStates();
+        destination = states.get(states.size()-1).poseMeters;
     }
 
-    public static Trajectory generateTrajectory(Pose2d startPose) {
+    public Trajectory getTrajectory() {
+        return trajectory;
+    }
 
-        // 2018 cross scale auto waypoints.
+    public static Trajectory generateTrajectory(String filename) {
+        Trajectory trajectory = new Trajectory();
+        try {
+            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(filename);
+            trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+        } catch (IOException ex) {
+            DriverStation.reportError("Unable to open trajectory: " + filename, ex.getStackTrace());
+        }
+        return trajectory;
 
-        var endPose = new Pose2d(4.49, 5.08,
-                Rotation2d.fromDegrees(0));
+        // var interiorWaypoints = new ArrayList<Translation2d>();
+        // interiorWaypoints.add(new Translation2d(2.8, 5.08));
+        // // interiorWaypoints.add(new Translation2d(Units.feetToMeters(21.04), Units.feetToMeters(18.23)));
+        // Pose2d startPose = new Pose2d(1.75,4.36,new Rotation2d(Math.toRadians(180)));
+        // TrajectoryConfig config = new TrajectoryConfig(7, 3.5);
+        // Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+        //     startPose,
+        //     interiorWaypoints,
+        //     destination,
+        //     config);
 
-        var interiorWaypoints = new ArrayList<Translation2d>();
-        interiorWaypoints.add(new Translation2d(2.8, 5.08));
-        // interiorWaypoints.add(new Translation2d(Units.feetToMeters(21.04), Units.feetToMeters(18.23)));
-
-        TrajectoryConfig config = new TrajectoryConfig(1, 0.5);
-
-        return TrajectoryGenerator.generateTrajectory(
-                startPose,
-                interiorWaypoints,
-                endPose,
-                config);
+        // return trajectory;
     }
 
     void init() {
@@ -74,10 +88,10 @@ public class TrajectoryCommand extends CommandBase {
 
     public void initialize() {
         initialPose = poseProvider.get();
-        logf("Init Path Follow pose:<%.2f,%.2f,%.2f> yaw:%.2f\n", initialPose.getX(), initialPose.getY(),
+        logf("Init Trajectory Follow pose:<%.2f,%.2f,%.2f> yaw:%.2f\n", initialPose.getX(), initialPose.getY(),
                 initialPose.getRotation().getDegrees(), drivetrainSubsystem.m_navx.getYaw());
         initialTime = RobotController.getFPGATime();
-        trajectory = generateTrajectory(initialPose);
+
         omegaController.reset(initialPose.getRotation().getRadians());
         xController.reset(initialPose.getX());
         yController.reset(initialPose.getY());
@@ -94,13 +108,19 @@ public class TrajectoryCommand extends CommandBase {
         //     SmartDashboard.putNumber("goal Y", goalY);
         //     SmartDashboard.putNumber("goal A", goalAngle);
         // }
+
         Trajectory.State goal = trajectory
-                .sample(2 * ((double) (RobotController.getFPGATime() - initialTime)) / 1000000.0); // sample the trajectory at 3.4 seconds from the beginning
+                .sample(((double) (RobotController.getFPGATime() - initialTime)) / 1000000.0);
         if (Robot.count % 10 == 3) {
-            logf("Path time:%.3f goal:<%.2f,%.2f,%.2f> robot pose:<%.2f,%.2f,%.2f>\n",
+            // logf("Trajectory Path time:%.3f goal:<%.2f,%.2f,%.2f> robot pose:<%.2f,%.2f,%.2f>\n",
+            //         (RobotController.getFPGATime() - initialTime) / 1000000.0,
+            //         goal.poseMeters.getX(), goal.poseMeters.getY(),
+            //         goal.poseMeters.getRotation().getDegrees(),
+            //         robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
+            logf("Trajectory Path time:%.3f goal:<%.2f,%.2f,%.2f> robot pose:<%.2f,%.2f,%.2f>\n",
                     (RobotController.getFPGATime() - initialTime) / 1000000.0,
-                    goal.poseMeters.getX(), goal.poseMeters.getY(),
-                    goal.poseMeters.getRotation().getDegrees(),
+                    destination.getX(), destination.getY(),
+                    destination.getRotation().getDegrees(),
                     robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
         }
 
@@ -117,7 +137,6 @@ public class TrajectoryCommand extends CommandBase {
             ySpeed = 0;
         }
 
-
         var omegaSpeed = omegaController.calculate(robotPose.getRotation().getRadians());
         if (omegaController.atGoal()) {
             omegaSpeed = 0;
@@ -129,22 +148,18 @@ public class TrajectoryCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        //double currentTime = RobotController.getFPGATime();
-        Pose2d destination = trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters;
         var robotPose = poseProvider.get();
-        boolean atGoalX = Math.abs(robotPose.getX() - destination.getX()) < 0.01;
-        boolean atGoalY = Math.abs(robotPose.getY() - destination.getY()) < 0.01;
-        boolean atGoalO = Math.abs((Util.normalizeAngle(robotPose.getRotation().getDegrees() -
-                destination.getRotation().getDegrees()))) < 1;
-        boolean finished = atGoalX && atGoalY && atGoalO;
-        if (finished) {
-            logf("Path Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b> yaw:%.2f\n",
+        if (Math.abs(robotPose.getX() - destination.getX()) < 0.03 &&
+                Math.abs(robotPose.getY() - destination.getY()) < 0.03 &&
+                Math.abs((Util.normalizeAngle(robotPose.getRotation().getDegrees() -
+                        destination.getRotation().getDegrees()))) < 2) {
+            logf("Trajectory Follow Complete time:%3f robot pose:<%.2f,%.2f,%.2f, %b, %b, %b> yaw:%.2f\n",
                     (RobotController.getFPGATime() - initialTime) / 1000000.0,
-                    robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), atGoalX, atGoalY,
-                    atGoalO, drivetrainSubsystem.m_navx.getYaw());
+                    robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees(), true, true,
+                    true, drivetrainSubsystem.m_navx.getYaw());
+            return true;
         }
-        return finished;
-
+        return false;
     }
 
     @Override

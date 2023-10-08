@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-//import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -28,13 +27,9 @@ import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultGrabberCommand;
-import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
-import frc.robot.commands.StraightPathCommand;
-import frc.robot.commands.TrajectoryCommand;
-import frc.robot.commands.ZeroGyroCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberTiltSubsystem;
@@ -58,15 +53,15 @@ public class RobotContainer {
 
   public final GrabberTiltSubsystem grabberSubsystem = new GrabberTiltSubsystem(this);
   //private final LimeLightPose limeLightPose = new LimeLightPose();
-  private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   public final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(grabberSubsystem);
-  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
+  public final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   public final static LedSubsystem leds = new LedSubsystem();
   private final static CommandXboxController driveController = new CommandXboxController(2);
   private final static CommandXboxController operatorController = new CommandXboxController(3);
   public final Autonomous autotonomous = new Autonomous(this, drivetrainSubsystem, intakeSubsystem);
   public boolean USBCamera = false;
-  private final BalanceCommand balanceCommand = new BalanceCommand(drivetrainSubsystem);
+  public final BalanceCommand balanceCommand = new BalanceCommand(drivetrainSubsystem);
   private SlewRateLimiter sLX = new SlewRateLimiter(9);
   private SlewRateLimiter sLY = new SlewRateLimiter(9);
   private SlewRateLimiter sRX = new SlewRateLimiter(1);
@@ -209,26 +204,13 @@ public class RobotContainer {
     }));
     // y Button will rotate the Robot 180 degrees
     driveController.y().onTrue(new RotateCommand(drivetrainSubsystem));
-    driveController.a().whileTrue(new TrajectoryCommand(drivetrainSubsystem, limeLightPoseSubsystem));
-    driveController.b().whileTrue(
-        new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
-            .andThen(new SetModeConeCube(RobotMode.Cube))
-            //.andThen(new PositionCommand(this, OperatorButtons.LOW))
-            .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300))
-            // .andThen(new PositionCommand(this, OperatorButtons.HOME))
-            .andThen(
-                new StraightPathCommand(drivetrainSubsystem,
-                    limeLightPoseSubsystem, new Pose2d(4.49, 5.08, new Rotation2d(Math.toRadians(180)))))
-            .andThen(new RotateCommand(drivetrainSubsystem))
-            .andThen(new StraightPathCommand(drivetrainSubsystem,
-                limeLightPoseSubsystem, new Pose2d(4.79, 5.08, new Rotation2d(Math.toRadians(0))))
-                .andThen(new PositionCommand(this, OperatorButtons.GROUND)))
-            .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.IN, 1000))
-            .andThen(new PositionCommand(this, OperatorButtons.HOME))
-            .andThen(new RotateCommand(drivetrainSubsystem))
-            .andThen(new StraightPathCommand(drivetrainSubsystem,
-                limeLightPoseSubsystem, new Pose2d(1.89, 4.88, new Rotation2d(Math.toRadians(180)))))
-            .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300)));
+    // driveController.a().whileTrue(
+    //    new TrajectoryCommand("/home/lvuser/deploy/Red 3.wpilib.json", drivetrainSubsystem, limeLightPoseSubsystem));
+    // Red 3
+    // driveController.b().whileTrue(get2PiecesCommand("/home/lvuser/deploy/Red 3.wpilib.json",
+    //     "/home/lvuser/deploy/Red 3 Return.wpilib.json", new Pose2d(9.8,4.58,new Rotation2d(Math.toRadians(180)))));
+    driveController.b().whileTrue(Autonomous.get2PiecesCommand(this, "/home/lvuser/deploy/Blue8.wpilib.json",
+        "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9, new Rotation2d(Math.toRadians(0)))));
     operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));
     operatorController.button(OperatorButtons.MIDDLE.value).onTrue(new PositionCommand(this, OperatorButtons.MIDDLE));
     operatorController.button(OperatorButtons.HIGH.value).onTrue(new PositionCommand(this, OperatorButtons.HIGH));

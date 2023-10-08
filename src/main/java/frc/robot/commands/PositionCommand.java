@@ -22,12 +22,12 @@ public class PositionCommand extends CommandBase {
     double elevatorDistance = 0;
     long initialTime;
 
-    public PositionCommand(RobotContainer robotContainer, OperatorButtons type) {
+    public PositionCommand(RobotContainer robotContainer2, OperatorButtons type) {
         this.type = type;
-        this.robotContainer = robotContainer;
+        this.robotContainer = robotContainer2;
 
-        addRequirements(robotContainer.grabberSubsystem);
-        addRequirements(robotContainer.elevatorSubsystem);
+        addRequirements(robotContainer2.grabberSubsystem);
+        addRequirements(robotContainer2.elevatorSubsystem);
 
         // Use addRequirements() here to declare subsystem dependencies.
     }

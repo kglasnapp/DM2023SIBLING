@@ -1,15 +1,11 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
+import static frc.robot.Util.logf;
+
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,14 +14,16 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import static frc.robot.Util.logf;
-
-import java.util.function.Supplier;
-
-import edu.wpi.first.math.Vector;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 
 public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Pose2d> {
-    private final SwerveDrivePoseEstimator poseEstimator;
+    private SwerveDrivePoseEstimator poseEstimator;
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
     NetworkTableEntry tx = table.getEntry("tx");
     NetworkTableEntry ty = table.getEntry("ty");
@@ -34,7 +32,7 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
     //NetworkTableEntry timestamp = table.getEntry("timestamp");
     ShuffleboardTab tab;
     private final Field2d field2d = new Field2d();
-    Pose2d pose = new Pose2d();
+    Pose2d pose = new Pose2d(1.89,0.5,new Rotation2d(Math.toRadians(180)));
     private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(5));
     private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
     DrivetrainSubsystem drivetrainSubsystem;
@@ -48,13 +46,24 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
                 DrivetrainSubsystem.m_kinematics,
                 drivetrainSubsystem.getGyroscopeRotation(),
                 drivetrainSubsystem.getModulePositions(),
-                new Pose2d(),
+                new Pose2d(1.89,0.5,new Rotation2d(Math.toRadians(180))),
                 stateStdDevs,
                 visionMeasurementStdDevs);
     }
 
     double camearaToYawAdjustment = 0;
     Rotation2d yaw = new Rotation2d();
+
+    public void setCurrentPose(Pose2d pose) {
+        this.pose = pose;
+        poseEstimator = new SwerveDrivePoseEstimator(
+                DrivetrainSubsystem.m_kinematics,
+                drivetrainSubsystem.getGyroscopeRotation(),
+                drivetrainSubsystem.getModulePositions(),
+                pose,
+                stateStdDevs,
+                visionMeasurementStdDevs);
+    }
 
     @Override
     public void periodic() {
@@ -72,15 +81,16 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
                 SmartDashboard.putNumber("LimeLArea", area);
             }
 
-            String pipeLine = (Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
+            String pipeLine = "botpose_wpiblue"; // (Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
             double llPose[] = NetworkTableInstance.getDefault().getTable("limelight").getEntry(pipeLine)
                     .getDoubleArray(new double[6]);
             double cameraAngle = Math.toRadians(llPose[5]);
             camearaToYawAdjustment = cameraAngle - yaw.getRadians();
             Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(cameraAngle));
             double timeS = RobotController.getFPGATime() / 1000000.0;
-            poseEstimator.addVisionMeasurement(visionPose, timeS);
+            // poseEstimator.addVisionMeasurement(visionPose, timeS);
         }
+        camearaToYawAdjustment = 0;
         yaw = new Rotation2d(yaw.getRadians() - camearaToYawAdjustment);
         poseEstimator.update(yaw,
                 drivetrainSubsystem.getModulePositions());
