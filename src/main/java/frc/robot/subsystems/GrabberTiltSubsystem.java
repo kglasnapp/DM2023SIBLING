@@ -101,8 +101,8 @@ public class GrabberTiltSubsystem extends SubsystemBase {
         /* Angle Encoder Config */
 
         //setTiltAngle(0);
-        logf("Grabber System Setup kP for Tilt:%.6f Conversion Factor:%.2f Counts per Rev:%d\n", pid.kP,
-                tiltEncoder.getPositionConversionFactor(), tiltEncoder.getCountsPerRevolution());
+        // logf("Grabber System Setup kP for Tilt:%.6f Conversion Factor:%.2f Counts per Rev:%d Abs Encoder:%,2f\n", pid.kP,
+        //         tiltEncoder.getPositionConversionFactor(), tiltEncoder.getCountsPerRevolution(),  tiltEncoder.setPosition(getAbsEncoder() );
     }
 
     public boolean setTiltAngle(double angle) {
@@ -291,6 +291,11 @@ public class GrabberTiltSubsystem extends SubsystemBase {
                     myCount = 25; // Set to wait 500 ms to see if high current stops
                     state = STATE.OVERCURRENT_READY;
                     logf("**** Error ***** Tilt Over Current:%.2f in Ready mode\n", current);
+                }
+                if (isEncoderHomed()) {                    
+                    setHomed(true);                              
+                    tiltEncoder.setPosition(0);
+                    break;
                 }
                 break;
             case OVERCURRENT_HOMING:

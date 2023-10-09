@@ -59,7 +59,7 @@ public class RobotContainer {
   public final static LedSubsystem leds = new LedSubsystem();
   private final static CommandXboxController driveController = new CommandXboxController(2);
   private final static CommandXboxController operatorController = new CommandXboxController(3);
-  public final Autonomous autotonomous = new Autonomous(this, drivetrainSubsystem, intakeSubsystem);
+  
   public boolean USBCamera = false;
   public final BalanceCommand balanceCommand = new BalanceCommand(drivetrainSubsystem);
   private SlewRateLimiter sLX = new SlewRateLimiter(9);
@@ -69,11 +69,14 @@ public class RobotContainer {
   public static boolean smartForElevator = true;
   public static RobotMode robotMode;
   public static boolean smartDashBoardForElevator = true;
-  public LimeLightPoseSubsystem limeLightPoseSubsystem;
+  public LimeLightPoseSubsystem limeLightPoseSubsystemLeft;
+  public LimeLightPoseSubsystem limeLightPoseSubsystemRight;
 
   public static RobotContainer instance;
 
   public static ShowPID showPID = ShowPID.TILT;
+  
+  public Autonomous autotonomous;
 
   public static enum RobotMode {
     Cone, Cube
@@ -120,9 +123,11 @@ public class RobotContainer {
             : -modifyAxis((driveController.getRightX()))
                 * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND),
         driveController.y()));// Set precision based upon left bumper
-    limeLightPoseSubsystem = new LimeLightPoseSubsystem(drivetrainSubsystem);
+    limeLightPoseSubsystemLeft = new LimeLightPoseSubsystem(drivetrainSubsystem, "limelight-left");
+    limeLightPoseSubsystemRight = new LimeLightPoseSubsystem(drivetrainSubsystem, "limelight-right");
     configureButtonBindings();
     configureDashboard();
+    autotonomous = new Autonomous(this, drivetrainSubsystem, intakeSubsystem);
   }
 
   public double squareWithSign(double v) {
@@ -164,7 +169,7 @@ public class RobotContainer {
   }
 
   public Pose2d getLLPose() {
-    return limeLightPoseSubsystem.getPose();
+    return limeLightPoseSubsystemLeft.getPose();
   }
 
   /**
@@ -207,10 +212,18 @@ public class RobotContainer {
     // driveController.a().whileTrue(
     //    new TrajectoryCommand("/home/lvuser/deploy/Red 3.wpilib.json", drivetrainSubsystem, limeLightPoseSubsystem));
     // Red 3
-    // driveController.b().whileTrue(get2PiecesCommand("/home/lvuser/deploy/Red 3.wpilib.json",
-    //     "/home/lvuser/deploy/Red 3 Return.wpilib.json", new Pose2d(9.8,4.58,new Rotation2d(Math.toRadians(180)))));
-    driveController.b().whileTrue(Autonomous.get2PiecesCommand(this, "/home/lvuser/deploy/Blue8.wpilib.json",
-        "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9, new Rotation2d(Math.toRadians(0)))));
+    
+    driveController.b().whileTrue(
+      Autonomous.get2PiecesCommand(this,
+                        this.limeLightPoseSubsystemRight,
+                        "/home/lvuser/deploy/Red1.wpilib.json",
+                        "/home/lvuser/deploy/Red1Return.wpilib.json",
+                        // TODO need to update final position
+                        new Pose2d(10.2, 0.9, new Rotation2d(Math.toRadians(180)))));
+      // Autonomous.get2PiecesCommand(this, limeLightPoseSubsystemRight,"/home/lvuser/deploy/Blue8.wpilib.json",        
+      // "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9,new Rotation2d(Math.toRadians(0)))));
+    // driveController.b().whileTrue(Autonomous.get2PiecesCommand(this, "/home/lvuser/deploy/Blue8.wpilib.json",
+    //     "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9, new Rotation2d(Math.toRadians(0)))));
     operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));
     operatorController.button(OperatorButtons.MIDDLE.value).onTrue(new PositionCommand(this, OperatorButtons.MIDDLE));
     operatorController.button(OperatorButtons.HIGH.value).onTrue(new PositionCommand(this, OperatorButtons.HIGH));

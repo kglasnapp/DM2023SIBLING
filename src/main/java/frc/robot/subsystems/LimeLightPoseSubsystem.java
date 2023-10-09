@@ -24,29 +24,37 @@ import frc.robot.Robot;
 
 public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Pose2d> {
     private SwerveDrivePoseEstimator poseEstimator;
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    NetworkTableEntry tx = table.getEntry("tx");
-    NetworkTableEntry ty = table.getEntry("ty");
-    NetworkTableEntry ta = table.getEntry("ta");
-    NetworkTableEntry tv = table.getEntry("tv");
+    NetworkTable table;
+    NetworkTableEntry tx;
+    NetworkTableEntry ty;
+    NetworkTableEntry ta;
+    NetworkTableEntry tv;
     //NetworkTableEntry timestamp = table.getEntry("timestamp");
     ShuffleboardTab tab;
     private final Field2d field2d = new Field2d();
-    Pose2d pose = new Pose2d(1.89,0.5,new Rotation2d(Math.toRadians(180)));
+    Pose2d pose = new Pose2d(1.89, 0.5, new Rotation2d(Math.toRadians(180)));
     private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(5));
     private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
     DrivetrainSubsystem drivetrainSubsystem;
+    static int count = 0;
+    public String cameraId;
 
-    public LimeLightPoseSubsystem(DrivetrainSubsystem drivetrainSubsystem) {
+    public LimeLightPoseSubsystem(DrivetrainSubsystem drivetrainSubsystem, String cameraId) {
         this.drivetrainSubsystem = drivetrainSubsystem;
-        tab = Shuffleboard.getTab("Vision LimeLight");
+        this.cameraId = cameraId;
+        this.table = NetworkTableInstance.getDefault().getTable(cameraId);
+        tx = table.getEntry("tx");
+        ty = table.getEntry("ty");
+        ta = table.getEntry("ta");
+        tv = table.getEntry("tv");
+        tab = Shuffleboard.getTab("Vision LimeLight "+(++count));
         tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
         tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
         poseEstimator = new SwerveDrivePoseEstimator(
                 DrivetrainSubsystem.m_kinematics,
                 drivetrainSubsystem.getGyroscopeRotation(),
                 drivetrainSubsystem.getModulePositions(),
-                new Pose2d(1.89,0.5,new Rotation2d(Math.toRadians(180))),
+                new Pose2d(1.89, 0.5, new Rotation2d(Math.toRadians(180))),
                 stateStdDevs,
                 visionMeasurementStdDevs);
     }

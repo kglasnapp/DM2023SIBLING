@@ -77,7 +77,7 @@ public class PositionCommand extends CommandBase {
                 break;
             case HIGH:
                 if (mode == RobotMode.Cube) {
-                    tiltAngle = 70;
+                    tiltAngle = 60;
                     elevatorDistance = 115; 
                 } else {
                     tiltAngle = 122;

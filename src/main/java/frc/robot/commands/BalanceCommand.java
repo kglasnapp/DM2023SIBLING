@@ -95,7 +95,7 @@ public class BalanceCommand extends CommandBase {
         }
         if (state == State.LOCK_WHEELS_COMPLETE) {
             if (RobotController.getFPGATime() / 1000 - initTime > 100) {                
-                state = State.CHECK_BALANCE;
+                state = State.FINISHED;
                 initTime = RobotController.getFPGATime() / 1000;
                 drivetrainSubsystem.stop();
             }

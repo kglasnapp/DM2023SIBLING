@@ -44,33 +44,51 @@ public class Autonomous {
         this.robotContainer = robotContainer;
         this.drivetrainSubsystem = drivetrain;
         balanceCommand = new BalanceCommand(drivetrain);
-        RobotContainer.autonomousChooser.setDefaultOption("Case 1 outside", getAutonomousCommandCase1());
-        RobotContainer.autonomousChooser.addOption("Case left turn", caseCommand("Left Turn", intake, 0.2));
-        RobotContainer.autonomousChooser.addOption("Case right turn", caseCommand("Right Turn", intake, -0.6));
-        RobotContainer.autonomousChooser.addOption("Case 3 Center Balance", getAutonomousCommandCase3());
-        RobotContainer.autonomousChooser.addOption("Case 4 Center Pickup Balance", getAutonomousCommandCase4());
-        RobotContainer.autonomousChooser.addOption("Test Movements", testMovements(drivetrain, intake, robotContainer));
-        RobotContainer.autonomousChooser.addOption("Balance ", getOverAndBalanceCommand(drivetrain));
+        // RobotContainer.autonomousChooser.setDefaultOption("Case 1 outside", getAutonomousCommandCase1());
+        // RobotContainer.autonomousChooser.addOption("Case left turn", caseCommand("Left Turn", intake, 0.2));
+        // RobotContainer.autonomousChooser.addOption("Case right turn", caseCommand("Right Turn", intake, -0.6));
+        // RobotContainer.autonomousChooser.addOption("Case 3 Center Balance", getAutonomousCommandCase3());
+        // RobotContainer.autonomousChooser.addOption("Case 4 Center Pickup Balance", getAutonomousCommandCase4());
+        // RobotContainer.autonomousChooser.addOption("Test Movements", testMovements(drivetrain, intake, robotContainer));
+        RobotContainer.autonomousChooser.setDefaultOption("Balance ", getOverAndBalanceCommand(drivetrain));
+
+        RobotContainer.autonomousChooser.addOption("Red 1",
+                Autonomous.get2PiecesCommand(robotContainer,
+                        robotContainer.limeLightPoseSubsystemLeft,
+                        "/home/lvuser/deploy/Red1.wpilib.json",
+                        "/home/lvuser/deploy/Red1Return.wpilib.json",
+                        // TODO need to update final position
+                        new Pose2d(10.3, 0.9, new Rotation2d(Math.toRadians(180)))));
+
+        RobotContainer.autonomousChooser.addOption("Red 3",
+                Autonomous.get2PiecesCommand(robotContainer,
+                        robotContainer.limeLightPoseSubsystemRight,
+                        "/home/lvuser/deploy/Red3.wpilib.json",
+                        "/home/lvuser/deploy/Red3Return.wpilib.json",
+                        new Pose2d(10.3, 4.58, new Rotation2d(Math.toRadians(180)))));
+
+        RobotContainer.autonomousChooser.addOption("Blue 6",        
+                Autonomous.get2PiecesCommand(robotContainer,
+                        robotContainer.limeLightPoseSubsystemLeft,
+                        "/home/lvuser/deploy/Blue6.wpilib.json",
+                        "/home/lvuser/deploy/Blue6Return.wpilib.json",
+                        new Pose2d(6.83, 4.57, new Rotation2d(Math.toRadians(0)))));
 
         RobotContainer.autonomousChooser.addOption("Blue 8",
                 Autonomous.get2PiecesCommand(robotContainer,
+                        robotContainer.limeLightPoseSubsystemRight,
                         "/home/lvuser/deploy/Blue8.wpilib.json",
                         "/home/lvuser/deploy/Blue8Return.wpilib.json",
                         new Pose2d(6.83, 0.9, new Rotation2d(Math.toRadians(0)))));
 
-        test = testMovements(drivetrain, intake, robotContainer);
+        // test = testMovements(drivetrain, intake, robotContainer);
         // Put the chooser on the dashboard
         SmartDashboard.putData("Autonomous Mode", RobotContainer.autonomousChooser);
         //SmartDashboard.putData("Autonomous Mode", autonomousChooser);
 
     }
 
-    private Command getAutonomousCommandCase1() {
-        CommandBase command = new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
-                .andThen(new WaitCommand(0.5))
-                .andThen(new DisplayLogCommand("Run Case 1"));
-        return command;
-    }
+    
 
     public Command getAutonomousCommandCase2() {
         CommandBase command = new DisplayLogCommand("Case 2")
@@ -78,19 +96,8 @@ public class Autonomous {
         return command;
     }
 
-    private Command getAutonomousCommandCase3() {
-        CommandBase command = new DisplayLogCommand("Case 3")
-                .andThen(new WaitCommand(0.5));
-        return command;
-    }
-
-    private Command getAutonomousCommandCase4() {
-        CommandBase command = new DisplayLogCommand("Case 4")
-                .andThen(new WaitCommand(0.5));
-        return command;
-    }
-
-    private Command caseCommand(String name, IntakeSubsystem intakeSubsystem, double deltaY) {
+    
+    public Command caseCommand(String name, IntakeSubsystem intakeSubsystem, double deltaY) {
         return new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, (180))
                 .andThen(new SetModeConeCube(RobotMode.Cube))
                 //.andThen(new PositionCommand(this, OperatorButtons.LOW))
@@ -98,17 +105,17 @@ public class Autonomous {
                 // .andThen(new PositionCommand(this, OperatorButtons.HOME))
                 .andThen(
                         new StraightPathCommand(drivetrainSubsystem,
-                                robotContainer.limeLightPoseSubsystem,
+                                robotContainer.limeLightPoseSubsystemLeft,
                                 new Pose2d(4.49, 5.08, new Rotation2d(Math.toRadians(180)))))
                 .andThen(new RotateCommand(drivetrainSubsystem))
-                .andThen(new StraightPathCommand(drivetrainSubsystem, robotContainer.limeLightPoseSubsystem,
+                .andThen(new StraightPathCommand(drivetrainSubsystem, robotContainer.limeLightPoseSubsystemLeft,
                         new Pose2d(4.79, 5.08, new Rotation2d(Math.toRadians(0)))))
                 .andThen(new PositionCommand(robotContainer, OperatorButtons.GROUND))
                 .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.IN, 1000))
                 .andThen(new PositionCommand(robotContainer, OperatorButtons.HOME))
                 .andThen(new RotateCommand(drivetrainSubsystem))
                 .andThen(new StraightPathCommand(drivetrainSubsystem,
-                        robotContainer.limeLightPoseSubsystem,
+                        robotContainer.limeLightPoseSubsystemLeft,
                         new Pose2d(1.89, 4.88, new Rotation2d(Math.toRadians(180)))))
                 .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300));
     }
@@ -185,16 +192,16 @@ public class Autonomous {
 
         }
                 .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, -0.03, 0, 0, 3500))
-                .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, 0.02, 0, 0, 2500))
+                .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, 0.02, 0, 0, 800))
                 .andThen(balanceCommand);
     }
 
     public static Command get2PiecesCommand(
-            RobotContainer robotContainer,
+            RobotContainer robotContainer,LimeLightPoseSubsystem limeLightPoseSubsystem,
             String splineGetCube, String splineDropCube, Pose2d cubePose) {
         DrivetrainSubsystem drivetrainSubsystem = robotContainer.drivetrainSubsystem;
         BalanceCommand balanceCommand = robotContainer.balanceCommand;
-        LimeLightPoseSubsystem limeLightPoseSubsystem = robotContainer.limeLightPoseSubsystem;
+         
         IntakeSubsystem intakeSubsystem = robotContainer.intakeSubsystem;
 
         return new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, 180)
@@ -203,7 +210,7 @@ public class Autonomous {
                     public void initialize() {
 
                         String pipeLine = "botpose_wpiblue";//(Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
-                        double llPose[] = NetworkTableInstance.getDefault().getTable("limelight").getEntry(pipeLine)
+                        double llPose[] = NetworkTableInstance.getDefault().getTable(limeLightPoseSubsystem.cameraId).getEntry(pipeLine)
                                 .getDoubleArray(new double[6]);
                         double cameraAngle = Math.toRadians(llPose[5]);
                         Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(cameraAngle));
