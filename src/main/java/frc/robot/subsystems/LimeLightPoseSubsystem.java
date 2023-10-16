@@ -90,12 +90,13 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
             }
 
             String pipeLine = "botpose_wpiblue"; // (Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
-            double llPose[] = NetworkTableInstance.getDefault().getTable("limelight").getEntry(pipeLine)
+            double llPose[] = NetworkTableInstance.getDefault().getTable(cameraId).getEntry(pipeLine)
                     .getDoubleArray(new double[6]);
             double cameraAngle = Math.toRadians(llPose[5]);
             camearaToYawAdjustment = cameraAngle - yaw.getRadians();
             Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(cameraAngle));
             double timeS = RobotController.getFPGATime() / 1000000.0;
+            
             // poseEstimator.addVisionMeasurement(visionPose, timeS);
         }
         camearaToYawAdjustment = 0;

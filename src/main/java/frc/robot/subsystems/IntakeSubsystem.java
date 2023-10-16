@@ -89,11 +89,11 @@ public class IntakeSubsystem extends SubsystemBase {
             logf("Intake Cur:%.2f Avg:%.2f Count:%d\n", current, avgCurrent, StateMachineForCurrent.counter);
         }
         double power;
-        if (!isOut) {
-            power = StateMachineForCurrent.periodic(targetIntakePower, avgCurrent);
-        } else {
+        //if (!isOut) {
+          //  power = StateMachineForCurrent.periodic(targetIntakePower, avgCurrent);
+        //} else {
             power = targetIntakePower;
-        }
+        //}
         if (power != lastIntakePower) {
             intakeMotor.set(power);
             lastIntakePower = power;

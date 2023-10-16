@@ -174,7 +174,7 @@ public class Autonomous {
         return command;
     }
 
-    public static Command getOverAndBalanceCommand(DrivetrainSubsystem m_drivetrainSubsystem) {
+    public Command getOverAndBalanceCommand(DrivetrainSubsystem m_drivetrainSubsystem) {
         BalanceCommand balanceCommand = new BalanceCommand(m_drivetrainSubsystem);
 
         return new CommandBase() {
@@ -191,6 +191,10 @@ public class Autonomous {
             }
 
         }
+                .andThen(new SetModeConeCube(RobotMode.Cube))
+                .andThen(new PositionCommand(robotContainer, OperatorButtons.HIGH))
+                .andThen(new IntakeCommand(robotContainer.intakeSubsystem, IntakeCommand.State.OUT, 300))
+                .andThen(new PositionCommand(robotContainer, OperatorButtons.HOME))
                 .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, -0.03, 0, 0, 3500))
                 .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, 0.02, 0, 0, 800))
                 .andThen(balanceCommand);
