@@ -58,14 +58,14 @@ public class Autonomous {
                         "/home/lvuser/deploy/Red1.wpilib.json",
                         "/home/lvuser/deploy/Red1Return.wpilib.json",
                         // TODO need to update final position
-                        new Pose2d(10.3, 0.9, new Rotation2d(Math.toRadians(180)))));
+                        new Pose2d(10.0, 0.9, new Rotation2d(Math.toRadians(180)))));
 
         RobotContainer.autonomousChooser.addOption("Red 3",
                 Autonomous.get2PiecesCommand(robotContainer,
                         robotContainer.limeLightPoseSubsystemRight,
                         "/home/lvuser/deploy/Red3.wpilib.json",
                         "/home/lvuser/deploy/Red3Return.wpilib.json",
-                        new Pose2d(10.3, 4.58, new Rotation2d(Math.toRadians(180)))));
+                        new Pose2d(10.1, 4.58, new Rotation2d(Math.toRadians(180)))));
 
         RobotContainer.autonomousChooser.addOption("Blue 6",        
                 Autonomous.get2PiecesCommand(robotContainer,
@@ -73,6 +73,7 @@ public class Autonomous {
                         "/home/lvuser/deploy/Blue6.wpilib.json",
                         "/home/lvuser/deploy/Blue6Return.wpilib.json",
                         new Pose2d(6.83, 4.57, new Rotation2d(Math.toRadians(0)))));
+                        // new Pose2d(6.53, 4.16, new Rotation2d(Math.toRadians(0)))));
 
         RobotContainer.autonomousChooser.addOption("Blue 8",
                 Autonomous.get2PiecesCommand(robotContainer,
@@ -120,7 +121,7 @@ public class Autonomous {
                 .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300));
     }
 
-    private Command testMovements(DrivetrainSubsystem drivetrainSubsystem, IntakeSubsystem intake,
+    public Command testMovements(DrivetrainSubsystem drivetrainSubsystem, IntakeSubsystem intake,
             RobotContainer robotContainer) {
         return new DisplayLogCommand("Test Case")
                 //.andThen(new RobotOrientedDriveCommand(drivetrainSubsystem, .4, 0, 0, 500))

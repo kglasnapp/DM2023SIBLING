@@ -12,6 +12,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -30,6 +32,7 @@ import frc.robot.commands.DefaultGrabberCommand;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
+import frc.robot.commands.StraightPathCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberTiltSubsystem;
@@ -214,13 +217,36 @@ public class RobotContainer {
     // Red 3
     
     driveController.b().whileTrue(
-      Autonomous.get2PiecesCommand(this,
-                        this.limeLightPoseSubsystemRight,
-                        "/home/lvuser/deploy/Red1.wpilib.json",
-                        "/home/lvuser/deploy/Red1Return.wpilib.json",
-                        // TODO need to update final position
-                        new Pose2d(10.2, 0.9, new Rotation2d(Math.toRadians(180)))));
-      // Autonomous.get2PiecesCommand(this, limeLightPoseSubsystemRight,"/home/lvuser/deploy/Blue8.wpilib.json",        
+      new CommandBase() {
+        @Override
+        public void initialize() {
+
+            String pipeLine = "botpose_wpiblue";//(Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
+            double llPose[] = NetworkTableInstance.getDefault().getTable(limeLightPoseSubsystemLeft.cameraId).getEntry(pipeLine)
+                    .getDoubleArray(new double[6]);
+            double cameraAngle = Math.toRadians(llPose[5]);
+            Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(cameraAngle));
+            limeLightPoseSubsystemLeft.setCurrentPose(visionPose);
+            // limeLightPoseSubsystem.setCurrentPose(new Pose2d(1.89, 0.5, new Rotation2d(Math.toRadians(180))));
+        }
+
+        @Override
+        public boolean isFinished() {
+            return true;
+        }
+    }.andThen(
+
+
+      new StraightPathCommand(drivetrainSubsystem, limeLightPoseSubsystemLeft, new Pose2d(6.50,4.57,new Rotation2d(Math.toRadians(180)))))); 
+    // Autonomous.get2PiecesCommand(this,
+    //                     this.limeLightPoseSubsystemRight,
+    //                     "/home/lvuser/deploy/Red1.wpilib.json",
+    //                     "/home/lvuser/deploy/Red1Return.wpilib.json",
+    //                     // TODO need to update final position
+    //                     new Pose2d(10.2, 0.9, new Rotation2d(Math.toRadians(180)))));
+    
+    
+    // Autonomous.get2PiecesCommand(this, limeLightPoseSubsystemRight,"/home/lvuser/deploy/Blue8.wpilib.json",        
       // "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9,new Rotation2d(Math.toRadians(0)))));
     // driveController.b().whileTrue(Autonomous.get2PiecesCommand(this, "/home/lvuser/deploy/Blue8.wpilib.json",
     //     "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9, new Rotation2d(Math.toRadians(0)))));

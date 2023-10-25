@@ -64,6 +64,7 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
 
     public void setCurrentPose(Pose2d pose) {
         this.pose = pose;
+        logf("Setting the new pose %s\n",pose.toString());
         poseEstimator = new SwerveDrivePoseEstimator(
                 DrivetrainSubsystem.m_kinematics,
                 drivetrainSubsystem.getGyroscopeRotation(),
@@ -119,7 +120,7 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
                 pose.getY(),
                 pose.getRotation().getDegrees());
         if (Robot.count % 250 == 0) {
-            logf("LL Pose %s yaw:%.2f\n", s, yaw.getDegrees());
+            logf("Camera %s LL Pose %s yaw:%.2f\n", cameraId, s, yaw.getDegrees());
         }
         return s;
     }

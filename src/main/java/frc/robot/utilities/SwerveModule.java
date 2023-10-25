@@ -31,8 +31,8 @@ public class SwerveModule {
 
   public static CTREConfigs ctreConfigs = new CTREConfigs();
 
-  public static final double trackWidth = Units.inchesToMeters(24);
-  public static final double wheelBase = Units.inchesToMeters(24);
+  public static final double trackWidth = Units.inchesToMeters(22);
+  public static final double wheelBase = Units.inchesToMeters(22);
   public static final double wheelDiameter = Units.inchesToMeters(4.0);
   public static final double wheelCircumference = wheelDiameter * Math.PI;
 

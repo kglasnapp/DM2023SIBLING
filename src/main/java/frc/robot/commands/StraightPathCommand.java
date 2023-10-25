@@ -103,12 +103,12 @@ public class StraightPathCommand extends CommandBase {
         //     SmartDashboard.putNumber("goal A", goalAngle);
         // }
 
-        if (Robot.count % 20 == 3) {
-            // logf("Path time:%.3f goal:<%.2f,%.2f,%.2f> robot pose:<%.2f,%.2f,%.2f>\n",
-            // (currentTime - initialTime) / 1000000,
-            // goal.poseMeters.getX(), goal.poseMeters.getX(),
-            // goal.poseMeters.getRotation().getDegrees(),
-            // robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
+        if (Robot.count % 5 == 3) {
+            logf("Path  goal:<%.2f,%.2f,%.2f> robot pose:<%.2f,%.2f,%.2f>\n",
+           
+            destination.getX(), destination.getX(),
+            destination.getRotation().getDegrees(),
+            robotPose.getX(), robotPose.getY(), robotPose.getRotation().getDegrees());
         }
         var xSpeed = xController.calculate(robotPose.getX());
         if (xController.atGoal()) {
