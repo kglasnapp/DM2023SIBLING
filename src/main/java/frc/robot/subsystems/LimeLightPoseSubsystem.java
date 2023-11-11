@@ -14,7 +14,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.RobotController;
+//import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -95,8 +95,8 @@ public class LimeLightPoseSubsystem extends SubsystemBase implements Supplier<Po
                     .getDoubleArray(new double[6]);
             double cameraAngle = Math.toRadians(llPose[5]);
             camearaToYawAdjustment = cameraAngle - yaw.getRadians();
-            Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(cameraAngle));
-            double timeS = RobotController.getFPGATime() / 1000000.0;
+            //Pose2d visionPose = new Pose2d(llPose[0], llPose[1], new Rotation2d(cameraAngle));
+            //double timeS = RobotController.getFPGATime() / 1000000.0;
             
             // poseEstimator.addVisionMeasurement(visionPose, timeS);
         }

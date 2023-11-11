@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.controller.HolonomicDriveController;
+//import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -48,7 +48,7 @@ public class TrajectoryCommand extends CommandBase {
         init();
         List<Trajectory.State> states = trajectory.getStates();
         destination = states.get(states.size()-1).poseMeters;
-        HolonomicDriveController h = null;
+        //HolonomicDriveController h = null;
     }
 
     public Trajectory getTrajectory() {

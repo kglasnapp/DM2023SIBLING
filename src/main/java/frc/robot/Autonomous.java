@@ -57,7 +57,6 @@ public class Autonomous {
                         robotContainer.limeLightPoseSubsystemLeft,
                         "/home/lvuser/deploy/Red1.wpilib.json",
                         "/home/lvuser/deploy/Red1Return.wpilib.json",
-                        // TODO need to update final position
                         new Pose2d(10.0, 0.9, new Rotation2d(Math.toRadians(180)))));
 
         RobotContainer.autonomousChooser.addOption("Red 3",

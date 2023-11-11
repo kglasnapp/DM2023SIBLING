@@ -29,10 +29,12 @@ import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultGrabberCommand;
+import frc.robot.commands.DriveToObjectCommand;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
 import frc.robot.commands.StraightPathCommand;
+import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberTiltSubsystem;
@@ -74,6 +76,7 @@ public class RobotContainer {
   public static boolean smartDashBoardForElevator = true;
   public LimeLightPoseSubsystem limeLightPoseSubsystemLeft;
   public LimeLightPoseSubsystem limeLightPoseSubsystemRight;
+  public static CoralSubsystem coralSubsystem = new CoralSubsystem();
 
   public static RobotContainer instance;
 
@@ -216,6 +219,8 @@ public class RobotContainer {
     //    new TrajectoryCommand("/home/lvuser/deploy/Red 3.wpilib.json", drivetrainSubsystem, limeLightPoseSubsystem));
     // Red 3
     
+    driveController.b().whileTrue(new DriveToObjectCommand(drivetrainSubsystem, "cube"));
+    /*
     driveController.b().whileTrue(
       new CommandBase() {
         @Override
@@ -242,9 +247,9 @@ public class RobotContainer {
     //                     this.limeLightPoseSubsystemRight,
     //                     "/home/lvuser/deploy/Red1.wpilib.json",
     //                     "/home/lvuser/deploy/Red1Return.wpilib.json",
-    //                     // TODO need to update final position
+    //               
     //                     new Pose2d(10.2, 0.9, new Rotation2d(Math.toRadians(180)))));
-    
+    */
     
     // Autonomous.get2PiecesCommand(this, limeLightPoseSubsystemRight,"/home/lvuser/deploy/Blue8.wpilib.json",        
       // "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9,new Rotation2d(Math.toRadians(0)))));

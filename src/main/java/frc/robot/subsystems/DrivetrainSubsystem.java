@@ -220,10 +220,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * 'forwards' direction.
    */
   public void zeroGyroscope() {
-    // if (!RobotContainer.getBack()) { // TODO back has two functions find other and fix Clean up always was hit
-    //   return;
-    // }
-
     // FIXed Uncomment if you are using a NavX
     logf("zero Gyro DT\n");
     currentOrientation = 0;
