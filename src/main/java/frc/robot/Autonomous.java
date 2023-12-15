@@ -17,6 +17,7 @@ import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DisplayLogCommand;
 import frc.robot.commands.DriveCommand;
+import frc.robot.commands.DriveToObjectCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.IntakeCommand.State;
 import frc.robot.commands.PositionCommand;
@@ -26,6 +27,7 @@ import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
 import frc.robot.commands.StraightPathCommand;
 import frc.robot.commands.TrajectoryCommand;
+import frc.robot.commands.TrajectoryUntilSeeingCube;
 import frc.robot.commands.ZeroGyroCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -51,6 +53,13 @@ public class Autonomous {
         // RobotContainer.autonomousChooser.addOption("Case 4 Center Pickup Balance", getAutonomousCommandCase4());
         // RobotContainer.autonomousChooser.addOption("Test Movements", testMovements(drivetrain, intake, robotContainer));
         RobotContainer.autonomousChooser.setDefaultOption("Balance ", getOverAndBalanceCommand(drivetrain));
+
+        RobotContainer.autonomousChooser.addOption("Coral Tag 6", 
+        Autonomous.getPieceWithCoral(robotContainer,
+        robotContainer.limeLightPoseSubsystemLeft,
+        "/home/lvuser/deploy/Blue6Short.wpilib.json",
+        "/home/lvuser/deploy/Blue6ReturnShort.wpilib.json",
+        new Pose2d(3.8,4.8, new Rotation2d(Math.toRadians(180)))));
 
         RobotContainer.autonomousChooser.addOption("Red 1",
                 Autonomous.get2PiecesCommand(robotContainer,
@@ -199,6 +208,25 @@ public class Autonomous {
                 .andThen(new RobotOrientedDriveCommand(m_drivetrainSubsystem, 0.02, 0, 0, 800))
                 .andThen(balanceCommand);
     }
+
+    public static Command getPieceWithCoral(RobotContainer robotContainer,LimeLightPoseSubsystem limeLightPoseSubsystem,
+    String splineGetCube, String splineDropCube, Pose2d cubePose) {
+        DrivetrainSubsystem drivetrainSubsystem = robotContainer.drivetrainSubsystem; 
+        IntakeSubsystem intakeSubsystem = robotContainer.intakeSubsystem;
+        return 
+                new SetModeConeCube(RobotMode.Cube)                
+                .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300))        
+                .andThen(new TrajectoryUntilSeeingCube(splineGetCube,
+                                drivetrainSubsystem, limeLightPoseSubsystem))
+                .andThen(new PositionCommand(robotContainer, OperatorButtons.GROUND))
+                .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.IN, 2500)
+                        .alongWith(new DriveToObjectCommand(drivetrainSubsystem, "cube"))
+                ).andThen(new PositionCommand(robotContainer, OperatorButtons.HOME))
+                .andThen(new TrajectoryCommand(splineDropCube,
+                                drivetrainSubsystem, limeLightPoseSubsystem))
+                .andThen(new IntakeCommand(intakeSubsystem, IntakeCommand.State.OUT, 300));
+    }
+    
 
     public static Command get2PiecesCommand(
             RobotContainer robotContainer,LimeLightPoseSubsystem limeLightPoseSubsystem,

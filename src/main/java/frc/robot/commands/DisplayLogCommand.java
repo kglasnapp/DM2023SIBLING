@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.utilities.*;
 
@@ -8,16 +9,27 @@ import frc.robot.utilities.*;
  */
 public class DisplayLogCommand extends CommandBase {
   private String s;
+  boolean includeTimestamp;
 
   public DisplayLogCommand(String s) {
     // Use requires() here to declare subsystem dependencies
     this.s = s;
   }
 
+  public DisplayLogCommand(String s, boolean includeTimestamp) {
+    // Use requires() here to declare subsystem dependencies
+    this.s = s;
+    this.includeTimestamp = includeTimestamp;
+  }
+
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
-    Util.logf("%s\n", s);
+    if (includeTimestamp) {
+      Util.logf("%s - %.3f\n", s, RobotController.getFPGATime()/1000.0);
+    } else {
+      Util.logf("%s\n", s);
+    }
   }
 
   // Called repeatedly when this Command is scheduled to run

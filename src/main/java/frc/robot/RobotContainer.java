@@ -12,16 +12,17 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
+//import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+//import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -29,11 +30,14 @@ import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultGrabberCommand;
+import frc.robot.commands.DisplayLogCommand;
 import frc.robot.commands.DriveToObjectCommand;
 import frc.robot.commands.PositionCommand;
+import frc.robot.commands.ResetOdometryWithCameraCommand;
 import frc.robot.commands.RotateCommand;
 import frc.robot.commands.SetModeConeCube;
-import frc.robot.commands.StraightPathCommand;
+import frc.robot.commands.ZeroGyroCommand;
+//import frc.robot.commands.StraightPathCommand;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -64,7 +68,7 @@ public class RobotContainer {
   public final static LedSubsystem leds = new LedSubsystem();
   private final static CommandXboxController driveController = new CommandXboxController(2);
   private final static CommandXboxController operatorController = new CommandXboxController(3);
-  
+
   public boolean USBCamera = false;
   public final BalanceCommand balanceCommand = new BalanceCommand(drivetrainSubsystem);
   private SlewRateLimiter sLX = new SlewRateLimiter(9);
@@ -81,7 +85,7 @@ public class RobotContainer {
   public static RobotContainer instance;
 
   public static ShowPID showPID = ShowPID.TILT;
-  
+
   public Autonomous autotonomous;
 
   public static enum RobotMode {
@@ -218,14 +222,31 @@ public class RobotContainer {
     // driveController.a().whileTrue(
     //    new TrajectoryCommand("/home/lvuser/deploy/Red 3.wpilib.json", drivetrainSubsystem, limeLightPoseSubsystem));
     // Red 3
-    
-    driveController.b().whileTrue(new DriveToObjectCommand(drivetrainSubsystem, "cube"));
+
+    driveController.b().whileTrue(
+        new DisplayLogCommand("Start",true)
+        .andThen(new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, 180))
+        .andThen(new ResetOdometryWithCameraCommand(limeLightPoseSubsystemLeft)
+        .andThen(Autonomous.getPieceWithCoral(this,
+                    limeLightPoseSubsystemLeft,
+                    "/home/lvuser/deploy/Blue6Short.wpilib.json",
+                    "/home/lvuser/deploy/Blue6ReturnShort.wpilib.json",
+                    new Pose2d(3.8, 4.8, new Rotation2d(Math.toRadians(180)))))
+        
+        .andThen(Autonomous.getPieceWithCoral(this,
+                    limeLightPoseSubsystemLeft,
+                    "/home/lvuser/deploy/Blue6Short.wpilib.json",
+                    "/home/lvuser/deploy/Blue6ReturnShort.wpilib.json",
+                    new Pose2d(3.8, 4.8, new Rotation2d(Math.toRadians(180))))))
+        .andThen(new DisplayLogCommand("End",true)));
+
+    //new DriveToObjectCommand(drivetrainSubsystem, "cube"));
     /*
     driveController.b().whileTrue(
       new CommandBase() {
         @Override
         public void initialize() {
-
+    
             String pipeLine = "botpose_wpiblue";//(Robot.alliance == Alliance.Red) ? "botpose_wpired" : "botpose_wpiblue";
             double llPose[] = NetworkTableInstance.getDefault().getTable(limeLightPoseSubsystemLeft.cameraId).getEntry(pipeLine)
                     .getDoubleArray(new double[6]);
@@ -234,14 +255,14 @@ public class RobotContainer {
             limeLightPoseSubsystemLeft.setCurrentPose(visionPose);
             // limeLightPoseSubsystem.setCurrentPose(new Pose2d(1.89, 0.5, new Rotation2d(Math.toRadians(180))));
         }
-
+    
         @Override
         public boolean isFinished() {
             return true;
         }
     }.andThen(
-
-
+    
+    
       new StraightPathCommand(drivetrainSubsystem, limeLightPoseSubsystemLeft, new Pose2d(6.50,4.57,new Rotation2d(Math.toRadians(180)))))); 
     // Autonomous.get2PiecesCommand(this,
     //                     this.limeLightPoseSubsystemRight,
@@ -250,9 +271,9 @@ public class RobotContainer {
     //               
     //                     new Pose2d(10.2, 0.9, new Rotation2d(Math.toRadians(180)))));
     */
-    
+
     // Autonomous.get2PiecesCommand(this, limeLightPoseSubsystemRight,"/home/lvuser/deploy/Blue8.wpilib.json",        
-      // "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9,new Rotation2d(Math.toRadians(0)))));
+    // "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9,new Rotation2d(Math.toRadians(0)))));
     // driveController.b().whileTrue(Autonomous.get2PiecesCommand(this, "/home/lvuser/deploy/Blue8.wpilib.json",
     //     "/home/lvuser/deploy/Blue8Return.wpilib.json", new Pose2d(6.83, 0.9, new Rotation2d(Math.toRadians(0)))));
     operatorController.button(OperatorButtons.LOW.value).onTrue(new PositionCommand(this, OperatorButtons.LOW));

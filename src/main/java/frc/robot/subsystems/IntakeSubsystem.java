@@ -86,7 +86,7 @@ public class IntakeSubsystem extends SubsystemBase {
         double current = intakeMotor.getOutputCurrent();
         double avgCurrent = avg.add(current);
         if (current > 4.5) {
-            logf("Intake Cur:%.2f Avg:%.2f Count:%d\n", current, avgCurrent, StateMachineForCurrent.counter);
+            logf("Intake Cur:%.2f Avg:%.2f Count:%d Direction:%b\n", current, avgCurrent, StateMachineForCurrent.counter, isOut);
         }
         double power;
         //if (!isOut) {

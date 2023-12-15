@@ -7,14 +7,14 @@ import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import static frc.robot.utilities.Util.logf;
-import static frc.robot.Constants.isMini;
+//import static frc.robot.Constants.isMini;
 
 public class DriveToObjectCommand extends CommandBase {
     private DrivetrainSubsystem drivetrainSubsystem;
     private CoralSubsystem coral;
     private double x;
     private double area;
-    private double finishArea = 160000;
+    private double finishArea = 200000;
     private double finishX = 0.002;
     private String type;
 
@@ -39,18 +39,17 @@ public class DriveToObjectCommand extends CommandBase {
         double xSpeed = 0;
         x = -coral.x;
         if (Math.abs(x) > finishX) {
-            omegaSpeed = x*x / 64;
-            if (x<0) {
+            omegaSpeed = x * x * 5;
+            if (x < 0) {
                 omegaSpeed = -omegaSpeed;
             }
 
         }
         area = coral.area;
         if (area < finishArea) {
-            xSpeed = 20;
-            xSpeed = 0;
+            xSpeed = 0.01;
         }
-        if (Robot.count % 10 == 5) {
+        if (Robot.count % 5 == 0) {
             logf("Coral type:%s x:%.4f y:%.4f area:%.0f PerCent:%.0f xSpeed:%.5f omegaSpeed:%.5f\n",
                     coral.type, x, coral.y, area, coral.percent, xSpeed, omegaSpeed);
 
@@ -62,7 +61,7 @@ public class DriveToObjectCommand extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return false;
+        return (area > finishArea);
         // if (!coral.type.equals(type)) {
         //     logf("Coral invalid type: coral:%s requested:%s\n", coral.type, type);
         //     return true;
