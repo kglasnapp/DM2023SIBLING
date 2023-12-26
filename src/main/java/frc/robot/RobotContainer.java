@@ -12,17 +12,14 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-//import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-//import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,7 +28,7 @@ import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DefaultElevatorCommand;
 import frc.robot.commands.DefaultGrabberCommand;
 import frc.robot.commands.DisplayLogCommand;
-import frc.robot.commands.DriveToObjectCommand;
+import frc.robot.commands.DisplayLogCommand.DISPLAYMODE;
 import frc.robot.commands.PositionCommand;
 import frc.robot.commands.ResetOdometryWithCameraCommand;
 import frc.robot.commands.RotateCommand;
@@ -87,6 +84,8 @@ public class RobotContainer {
   public static ShowPID showPID = ShowPID.TILT;
 
   public Autonomous autotonomous;
+
+  public static long autonomousInitTime;
 
   public static enum RobotMode {
     Cone, Cube
@@ -224,21 +223,21 @@ public class RobotContainer {
     // Red 3
 
     driveController.b().whileTrue(
-        new DisplayLogCommand("Start",true)
+        new DisplayLogCommand("Start", DISPLAYMODE.INIT_TIME) 
         .andThen(new ZeroGyroCommand(drivetrainSubsystem, balanceCommand, 180))
-        .andThen(new ResetOdometryWithCameraCommand(limeLightPoseSubsystemLeft)
+        .andThen(new ResetOdometryWithCameraCommand(limeLightPoseSubsystemLeft, 1.0, 5)
         .andThen(Autonomous.getPieceWithCoral(this,
                     limeLightPoseSubsystemLeft,
                     "/home/lvuser/deploy/Blue6Short.wpilib.json",
                     "/home/lvuser/deploy/Blue6ReturnShort.wpilib.json",
                     new Pose2d(3.8, 4.8, new Rotation2d(Math.toRadians(180)))))
-        
+        .andThen(new ResetOdometryWithCameraCommand(limeLightPoseSubsystemLeft, 1.0, 5)
         .andThen(Autonomous.getPieceWithCoral(this,
                     limeLightPoseSubsystemLeft,
                     "/home/lvuser/deploy/Blue6Short.wpilib.json",
                     "/home/lvuser/deploy/Blue6ReturnShort.wpilib.json",
                     new Pose2d(3.8, 4.8, new Rotation2d(Math.toRadians(180))))))
-        .andThen(new DisplayLogCommand("End",true)));
+        .andThen(new DisplayLogCommand("End",DISPLAYMODE.ELASPED_TIME))));
 
     //new DriveToObjectCommand(drivetrainSubsystem, "cube"));
     /*

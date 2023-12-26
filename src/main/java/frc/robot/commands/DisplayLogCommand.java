@@ -1,34 +1,49 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.RobotContainer;
 import frc.robot.utilities.*;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /**
  * An example command. You can replace me with your own command.
  */
 public class DisplayLogCommand extends CommandBase {
   private String s;
-  boolean includeTimestamp;
+
+  public static enum DISPLAYMODE {
+    NORM, INIT_TIME, ELASPED_TIME
+  }
+
+  DISPLAYMODE mode = DISPLAYMODE.NORM;
+
+  public DisplayLogCommand(String s, DISPLAYMODE mode) {
+    this.s = s;
+    this.mode = mode;
+  }
 
   public DisplayLogCommand(String s) {
     // Use requires() here to declare subsystem dependencies
     this.s = s;
-  }
-
-  public DisplayLogCommand(String s, boolean includeTimestamp) {
-    // Use requires() here to declare subsystem dependencies
-    this.s = s;
-    this.includeTimestamp = includeTimestamp;
+    mode = DISPLAYMODE.NORM;
   }
 
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
-    if (includeTimestamp) {
-      Util.logf("%s - %.3f\n", s, RobotController.getFPGATime()/1000.0);
-    } else {
-      Util.logf("%s\n", s);
+    switch (mode) {
+      case NORM:
+        Util.logf("%s\n", s);
+        break;
+      case INIT_TIME:
+        RobotContainer.autonomousInitTime = RobotController.getFPGATime();
+        Util.logf("********* Start %s Time:%.3f\n", s, RobotContainer.autonomousInitTime / 1000000.0);
+        break;
+      case ELASPED_TIME:
+        long completeTime = RobotController.getFPGATime();
+        Util.logf("********** End %s Current Time:%.3f Elapsed:%.3f\n", s, completeTime / 1000000.0,
+            (completeTime - RobotContainer.autonomousInitTime) / 1000000.0);
+        break;
     }
   }
 
@@ -47,5 +62,5 @@ public class DisplayLogCommand extends CommandBase {
   @Override
   public void end(boolean interrupted) {
   }
- 
+
 }

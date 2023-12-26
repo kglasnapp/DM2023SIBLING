@@ -61,7 +61,11 @@ public class DriveToObjectCommand extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return (area > finishArea);
+        if (area > finishArea) {
+            logf("Drive to Object area:%.0f percent:%.1f Requesed Type:%s\n", area, coral.percent, type);
+            return true;
+        }
+        return false;
         // if (!coral.type.equals(type)) {
         //     logf("Coral invalid type: coral:%s requested:%s\n", coral.type, type);
         //     return true;
@@ -73,6 +77,6 @@ public class DriveToObjectCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, 0));
-        logf("Drive to object end\n");
+        logf("Drive to object end area:%.0f \n", coral.area);
     }
 }

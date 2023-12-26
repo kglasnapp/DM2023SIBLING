@@ -27,7 +27,7 @@ public class TrajectoryUntilSeeingCube extends TrajectoryCommand {
     public boolean isFinished() {
         if (super.isFinished() || (RobotController.getFPGATime() - initTime > 2500000 && 
         "cube".equals(RobotContainer.coralSubsystem.type) && 
-        RobotContainer.coralSubsystem.percent > 0.6)) {
+        RobotContainer.coralSubsystem.percent > 60)) {
             logf("TrajectoryUntilSeeingCube Follow Complete time:%3f is a cube %.2f percent\n",
                     (RobotController.getFPGATime() - initTime) / 1000000.0, RobotContainer.coralSubsystem.percent);
             return true;
